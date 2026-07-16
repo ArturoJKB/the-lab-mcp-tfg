@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets — NEVER commit tokens
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Reproducible outputs: keep the folder + curated results, ignore scratch.
+# Commit the metrics/figures you cite in the memoria; ignore large artifacts.
+results/**/*.db
+results/**/*.joblib
+results/**/*.pkl
+results/**/*.pt
+results/scratch/
+
+# OS
+.DS_Store
+Thumbs.db

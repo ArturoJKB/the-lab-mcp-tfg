@@ -1,0 +1,47 @@
+%% Architecture of "the Lab" — Context-Aware Multi-Agent Orchestration via MCP
+%% Render: https://mermaid.live  or  `mmdc -i architecture.mmd -o architecture.png`
+%% Key figure for memoria §3 (Análisis y diseño). Keep in sync with TFG_Workbook.md §2.
+flowchart TB
+    goal([ML goal]) --> LAB
+
+    subgraph LAB["THE LAB · orchestrator core (hand-rolled)"]
+        CTX["Context store /<br/>experiment log (SQLite)"]
+        RAG["RAG retrieval (CORE)<br/>within-run docs + cross-run memory"]
+        REG["Agent + module registry"]
+        CLI["MCP client / router"]
+    end
+
+    subgraph AGENTS["Specialized agents"]
+        DA["Data agent"]
+        TR["Trainer agent"]
+        EV["Evaluator agent"]
+        DE["Deployer agent"]
+    end
+
+    subgraph MODS["MCP modules (FastMCP servers)"]
+        M1["capability tools<br/>(one capability per module)"]
+    end
+
+    LAB -->|routes sub-goals| AGENTS
+    AGENTS -->|each capability =<br/>an MCP tool call| MODS
+    AGENTS -.->|read/write runs| CTX
+    CTX -->|indexed by| RAG
+    AGENTS -->|retrieve: within-run + cross-run| RAG
+    DE -->|serves model| ENDPOINT["Live FastAPI endpoint<br/>(put-to-life)"]
+
+    subgraph OPEN["Layer 2 · openness"]
+        BUILD["Builder agent (OpenCode)<br/>scaffold → sandbox → HUMAN APPROVAL"]
+        CONN["Documented connection interface<br/>+ template + CONTRIBUTING"]
+    end
+
+    gap{{capability gap}} --> BUILD
+    BUILD -->|registers new module| MODS
+    CONN -->|3rd parties add modules| MODS
+
+    subgraph L3["Layer 3 · optional, late (SEPARATE from RAG — no GraphRAG)"]
+        GRAPH["Graph memory (independent)"]
+    end
+    CTX -.->|optional| GRAPH
+
+    classDef opt fill:#eee,stroke:#999,stroke-dasharray:4 3;
+    class L3,GRAPH opt;
