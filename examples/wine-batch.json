@@ -1,0 +1,20 @@
+[
+  {
+    "dataset": "examples/wine.csv",
+    "target": "class",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/wine.csv",
+    "target": "class",
+    "model": "random_forest",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/wine.csv",
+    "target": "class",
+    "model": "svc",
+    "seed": 42
+  }
+]

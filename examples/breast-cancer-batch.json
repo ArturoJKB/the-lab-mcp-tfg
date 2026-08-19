@@ -1,0 +1,20 @@
+[
+  {
+    "dataset": "examples/breast_cancer.csv",
+    "target": "target",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/breast_cancer.csv",
+    "target": "target",
+    "model": "random_forest",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/breast_cancer.csv",
+    "target": "target",
+    "model": "sgd_classifier",
+    "seed": 42
+  }
+]

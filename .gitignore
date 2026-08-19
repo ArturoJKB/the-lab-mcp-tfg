@@ -25,6 +25,29 @@ results/**/*.pkl
 results/**/*.pt
 results/scratch/
 
+# Generated run outputs (workspace conventions)
+runs/
+
+# Exploratory scratch outputs
+scratch/
+
+# Local context store derivatives
+.thelab/context/
+.thelab/local-logs/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.pytype/
+.dmypy.json
+
+# Editor swap files
+*.kate-swp
+*.swp
+*.swo
+*~
+
 # OS
 .DS_Store
 Thumbs.db

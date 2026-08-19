@@ -1,0 +1,38 @@
+[
+  {
+    "dataset": "examples/iris.csv",
+    "target": "species",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/iris.csv",
+    "target": "species",
+    "model": "random_forest",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/wine.csv",
+    "target": "class",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/wine.csv",
+    "target": "class",
+    "model": "random_forest",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/breast_cancer.csv",
+    "target": "target",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/breast_cancer.csv",
+    "target": "target",
+    "model": "sgd_classifier",
+    "seed": 42
+  }
+]

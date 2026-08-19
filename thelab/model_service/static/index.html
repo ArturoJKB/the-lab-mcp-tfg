@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lab — Local Model Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <h1>The Lab</h1>
+    <p>Local model dashboard</p>
+  </header>
+
+  <nav id="tab-nav" class="tab-nav">
+    <button class="tab-button active" data-tab="tab-models">Models</button>
+    <button class="tab-button" data-tab="tab-coding">Coding / Logger</button>
+    <button class="tab-button" data-tab="tab-research">Research / Copilot</button>
+  </nav>
+
+  <main>
+    <section id="tab-models" class="tab-panel active">
+      <section id="panel-status" class="panel">
+        <h2>Status</h2>
+        <div id="status-content">Loading…</div>
+      </section>
+
+      <section id="panel-models" class="panel">
+        <h2>Approved models</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Run ID</th>
+              <th>Model</th>
+              <th>Target</th>
+              <th>Test accuracy</th>
+              <th>Test F1</th>
+            </tr>
+          </thead>
+          <tbody id="models-table-body">
+            <tr><td colspan="5">Loading…</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="panel-metrics" class="panel">
+        <h2>Run metrics</h2>
+        <div id="metrics-content">Select an approved model to view details.</div>
+      </section>
+
+      <section id="panel-artifacts" class="panel">
+        <h2>Artifacts</h2>
+        <div id="artifacts-toolbar"></div>
+        <pre id="artifacts-content">Select an approved model to browse artifacts.</pre>
+      </section>
+
+      <section id="panel-predict" class="panel">
+        <h2>Predict</h2>
+        <div id="predict-form-area">Select an approved model to enable prediction.</div>
+        <div id="predict-result"></div>
+      </section>
+    </section>
+
+    <section id="tab-coding" class="tab-panel">
+      <section id="panel-coding" class="panel">
+        <h2>Coding / Logger</h2>
+        <p class="banner read-only-banner">
+          Read-only — no autonomous writes. Approval required before any modification or destructive action.
+        </p>
+        <div id="coding-toolbar">
+          <select id="coding-run-select"></select>
+          <button id="coding-load-run">Load run</button>
+        </div>
+        <div id="coding-content">
+          <p class="muted">Select a run to view evidence.</p>
+        </div>
+        <div id="coding-artifacts"></div>
+        <pre id="coding-artifact-content">Select an artifact to view.</pre>
+      </section>
+    </section>
+
+    <section id="tab-research" class="tab-panel">
+      <section id="panel-research" class="panel">
+        <h2>Research / Copilot</h2>
+        <p class="banner evidence-banner">
+          Grounded in local runs and context only. No external RAG or generative model.
+        </p>
+        <div id="research-status">Loading…</div>
+        <div id="research-search">
+          <input type="text" id="research-query" placeholder="Search context…">
+          <button id="research-search-button">Search</button>
+        </div>
+        <div id="research-results"></div>
+        <div id="research-entry"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

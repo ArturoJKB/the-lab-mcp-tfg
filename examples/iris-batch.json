@@ -1,0 +1,20 @@
+[
+  {
+    "dataset": "examples/iris.csv",
+    "target": "species",
+    "model": "logistic_regression",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/iris.csv",
+    "target": "species",
+    "model": "random_forest",
+    "seed": 42
+  },
+  {
+    "dataset": "examples/iris.csv",
+    "target": "species",
+    "model": "sgd_classifier",
+    "seed": 42
+  }
+]

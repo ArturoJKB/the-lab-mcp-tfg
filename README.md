@@ -1,43 +1,74 @@
-# The Lab — Context-Aware Multi-Agent Orchestration via MCP
-
-> *"The infrastructure is the lab; the custom apps are the experiments you run in it."*
+# The Lab — Local-First Data-to-Model Factory
 
 Bachelor thesis (TFG) at **Universidad Carlos III de Madrid**, Data Science and Engineering.
-Started July 2026
 
->  **Status:** WIP (September-26)
-
----
+> **Status:** P0 + Phase A hardening complete.
 
 ## What it is
 
-An open-source, MCP-based **multi-agent orchestration platform**, that will be validated by a **demo use case experiment**, an autonomous ML factory where specialized agents ingest data, train a model, evaluate it, and host it live behind a local endpoint, so the trained model itself becomes a tool other agents can call.The project aims to design and build a standardized arquitecture on top of MCP for different use cases (financial analysis, software engineering...)
+A local-first, reproducible ML experiment runner. Train models from CSVs, expose them via MCP/HTTP, index agent logs, and compare experiments in batches.
 
-## The demonstrator — Autonomous ML factory
+No cloud services, LLM providers, or vector databases are required for P0.
 
-Given an ML goal (e.g. "classify this dataset"), specialized agents run the pipeline:
+## Install
 
-1. **Data agent** — collects and prepare the dataset.
-2. **Trainer agent** — trains a small, reproducible model.
-3. **Evaluator agent** — scores it.
-4. **Deployer agent** — host it as a live MCP endpoint, so the trained model becomes a callable tool for other agents.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.lock
+pip install -e .
+```
 
-Every run is recorded to the experiment log. and RAG is used to retrieve relevant docs (capabilities, datasets, prior model cards) within a run, and relevant past runs.
-Architecture diagram: [`docs/figures/architecture.mmd`](./docs/figures/architecture.mmd).
+## Quick start
 
-## Design principles
+```bash
+# Train one model
+thelab run model --dataset examples/iris.csv --target species --model logistic_regression --seed 42 --output runs
 
-- **Deterministic code over LLM calls.** If a function can do the job, don't call a model.
-- **Log cost from day one.** Every model call records tokens and, where relevant, compute. Cost is a headline metric.
-- **Model-agnostic.** Connects to local models and cloud AI providers alike.
-- **Human-approved autonomy.** The builder agent scaffolds new modules but never registers them without a human approval step.
-- **Reproducibility as default.** Pinned dependencies, fixed seeds, config-driven runs, results committed to the repo.
+# Run a batch experiment
+thelab run batch --config examples/iris-batch.json --output runs --report batch_report.md
 
-## Validation metrics
+# Serve approved models over HTTP
+thelab-model-service
+```
 
-- Task success rate on the demonstrator.
-- Token and compute cost per experiment.
-- **RAG benefit:** measured improvement between a cold run and a run seeded with retrieved past-run memory.
+Run outputs live under `runs/<run_id>/` and include `manifest.json`, `metrics.json`, `model.joblib`, and `model_card.md`.
+
+## CLI commands
+
+| Command | Purpose |
+|---|---|
+| `thelab run model` | Train a single model from a CSV |
+| `thelab run batch` | Run many experiments from a JSON config |
+| `thelab context index` | Index agent-session logs |
+| `thelab context search` | Search indexed logs |
+| `thelab context show` | Show one log entry |
+| `thelab-model-service` | Local HTTP service for approved models |
+
+See [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) for the full command reference, supported models, batch config format, and examples.
+
+## Supported models
+
+- `logistic_regression`
+- `random_forest`
+- `svc`
+- `sgd_classifier`
+- `*_probability` variants for probability estimates
+
+## Tests
+
+```bash
+ruff check thelab tests scripts
+mypy thelab
+pytest tests/ -q
+python scripts/evaluate_thesis.py
+```
+
+## Docs
+
+- [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) — CLI usage and examples
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — implementation slices and status
+- [`docs/PRD_P0.md`](docs/PRD_P0.md) — binding P0 requirements
 
 ## Author
 
@@ -45,4 +76,4 @@ Architecture diagram: [`docs/figures/architecture.mmd`](./docs/figures/architect
 
 ## License
 
-[MIT](LICENSE). Chosen for permissive reuse; the memoria discusses the open-source licensing and IP angle.
+[MIT](LICENSE)
