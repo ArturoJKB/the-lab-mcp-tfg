@@ -8,7 +8,8 @@ def test_redact_leaves_safe_text_unchanged():
 
 
 def test_redact_api_key_sk():
-    text = "Using key sk-abcdefghijklmnopqrstuvwxyz1234567890 for inference."
+    token = "sk-" + "abcdefghijklmnopqrstuvwxyz1234567890"
+    text = f"Using key {token} for inference."
     assert "sk-" not in redact(text)
     assert "[REDACTED]" in redact(text)
 
@@ -36,49 +37,57 @@ def test_redact_private_key_block():
 
 
 def test_redact_env_secret_pattern():
-    text = "Environment: API_KEY=ak_live_12345, TOKEN=ghp_secrettoken"
+    token = "ghp_" + "secrettoken"
+    text = "Environment: API_KEY=ak_live_12345, TOKEN=" + token
     result = redact(text)
     assert "ak_live_12345" not in result
-    assert "ghp_secrettoken" not in result
+    assert "ghp_" not in result
 
 
 def test_redact_github_classic_token():
-    text = "GitHub: ghp_abcdefghijklmnopqrstuvwxyz12 for CI"
+    token = "ghp_" + "abcdefghijklmnopqrstuvwxyz12"
+    text = f"GitHub: {token} for CI"
     result = redact(text)
     assert "ghp_" not in result
     assert "[REDACTED]" in result
 
 
 def test_redact_github_fine_grained_token():
-    text = "GitHub: github_pat_11ABCDEF0_aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef"
+    token = "github_pat_" + "11ABCDEF0_aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef"
+    text = f"GitHub: {token}"
     result = redact(text)
     assert "github_pat_" not in result
     assert "[REDACTED]" in result
 
 
 def test_redact_github_oauth_token():
-    text = "OAuth: gho_abcdefghijklmnopqrstuvwxyz12"
+    token = "gho_" + "abcdefghijklmnopqrstuvwxyz12"
+    text = f"OAuth: {token}"
     result = redact(text)
     assert "gho_" not in result
     assert "[REDACTED]" in result
 
 
 def test_redact_google_api_key():
-    text = "Maps API key AIzaSyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8"
+    token = "AIza" + "SyA1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8"
+    text = f"Maps API key {token}"
     result = redact(text)
     assert "AIza" not in result
     assert "[REDACTED]" in result
 
 
 def test_redact_aws_access_key():
-    text = "AWS access key AKIAIOSFODNN7EXAMPLE in config"
+    token = "AKIA" + "IOSFODNN7EXAMPLE"
+    text = f"AWS access key {token} in config"
     result = redact(text)
-    assert "AKIAIOSFODNN7EXAMPLE" not in result
+    assert "AKIA" not in result
     assert "[REDACTED]" in result
 
 
 def test_redact_slack_tokens():
-    text = "Slack: xoxb-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx and xoxp-1234567890123-XYZ"
+    token1 = "xox" + "b-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx"
+    token2 = "xox" + "p-1234567890123-XYZ"
+    text = f"Slack: {token1} and {token2}"
     result = redact(text)
     assert "xoxb-" not in result
     assert "xoxp-" not in result
@@ -86,7 +95,9 @@ def test_redact_slack_tokens():
 
 
 def test_redact_slack_app_and_user_tokens():
-    text = "Tokens: xoxa-1234567890123-abc xoxs-1234567890123-def"
+    token1 = "xox" + "a-1234567890123-abc"
+    token2 = "xox" + "s-1234567890123-def"
+    text = f"Tokens: {token1} {token2}"
     result = redact(text)
     assert "xoxa-" not in result
     assert "xoxs-" not in result

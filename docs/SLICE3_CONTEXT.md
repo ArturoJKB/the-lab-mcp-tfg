@@ -84,7 +84,7 @@ The database path can also be set via `THELAB_CONTEXT_DB`.
 
 # Manual end-to-end (uses temporary files; does not touch .thelab/local-logs/)
 cat > /tmp/demo-events.jsonl <<'EOF'
-{"event_id":"evt-demo","event_type":"system","session_id":"sess-1","run_id":"run-20260809-212944-785f03ac","tags":["demo"],"redacted_summary":"Demo event with API key sk-1234567890abcdef","privacy_level":"internal","timestamp":"2026-08-09T12:00:00+00:00"}
+{"event_id":"evt-demo","event_type":"system","session_id":"sess-1","run_id":"run-20260809-212944-785f03ac","tags":["demo"],"redacted_summary":"Demo event with API key [REDACTED]","privacy_level":"internal","timestamp":"2026-08-09T12:00:00+00:00"}
 EOF
 thelab context index --source /tmp/demo-events.jsonl --db /tmp/demo-context.db
 thelab context search "demo" --db /tmp/demo-context.db

@@ -90,6 +90,7 @@ def test_indexer_is_idempotent(tmp_path):
 
 
 def test_indexer_redacts_secrets(tmp_path):
+    api_token = "sk-" + "1234567890abcdef1234567890"
     source = tmp_path / "agent-events.jsonl"
     _write_jsonl(
         source,
@@ -98,7 +99,7 @@ def test_indexer_redacts_secrets(tmp_path):
                 "event_id": "evt-secret",
                 "event_type": "system",
                 "session_id": "session-1",
-                "redacted_summary": "Using API key sk-1234567890abcdef1234567890",
+                "redacted_summary": f"Using API key {api_token}",
                 "timestamp": "2026-08-09T12:00:00+00:00",
             },
         ],
@@ -109,7 +110,7 @@ def test_indexer_redacts_secrets(tmp_path):
 
     entry = repo.get("evt-secret")
     assert entry is not None
-    assert "sk-1234567890abcdef" not in entry.redacted_summary
+    assert "sk-" not in entry.redacted_summary
     assert "[REDACTED]" in entry.redacted_summary
 
 

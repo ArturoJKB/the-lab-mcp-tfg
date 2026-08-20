@@ -76,7 +76,7 @@ Result:
 ```bash
 PATH=.venv/bin:$PATH
 cat > /tmp/demo-events.jsonl <<'EOF'
-{"event_id":"evt-demo","event_type":"system","session_id":"sess-1","run_id":"run-20260809-212944-785f03ac","tags":["demo"],"redacted_summary":"Demo event with AWS key AKIAIOSFODNN7EXAMPLE and Slack xoxb-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx","privacy_level":"internal","timestamp":"2026-08-09T12:00:00+00:00"}
+{"event_id":"evt-demo","event_type":"system","session_id":"sess-1","run_id":"run-20260809-212944-785f03ac","tags":["demo"],"redacted_summary":"Demo event with AWS key [REDACTED] and Slack [REDACTED]","privacy_level":"internal","timestamp":"2026-08-09T12:00:00+00:00"}
 EOF
 thelab context index --source /tmp/demo-events.jsonl --db /tmp/demo-context.db
 thelab context search "AWS" --db /tmp/demo-context.db
