@@ -12,7 +12,17 @@ from typing import Any
 
 from .run.model_registry import MODEL_REGISTRY
 from .run.prediction import predict
-from .run.runner import run_model, try_all_models
+from .run.runner import run_model
+
+__all__ = [
+    "Experiment",
+    "compare",
+    "experiment",
+    "list_models",
+    "predict",
+    "run_model",
+    "try_all_models",
+]
 
 
 class Experiment:
@@ -114,3 +124,28 @@ def compare(
 def list_models() -> list[str]:
     """Return all registered model names."""
     return MODEL_REGISTRY.list_models()
+
+
+def try_all_models(
+    dataset: Path | str,
+    target: str,
+    seed: int = 42,
+    output: str = "scratch",
+    workspace_root: Path | str | None = None,
+    dry_run: bool = True,
+) -> list[dict[str, Any]]:
+    """Train every registered model and return raw result dicts, best first.
+
+    Results are sorted best-first by ``test_f1_macro``. Prefer :func:`compare`
+    for ``Experiment`` handles; this thin wrapper exposes the runner API.
+    """
+    from .run.runner import try_all_models as _try_all
+
+    return _try_all(
+        dataset=dataset,
+        target=target,
+        seed=seed,
+        output=output,
+        workspace_root=workspace_root,
+        dry_run=dry_run,
+    )

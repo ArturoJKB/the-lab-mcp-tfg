@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .contracts import IndexedEntry
+from .filters import build_match_query
 from .schema import row_to_entry
 
 
@@ -204,8 +205,9 @@ class ContextRepository:
         params: list[Any] = []
 
         if query:
+            expression, _mode = build_match_query(query)
             conditions.append("entries_fts MATCH ?")
-            params.append(query)
+            params.append(expression)
 
         if run_id is not None:
             conditions.append("e.run_id = ?")

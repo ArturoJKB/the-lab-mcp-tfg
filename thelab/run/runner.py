@@ -279,9 +279,10 @@ def try_all_models(
 ) -> list[dict[str, Any]]:
     """Train every registered model and return a comparison list.
 
-    By default this runs in dry-run mode so nothing is persisted; set
-    *dry_run* to False and pick an *output* directory if you want to keep the
-    runs.
+    Results are sorted best-first by ``test_f1_macro`` (tiebreak:
+    ``test_accuracy``, then model name). By default this runs in dry-run mode
+    so nothing is persisted; set *dry_run* to False and pick an *output*
+    directory if you want to keep the runs.
     """
     results = []
     for model_name in MODEL_REGISTRY.list_models():
@@ -295,4 +296,11 @@ def try_all_models(
             dry_run=dry_run,
         )
         results.append(result)
-    return results
+    return sorted(
+        results,
+        key=lambda r: (
+            -float((r.get("metrics") or {}).get("test_f1_macro") or 0.0),
+            -float((r.get("metrics") or {}).get("test_accuracy") or 0.0),
+            str(r.get("model", "")),
+        ),
+    )

@@ -268,3 +268,64 @@ def test_status_counts_and_last_indexed_are_privacy_aware(tmp_path):
     # a valid ISO string from the visible entries.
     assert status["last_indexed_at"] is not None
     datetime.fromisoformat(status["last_indexed_at"])
+
+
+def test_search_expands_plain_keywords(tmp_path):
+    db = tmp_path / "context.db"
+    repo = ContextRepository(db)
+    repo.upsert(_make_entry("evt-1", "dataset validation failed before training"))
+    repo.upsert(_make_entry("evt-2", "unrelated summary about deployment"))
+
+    reader = ContextReader(db)
+    entries, mode = reader.search_with_mode("validation")
+    assert mode == "expanded"
+    assert [e.event_id for e in entries] == ["evt-1"]
+
+
+def test_search_exact_mode_disables_expansion(tmp_path):
+    db = tmp_path / "context.db"
+    repo = ContextRepository(db)
+    repo.upsert(_make_entry("evt-1", "dataset validation failed before training"))
+
+    reader = ContextReader(db)
+    entries, mode = reader.search_with_mode("validat", exact=True)
+    assert mode == "fts"
+    assert entries == []
+
+
+def test_search_like_fallback_matches_substring(tmp_path):
+    db = tmp_path / "context.db"
+    repo = ContextRepository(db)
+    repo.upsert(_make_entry("evt-1", "prevalidation hook executed"))
+
+    reader = ContextReader(db)
+    entries, mode = reader.search_with_mode("validation")
+    assert mode in {"expanded", "like"}
+    assert [e.event_id for e in entries] == ["evt-1"]
+
+
+def test_search_fts_syntax_passthrough(tmp_path):
+    db = tmp_path / "context.db"
+    repo = ContextRepository(db)
+    repo.upsert(_make_entry("evt-1", "validation report stored"))
+    repo.upsert(_make_entry("evt-2", "training completed"))
+
+    reader = ContextReader(db)
+    entries, mode = reader.search_with_mode('validation OR training')
+    assert mode == "fts"
+    assert len(entries) == 2
+
+
+def test_build_match_query_modes():
+    from thelab.context.filters import build_match_query
+
+    expr, mode = build_match_query("hello world")
+    assert mode == "expanded"
+    assert expr == "hello* OR world*"
+
+    expr, mode = build_match_query('"exact phrase"')
+    assert mode == "fts"
+    assert expr == '"exact phrase"'
+
+    expr, mode = build_match_query("")
+    assert mode == "fts"

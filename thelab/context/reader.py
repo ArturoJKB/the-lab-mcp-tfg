@@ -18,6 +18,7 @@ from typing import Any
 from thelab.contracts import PrivacyLevel
 
 from .contracts import IndexedEntry
+from .filters import build_match_query, like_fallback_pattern
 from .privacy import AGENT_SAFE_PRIVACY_LEVELS
 from .schema import row_to_entry, validate_schema
 
@@ -189,15 +190,50 @@ class ContextReader:
         until: datetime | str | None = None,
         limit: int = 50,
         privacy_levels: Iterable[PrivacyLevel] = AGENT_SAFE_PRIVACY_LEVELS,
+        exact: bool = False,
     ) -> list[IndexedEntry]:
         """Search indexed entries using FTS5 and structured filters.
 
         By default only ``public`` and ``internal`` entries are returned;
         ``restricted`` and ``secret`` entries are excluded unless explicitly
-        requested through ``privacy_levels``.
+        requested through ``privacy_levels``. Plain keyword queries are
+        expanded into a prefix OR-query for recall; pass ``exact=True`` to
+        use the raw FTS5 expression.
+        """
+        entries, _ = self.search_with_mode(
+            query=query,
+            run_id=run_id,
+            tags=tags,
+            event_type=event_type,
+            since=since,
+            until=until,
+            limit=limit,
+            privacy_levels=privacy_levels,
+            exact=exact,
+        )
+        return entries
+
+    def search_with_mode(
+        self,
+        query: str | None = None,
+        run_id: str | None = None,
+        tags: list[str] | None = None,
+        event_type: str | None = None,
+        since: datetime | str | None = None,
+        until: datetime | str | None = None,
+        limit: int = 50,
+        privacy_levels: Iterable[PrivacyLevel] = AGENT_SAFE_PRIVACY_LEVELS,
+        exact: bool = False,
+    ) -> tuple[list[IndexedEntry], str]:
+        """Search and also report how the query was matched.
+
+        Returns ``(entries, match_mode)`` where match_mode is ``"fts"`` for
+        exact/passthrough FTS5 matching, ``"expanded"`` for prefix
+        OR-expansion, or ``"like"`` when a substring fallback produced the
+        results.
         """
         if not self.initialized:
-            return []
+            return [], "fts"
 
         self._validate_query(query)
         self._validate_tags(tags)
@@ -206,12 +242,67 @@ class ContextReader:
         until_str = self._normalize_timestamp(until)
         privacy_values = self._validate_privacy_levels(privacy_levels)
 
+        expression: str | None = None
+        mode = "fts"
+        if query:
+            if exact:
+                expression = query
+            else:
+                expression, mode = build_match_query(query)
+
+        rows = self._execute_search(
+            expression=expression,
+            run_id=run_id,
+            tags=tags,
+            event_type=event_type,
+            since_str=since_str,
+            until_str=until_str,
+            limit=limit,
+            privacy_values=privacy_values,
+        )
+        if rows or not query:
+            return [row_to_entry(row) for row in rows], mode
+
+        if mode == "expanded":
+            fallback = like_fallback_pattern(query)
+            if fallback is not None:
+                like_clause, like_params = fallback
+                rows = self._execute_search(
+                    expression=None,
+                    run_id=run_id,
+                    tags=tags,
+                    event_type=event_type,
+                    since_str=since_str,
+                    until_str=until_str,
+                    limit=limit,
+                    privacy_values=privacy_values,
+                    extra_condition=like_clause,
+                    extra_params=like_params,
+                )
+                if rows:
+                    return [row_to_entry(row) for row in rows], "like"
+
+        return [], mode
+
+    def _execute_search(
+        self,
+        expression: str | None,
+        run_id: str | None,
+        tags: list[str] | None,
+        event_type: str | None,
+        since_str: str | None,
+        until_str: str | None,
+        limit: int,
+        privacy_values: list[str],
+        extra_condition: str | None = None,
+        extra_params: list[Any] | None = None,
+    ) -> list[sqlite3.Row]:
         conditions: list[str] = []
         params: list[Any] = []
 
-        if query:
+        if expression is not None:
             conditions.append("entries_fts MATCH ?")
-            params.append(query)
+            params.append(expression)
 
         privacy_placeholders = ",".join("?" for _ in privacy_values)
         conditions.append(f"e.privacy_level IN ({privacy_placeholders})")
@@ -245,14 +336,18 @@ class ContextReader:
             params.extend(tags)
             params.append(len(tags))
 
-        order_by = "rank" if query else "e.timestamp DESC"
+        if extra_condition is not None:
+            where_clause += f" AND ({extra_condition})"
+            params.extend(extra_params or [])
+
+        order_by = "rank" if expression is not None else "e.timestamp DESC"
         sql = f"""
             SELECT
                 e.*,
                 (SELECT json_group_array(tag) FROM entry_tags
                  WHERE event_id = e.event_id) AS tags
             FROM entries e
-            {'JOIN entries_fts ON e.rowid = entries_fts.rowid' if query else ''}
+            {'JOIN entries_fts ON e.rowid = entries_fts.rowid' if expression is not None else ''}
             WHERE {where_clause}
             ORDER BY {order_by}
             LIMIT ?
@@ -261,14 +356,12 @@ class ContextReader:
 
         with self._connect_raw() as conn:
             try:
-                rows = conn.execute(sql, params).fetchall()
+                return conn.execute(sql, params).fetchall()
             except sqlite3.OperationalError:
                 # Controlled result for malformed FTS5 syntax or read-only
                 # conflicts. We deliberately swallow the error and return an
                 # empty result set rather than propagate query-language errors.
                 return []
-
-        return [row_to_entry(row) for row in rows]
 
     def _validate_query(self, query: str | None) -> None:
         if query is None:

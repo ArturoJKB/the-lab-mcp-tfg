@@ -99,7 +99,7 @@ def _cmd_search(args: argparse.Namespace) -> int:
     )
 
     try:
-        entries = reader.search(
+        entries, match_mode = reader.search_with_mode(
             query=args.query,
             run_id=filters.run_id,
             tags=filters.tags,
@@ -107,12 +107,23 @@ def _cmd_search(args: argparse.Namespace) -> int:
             since=filters.since,
             until=filters.until,
             limit=args.limit,
+            exact=args.exact,
         )
     except ContextReaderError as exc:
         print(json.dumps({"ok": False, "error": str(exc)}, indent=2))
         return 1
 
-    print(json.dumps({"ok": True, "count": len(entries), "data": [_entry_to_dict(e) for e in entries]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "count": len(entries),
+                "match_mode": match_mode if args.query else None,
+                "data": [_entry_to_dict(e) for e in entries],
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -157,6 +168,11 @@ def _add_subparsers(subparsers: argparse._SubParsersAction) -> None:
     search_parser.add_argument("--since", default=None, help="ISO timestamp lower bound")
     search_parser.add_argument("--until", default=None, help="ISO timestamp upper bound")
     search_parser.add_argument("--limit", type=int, default=50, help="Maximum results")
+    search_parser.add_argument(
+        "--exact",
+        action="store_true",
+        help="Use the raw FTS5 query without prefix expansion or fallback",
+    )
     search_parser.add_argument(
         "--db",
         default=None,

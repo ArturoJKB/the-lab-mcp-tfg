@@ -80,6 +80,18 @@ def test_try_all_models_returns_all_registered(tmp_path: Path, fixture_csv: Path
     assert all("test_accuracy" in r["metrics"] for r in results)
 
 
+def test_try_all_models_sorted_best_first(tmp_path: Path, fixture_csv: Path):
+    results = try_all_models(
+        dataset="iris.csv",
+        target="species",
+        seed=42,
+        dry_run=True,
+        workspace_root=tmp_path,
+    )
+    f1_scores = [r["metrics"]["test_f1_macro"] for r in results]
+    assert f1_scores == sorted(f1_scores, reverse=True)
+
+
 def test_predict_from_run(tmp_path: Path, fixture_csv: Path):
     result = run_model(
         dataset=fixture_csv,

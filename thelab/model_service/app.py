@@ -16,7 +16,7 @@ import joblib
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from thelab.context.reader import ContextReader, ContextReaderError
 from thelab.mcp.common import discover_run_ids, get_runs_root, load_json_artifact, safe_run_dir
@@ -29,7 +29,27 @@ app = FastAPI(title="The Lab Model Service")
 
 class PredictRequest(BaseModel):
     run_id: str
-    features: list[Any] = Field(..., description="List of feature records (dicts) or rows (lists).")
+    features: list[Any] = Field(
+        ...,
+        description=(
+            "Feature rows as a list of records (dicts) or rows (lists). "
+            "A single record/row is also accepted and treated as one row."
+        ),
+    )
+
+    @field_validator("features", mode="before")
+    @classmethod
+    def _wrap_single_row(cls, value: Any) -> Any:
+        """Accept a single feature record or row and wrap it into a one-row list."""
+        if isinstance(value, dict):
+            return [value]
+        if (
+            isinstance(value, list)
+            and value
+            and all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value)
+        ):
+            return [value]
+        return value
 
 
 # Artifacts the UI is allowed to list and render.  Binary or unsafe files are

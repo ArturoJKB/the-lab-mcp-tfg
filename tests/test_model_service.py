@@ -78,6 +78,48 @@ def test_predict_returns_predictions(client: TestClient, tmp_path: Path, monkeyp
     assert len(payload["data"]["predictions"]) == 1
 
 
+def test_predict_accepts_single_feature_dict(client: TestClient, tmp_path: Path, monkeypatch):
+    run_id = _completed_iris_run(tmp_path)
+    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
+
+    response = client.post(
+        "/predict",
+        json={
+            "run_id": run_id,
+            "features": {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2},
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert len(payload["data"]["predictions"]) == 1
+
+
+def test_predict_accepts_single_feature_row(client: TestClient, tmp_path: Path, monkeypatch):
+    run_id = _completed_iris_run(tmp_path)
+    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
+
+    response = client.post(
+        "/predict",
+        json={"run_id": run_id, "features": [5.1, 3.5, 1.4, 0.2]},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert len(payload["data"]["predictions"]) == 1
+
+
+def test_predict_single_dict_matches_list_of_dicts(client: TestClient, tmp_path: Path, monkeypatch):
+    run_id = _completed_iris_run(tmp_path)
+    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
+
+    record = {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}
+    single = client.post("/predict", json={"run_id": run_id, "features": record})
+    wrapped = client.post("/predict", json={"run_id": run_id, "features": [record]})
+    assert single.status_code == wrapped.status_code == 200
+    assert single.json()["data"]["predictions"] == wrapped.json()["data"]["predictions"]
+
+
 def test_predict_rejects_unknown_run(client: TestClient, tmp_path: Path, monkeypatch):
     monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
     (tmp_path / "runs").mkdir()
