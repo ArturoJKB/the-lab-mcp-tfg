@@ -36,6 +36,17 @@
 | M1 | P1 Stage 1 | done | Task-type generalization (classification + regression) |
 | L1 | P1 Stage 1 | done | Agent harness + LLM provider protocol (mock provider) |
 | A1 | P1 Stage 1 | done | OpenAI-compatible LLM provider adapter |
+| S1 | P1 Stage 2 | done | Deterministic EDA skill pack |
+| A2 | P1 Stage 2 | done | Worker agent + experiment proposals |
+| L2 | P1 Stage 2 | done | Context writer MCP |
+| A3 | P1 Stage 2 | done | Global agents (researcher + diagnosis) |
+| A3.1 | P1 Stage 2 hardening | done | Agent hardening: worker prior runs, hyperparameter grids, memory, diagnosis |
+| A3.2 | P1 Stage 2 hardening | done | Ollama native provider adapter for local LLM-driven agents |
+| A3.3 | P1 Stage 2 hardening | done | Structured-output hardening: JSON repair, improved prompt, direct provider call in worker |
+| A3.4 | P1 Stage 2 hardening | done | OpenRouter provider adapter |
+| B1 | P1 Stage 3 | planned | Cross-domain benchmark suite |
+| U1 | P1 Stage 3 | planned | UI v2 dashboard |
+| D1 | P1 Stage 3 | planned | Demos and notebook |
 
 ## Slice 0 — Contracts and workspace
 
@@ -221,7 +232,7 @@ activated.
 
 | Now | Doc |
 |---|---|---|
-| **Status** | P0 + Phase A hardening complete — exploratory CLI/API slice done — pending GitHub-readiness review |
+| **Status** | P1 Stage 2 + A3.1 hardening complete — ready to activate P1 Stage 3 slice (B1, U1, or D1) |
 | Master map | this file |
 | Binding product spec | `docs/PRD_P0.md` |
 | Coding constraints | `docs/Agents.md` |

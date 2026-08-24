@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -50,6 +51,25 @@ def _build_parser() -> argparse.ArgumentParser:
 
     compare_parser = subparsers.add_parser("compare", help="Compare metrics across completed runs")
     compare_parser.add_argument("--output", default="runs", help="Directory containing run outputs")
+
+    proposals_parser = subparsers.add_parser("proposals", help="Approve or reject experiment proposals")
+    proposals_subparsers = proposals_parser.add_subparsers(dest="proposals_command", required=True)
+
+    approve_parser = proposals_subparsers.add_parser("approve", help="Approve a proposal and write a batch config")
+    approve_parser.add_argument("proposal_id", help="Proposal ID to approve")
+    approve_parser.add_argument("--principal", default="human", help="Principal approving the proposal")
+    approve_parser.add_argument("--run", action="store_true", help="Run the generated batch config immediately")
+    approve_parser.add_argument("--output", default="runs", help="Output directory for batch runs")
+
+    reject_parser = proposals_subparsers.add_parser("reject", help="Reject a proposal")
+    reject_parser.add_argument("proposal_id", help="Proposal ID to reject")
+    reject_parser.add_argument("--principal", default="human", help="Principal rejecting the proposal")
+    reject_parser.add_argument("--reason", default="", help="Reason for rejection")
+
+    _list_proposals_parser = proposals_subparsers.add_parser("list", help="List persisted proposals")
+
+    _show_proposal_parser = proposals_subparsers.add_parser("show", help="Show a proposal")
+    _show_proposal_parser.add_argument("proposal_id", help="Proposal ID to show")
 
     context_parser = subparsers.add_parser("context", help="Local context store commands")
     context_cli.build_parser_with_parent(context_parser)
@@ -148,6 +168,52 @@ def main(argv: list[str] | None = None) -> int:
             runs = compare_runs(Path(args.output))
             print(format_comparison(runs))
             return 0
+        except Exception as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+
+    if args.command == "proposals":
+        from .agents.worker import ProposalStore
+        from .run.batch import BatchResult, BatchRunner, write_markdown_report
+
+        try:
+            store = ProposalStore()
+            if args.proposals_command == "approve":
+                proposal = store.load(args.proposal_id)
+                store.approve(args.proposal_id, principal=args.principal)
+                batch_path = store.write_batch_config(args.proposal_id)
+                print(f"Approved proposal: {args.proposal_id}")
+                print(f"  Batch config: {batch_path}")
+                if args.run:
+                    runner = BatchRunner(workspace_root=Path.cwd())
+                    entries = runner.load_config(batch_path)
+                    proposal_run_results: list[BatchResult] = runner.run(entries, output=args.output)
+                    summary_path = Path(args.output) / "batch_summary.json"
+                    runner.write_summary(proposal_run_results, summary_path)
+                    print(f"  Batch summary: {summary_path}")
+                    report_path = batch_path.with_suffix(".md")
+                    write_markdown_report(proposal_run_results, report_path)
+                    print(f"  Batch report: {report_path}")
+                    return 0 if all(r.status == "completed" for r in proposal_run_results) else 1
+                return 0
+
+            if args.proposals_command == "reject":
+                store.reject(args.proposal_id, principal=args.principal, reason=args.reason)
+                print(f"Rejected proposal: {args.proposal_id}")
+                return 0
+
+            if args.proposals_command == "list":
+                for proposal_id in store.list_proposals():
+                    status = "approved" if store.is_approved(proposal_id) else (
+                        "rejected" if store.is_rejected(proposal_id) else "pending"
+                    )
+                    print(f"{proposal_id}: {status}")
+                return 0
+
+            if args.proposals_command == "show":
+                proposal = store.load(args.proposal_id)
+                print(json.dumps(proposal.safe_dict(), indent=2))
+                return 0
         except Exception as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1

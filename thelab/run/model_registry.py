@@ -151,11 +151,16 @@ class ModelRegistry:
         """Return True if the model can produce probability estimates."""
         return self.get(name).supports_probability
 
-    def build_estimator(self, name: str, seed: int) -> Any:
+    def build_estimator(
+        self,
+        name: str,
+        seed: int,
+        hyperparameters: dict[str, Any] | None = None,
+    ) -> Any:
         """Return a configured sklearn estimator instance.
 
         Probability is enabled when *name* ends with ``_probability`` and the
-        base model supports it.
+        base model supports it. Optional *hyperparameters* override defaults.
         """
         probability = False
         base_name = name
@@ -165,6 +170,8 @@ class ModelRegistry:
 
         entry = self.get(base_name)
         params = dict(entry.default_params)
+        if hyperparameters:
+            params.update(hyperparameters)
         if "random_state" in entry.estimator_class._get_param_names():
             params["random_state"] = seed
         if probability and entry.supports_probability:

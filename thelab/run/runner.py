@@ -79,6 +79,7 @@ def run_model(
     workspace_root: Path | str | None = None,
     dry_run: bool = False,
     task_type: TaskTypeArg = "auto",
+    hyperparameters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Execute a direct deterministic Data-to-Model run.
 
@@ -180,7 +181,7 @@ def run_model(
         if not dry_run:
             append_event(events_path, run_id, "validation_completed", "Validation completed", {"valid": True})
 
-        pipeline = build_pipeline(inputs.model, inputs.seed)
+        pipeline = build_pipeline(inputs.model, inputs.seed, hyperparameters=hyperparameters)
         fitted_pipeline, metrics, split_info, _, _, _, _ = train_and_evaluate(
             df,
             feature_columns,
@@ -205,6 +206,7 @@ def run_model(
                 "class": model_entry.estimator_class.__name__,
                 "module": model_entry.estimator_class.__module__,
                 "default_params": model_entry.default_params,
+                "hyperparameters": hyperparameters,
             },
             "supports_probability": model_entry.supports_probability,
         }

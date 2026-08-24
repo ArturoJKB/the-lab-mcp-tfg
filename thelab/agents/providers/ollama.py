@@ -1,4 +1,12 @@
-"""OpenAI-compatible LLM provider adapter implementing the L1 protocol."""
+"""Ollama native LLM provider adapter implementing the L1 protocol.
+
+Uses Ollama's ``/api/chat`` endpoint with ``format: "json"`` for structured
+outputs. No API key is required; configuration is read from environment
+variables or constructor arguments.
+
+Privacy boundary: this adapter never logs prompt content. Debug logs contain
+only message counts, payload byte sizes, HTTP status codes, and timing.
+"""
 
 from __future__ import annotations
 
@@ -7,7 +15,7 @@ import logging
 import os
 import time
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any
 
 import httpx
 
@@ -44,53 +52,31 @@ class _HTTPResponse:
 Transport = Callable[[str, dict[str, str], dict[str, Any]], _HTTPResponse]
 
 
-class OpenAICompatProvider:
-    """LLMProvider adapter for any OpenAI-compatible chat completions endpoint.
-
-    Configuration is read from environment variables and can be overridden via
-    constructor arguments. Required variables (base URL and API key) must be
-    explicitly provided; there is no default endpoint.
-
-    Privacy boundary: this adapter never logs prompt content. Debug logs contain
-    only message counts, payload byte sizes, HTTP status codes, and timing.
-    Redaction is the harness's responsibility before messages reach the adapter.
-    """
+class OllamaProvider:
+    """LLMProvider adapter for Ollama's native ``/api/chat`` endpoint."""
 
     def __init__(
         self,
         base_url: str | None = None,
-        api_key: str | None = None,
         model: str | None = None,
         timeout_seconds: float | None = None,
         max_retries: int = 3,
         transport: Transport | None = None,
-        extra_headers: dict[str, str] | None = None,
     ) -> None:
-        resolved_base_url = base_url or os.environ.get("THELAB_LLM_BASE_URL")
-        resolved_api_key = api_key or os.environ.get("THELAB_LLM_API_KEY")
+        resolved_base_url = base_url or os.environ.get("OLLAMA_BASE_URL")
         if not resolved_base_url:
-            raise LLMProviderError(
-                "THELAB_LLM_BASE_URL is required (e.g. http://localhost:11434/v1)",
-                code="config",
-            )
-        if not resolved_api_key:
-            raise LLMProviderError(
-                "THELAB_LLM_API_KEY is required (any non-empty value for local Ollama)",
-                code="config",
-            )
-        self.base_url = resolved_base_url
-        self.api_key = resolved_api_key
-        self.model = model or os.environ.get("THELAB_LLM_MODEL", "qwen3:4b")
+            resolved_base_url = "http://localhost:11434"
+        self.base_url = resolved_base_url.rstrip("/")
+        self.model = model or os.environ.get("OLLAMA_MODEL", "llama3.2:3b")
         self.timeout_seconds = timeout_seconds
         if self.timeout_seconds is None:
-            raw_timeout = os.environ.get("THELAB_LLM_TIMEOUT_SECONDS", "120")
+            raw_timeout = os.environ.get("OLLAMA_TIMEOUT_SECONDS", "120")
             try:
                 self.timeout_seconds = float(raw_timeout)
             except ValueError:
                 self.timeout_seconds = 120.0
         self.max_retries = max(0, max_retries)
         self._transport = transport or self._default_transport
-        self._extra_headers = extra_headers or {}
 
     def _default_transport(
         self,
@@ -113,13 +99,10 @@ class OpenAICompatProvider:
             raise LLMProviderError(f"HTTP error: {exc}", code="network") from exc
 
     @staticmethod
-    def _map_role(role: Literal["system", "user", "assistant", "tool"]) -> str:
-        return role
-
-    def _map_messages(self, messages: list[AgentMessage]) -> list[dict[str, Any]]:
+    def _map_messages(messages: list[AgentMessage]) -> list[dict[str, Any]]:
         out: list[dict[str, Any]] = []
         for msg in messages:
-            entry: dict[str, Any] = {"role": self._map_role(msg.role), "content": msg.content}
+            entry: dict[str, Any] = {"role": msg.role, "content": msg.content}
             if msg.role == "tool" and msg.tool_call_id:
                 entry["tool_call_id"] = msg.tool_call_id
             out.append(entry)
@@ -147,23 +130,20 @@ class OpenAICompatProvider:
         body: dict[str, Any] = {
             "model": self.model,
             "messages": self._map_messages(messages),
+            "stream": False,
+            "format": "json",
         }
         if tools:
             body["tools"] = self._map_tools(tools)
-            body["tool_choice"] = "auto"
         return body
 
     def _post_with_retries(self, payload: dict[str, Any]) -> _HTTPResponse:
-        url = f"{self.base_url.rstrip('/')}/chat/completions"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
-        }
-        headers.update(self._extra_headers)
+        url = f"{self.base_url}/api/chat"
+        headers = {"Content-Type": "application/json"}
 
         payload_bytes = len(json.dumps(payload, default=str).encode("utf-8"))
         logger.debug(
-            "OpenAI-compat request: url=%s messages=%d bytes=%d",
+            "Ollama request: url=%s messages=%d bytes=%d",
             url,
             len(payload.get("messages", [])),
             payload_bytes,
@@ -185,7 +165,7 @@ class OpenAICompatProvider:
 
             duration = time.perf_counter() - start
             logger.debug(
-                "OpenAI-compat response: status=%d bytes=%d duration=%.3fs",
+                "Ollama response: status=%d bytes=%d duration=%.3fs",
                 response.status_code,
                 len(response.text.encode("utf-8")),
                 duration,
@@ -229,13 +209,11 @@ class OpenAICompatProvider:
 
         requests: list[ToolCallRequest] = []
         for call in raw_calls:
-            if call.get("type") != "function":
-                raise LLMProviderError("unsupported tool_call type", code="protocol")
             function = call.get("function") or {}
             name = function.get("name")
             if not name or not isinstance(name, str):
                 raise LLMProviderError("tool_call missing function name", code="protocol")
-            arguments_raw = function.get("arguments", "{}")
+            arguments_raw = function.get("arguments", {})
             if isinstance(arguments_raw, dict):
                 arguments = arguments_raw
             else:
@@ -247,9 +225,7 @@ class OpenAICompatProvider:
                     ) from exc
             if not isinstance(arguments, dict):
                 raise LLMProviderError("tool_call arguments are not a JSON object", code="protocol")
-            requests.append(
-                ToolCallRequest(tool=name, arguments=arguments, id=call.get("id"))
-            )
+            requests.append(ToolCallRequest(tool=name, arguments=arguments, id=None))
         return requests
 
     def complete(
@@ -265,32 +241,20 @@ class OpenAICompatProvider:
         except (json.JSONDecodeError, ValueError) as exc:
             raise LLMProviderError(f"response is not valid JSON: {exc}", code="protocol") from exc
 
-        choices = data.get("choices")
-        if not isinstance(choices, list) or not choices:
-            raise LLMProviderError("response missing choices", code="protocol")
+        message = data.get("message") or {}
+        if not isinstance(message, dict):
+            raise LLMProviderError("response missing message", code="protocol")
 
-        message = choices[0].get("message") or {}
-        finish_reason = choices[0].get("finish_reason")
         content = message.get("content") or ""
         tool_calls = self._parse_tool_calls(message) if message.get("tool_calls") else []
 
-        if finish_reason == "tool_calls":
-            if not tool_calls:
-                raise LLMProviderError(
-                    "finish_reason=tool_calls but no tool_calls returned", code="protocol"
-                )
+        if tool_calls:
             return AgentTurn(tool_calls=tool_calls)
 
-        if finish_reason == "stop" or finish_reason is None:
-            if tool_calls:
-                raise LLMProviderError(
-                    "finish_reason=stop but tool_calls present", code="protocol"
-                )
-            if content == "":
-                raise LLMProviderError("empty text turn", code="protocol")
-            return AgentTurn(text=content)
+        if content == "":
+            raise LLMProviderError("empty text turn", code="protocol")
 
-        raise LLMProviderError(f"unsupported finish_reason: {finish_reason}", code="protocol")
+        return AgentTurn(text=content)
 
 
-__all__ = ["OpenAICompatProvider", "_HTTPResponse"]
+__all__ = ["OllamaProvider", "_HTTPResponse"]
