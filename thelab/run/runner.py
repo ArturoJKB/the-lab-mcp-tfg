@@ -6,17 +6,18 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from thelab.contracts import RunStatus, TaskSpec, TaskState, ValidationStatus
+from thelab.contracts import RunStatus, TaskSpec, TaskState, TaskType, ValidationStatus
 from thelab.version import dependency_versions
 from thelab.workspace import hash_file
 
 from .artifacts import append_event, write_artifacts
 from .contract import build_dataset_contract
 from .errors import RejectedRunError
-from .inputs import RunInputs
+from .inputs import RunInputs, TaskTypeArg
 from .model_registry import MODEL_REGISTRY
 from .preprocess import build_pipeline
 from .profile import profile_dataframe, read_csv
+from .task_type import infer_task_type
 from .train import train_and_evaluate
 from .validate import validate_dataset
 
@@ -77,6 +78,7 @@ def run_model(
     output: Path | str,
     workspace_root: Path | str | None = None,
     dry_run: bool = False,
+    task_type: TaskTypeArg = "auto",
 ) -> dict[str, Any]:
     """Execute a direct deterministic Data-to-Model run.
 
@@ -102,6 +104,7 @@ def run_model(
         model=model,
         seed=seed,
         output=output_path,
+        task_type=task_type,
         workspace_root=workspace_root,
     )
 
@@ -126,6 +129,7 @@ def run_model(
     validation_report: dict[str, Any] = {}
     fitted_pipeline: Any | None = None
     split_info: dict[str, int] | None = None
+    resolved_task_type: TaskType = "classification"
     dataset_path = inputs.workspace_root / inputs.dataset
 
     events_path = run_dir / "events.jsonl"
@@ -137,9 +141,27 @@ def run_model(
         df = read_csv(dataset_path)
         feature_columns = [col for col in df.columns if col != inputs.target]
 
+        resolved_task_type = (
+            infer_task_type(df, inputs.target)
+            if inputs.task_type == "auto"
+            else inputs.task_type
+        )
+
+        model_entry = MODEL_REGISTRY.get(inputs.model)
+        if model_entry.task_type != resolved_task_type:
+            raise RejectedRunError(
+                f"model '{inputs.model}' is a {model_entry.task_type} model, "
+                f"but the dataset resolves to {resolved_task_type}"
+            )
+
         data_profile = profile_dataframe(df, inputs.target)
         validation_report = validate_dataset(
-            df, dataset_path, inputs.target, feature_columns, inputs.seed
+            df,
+            dataset_path,
+            inputs.target,
+            feature_columns,
+            inputs.seed,
+            task_type=resolved_task_type,
         )
 
         if not validation_report["valid"]:
@@ -160,17 +182,22 @@ def run_model(
 
         pipeline = build_pipeline(inputs.model, inputs.seed)
         fitted_pipeline, metrics, split_info, _, _, _, _ = train_and_evaluate(
-            df, feature_columns, inputs.target, pipeline, inputs.seed
+            df,
+            feature_columns,
+            inputs.target,
+            pipeline,
+            inputs.seed,
+            task_type=resolved_task_type,
         )
 
         # Update split summary with actual counts from train_test_split.
         validation_report["split_summary"]["train_count"] = split_info["train_count"]
         validation_report["split_summary"]["test_count"] = split_info["test_count"]
 
-        model_entry = MODEL_REGISTRY.get(inputs.model)
         training_config = {
             "model": inputs.model,
             "seed": inputs.seed,
+            "task_type": resolved_task_type,
             "preprocessing": ["StandardScaler"],
             "split": validation_report["split_summary"],
             "dependency_versions": dependency_versions(),
@@ -183,12 +210,17 @@ def run_model(
         }
 
         if not dry_run:
+            event_data = (
+                {"test_rmse": metrics["test_rmse"]}
+                if resolved_task_type == "regression"
+                else {"test_accuracy": metrics["test_accuracy"]}
+            )
             append_event(
                 events_path,
                 run_id,
                 "training_completed",
                 "Training completed",
-                {"test_accuracy": metrics["test_accuracy"]},
+                event_data,
             )
 
         final_status = RunStatus.completed
@@ -222,6 +254,7 @@ def run_model(
         task_spec_path.write_text(task_spec.model_dump_json(indent=2), encoding="utf-8")
 
         safe_inputs = inputs.safe_dict()
+        safe_inputs["task_type"] = resolved_task_type
         manifest = write_artifacts(
             run_dir=run_dir,
             run_id=run_id,
@@ -241,18 +274,32 @@ def run_model(
             error_summary=error_summary,
             task_spec_id=task_spec.task_id,
             task_spec_path=task_spec_path,
+            task_type=resolved_task_type,
         )
 
     if final_status == RunStatus.completed:
         output_label = "not persisted (dry run)" if dry_run else _relative_output(run_dir, inputs.workspace_root)
-        print(
-            f"Run completed: {run_id}\n"
-            f"  Output: {output_label}\n"
-            f"  Model: {inputs.model}\n"
-            f"  Seed: {inputs.seed}\n"
-            f"  Test accuracy: {metrics['test_accuracy']:.6f}\n"
-            f"  Test macro F1: {metrics['test_f1_macro']:.6f}"
-        )
+        if resolved_task_type == "regression":
+            print(
+                f"Run completed: {run_id}\n"
+                f"  Output: {output_label}\n"
+                f"  Model: {inputs.model}\n"
+                f"  Seed: {inputs.seed}\n"
+                f"  Task type: {resolved_task_type}\n"
+                f"  Test RMSE: {metrics['test_rmse']:.6f}\n"
+                f"  Test MAE: {metrics['test_mae']:.6f}\n"
+                f"  Test R2: {metrics['test_r2']:.6f}"
+            )
+        else:
+            print(
+                f"Run completed: {run_id}\n"
+                f"  Output: {output_label}\n"
+                f"  Model: {inputs.model}\n"
+                f"  Seed: {inputs.seed}\n"
+                f"  Task type: {resolved_task_type}\n"
+                f"  Test accuracy: {metrics['test_accuracy']:.6f}\n"
+                f"  Test macro F1: {metrics['test_f1_macro']:.6f}"
+            )
     elif final_status == RunStatus.rejected:
         print(f"Run rejected: {run_id}\n  Error: {error_summary}", file=sys.stderr)
     else:
@@ -276,6 +323,7 @@ def try_all_models(
     output: Path | str = "scratch",
     workspace_root: Path | str | None = None,
     dry_run: bool = True,
+    task_type: TaskTypeArg = "auto",
 ) -> list[dict[str, Any]]:
     """Train every registered model and return a comparison list.
 
@@ -294,6 +342,7 @@ def try_all_models(
             output=output,
             workspace_root=workspace_root,
             dry_run=dry_run,
+            task_type=task_type,
         )
         results.append(result)
     return sorted(
@@ -301,6 +350,7 @@ def try_all_models(
         key=lambda r: (
             -float((r.get("metrics") or {}).get("test_f1_macro") or 0.0),
             -float((r.get("metrics") or {}).get("test_accuracy") or 0.0),
+            -float((r.get("metrics") or {}).get("test_r2") or 0.0),
             str(r.get("model", "")),
         ),
     )

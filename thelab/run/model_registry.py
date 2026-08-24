@@ -3,21 +3,29 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.ensemble import (
+    HistGradientBoostingClassifier,
+    HistGradientBoostingRegressor,
+    RandomForestClassifier,
+    RandomForestRegressor,
+)
+from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, SGDClassifier
 from sklearn.svm import SVC
+
+TaskType = Literal["classification", "regression"]
 
 
 @dataclass(frozen=True)
 class ModelEntry:
-    """Metadata for a registered classification model."""
+    """Metadata for a registered model."""
 
     name: str
     estimator_class: type[Any]
     default_params: dict[str, Any]
     supports_probability: bool = False
+    task_type: TaskType = "classification"
 
 
 class ModelRegistry:
@@ -28,12 +36,14 @@ class ModelRegistry:
         self._register_defaults()
 
     def _register_defaults(self) -> None:
+        # Classification models
         self.register(
             ModelEntry(
                 name="logistic_regression",
                 estimator_class=LogisticRegression,
                 default_params={"max_iter": 200, "solver": "lbfgs"},
                 supports_probability=True,
+                task_type="classification",
             )
         )
         self.register(
@@ -42,6 +52,7 @@ class ModelRegistry:
                 estimator_class=RandomForestClassifier,
                 default_params={"n_estimators": 100},
                 supports_probability=True,
+                task_type="classification",
             )
         )
         self.register(
@@ -50,6 +61,7 @@ class ModelRegistry:
                 estimator_class=SVC,
                 default_params={"kernel": "rbf"},
                 supports_probability=True,
+                task_type="classification",
             )
         )
         self.register(
@@ -58,6 +70,50 @@ class ModelRegistry:
                 estimator_class=SGDClassifier,
                 default_params={"loss": "log_loss", "max_iter": 1000, "tol": 1e-3},
                 supports_probability=True,
+                task_type="classification",
+            )
+        )
+        self.register(
+            ModelEntry(
+                name="hist_gradient_boosting",
+                estimator_class=HistGradientBoostingClassifier,
+                default_params={},
+                supports_probability=True,
+                task_type="classification",
+            )
+        )
+
+        # Regression models
+        self.register(
+            ModelEntry(
+                name="linear_regression",
+                estimator_class=LinearRegression,
+                default_params={},
+                task_type="regression",
+            )
+        )
+        self.register(
+            ModelEntry(
+                name="ridge",
+                estimator_class=Ridge,
+                default_params={"alpha": 1.0},
+                task_type="regression",
+            )
+        )
+        self.register(
+            ModelEntry(
+                name="random_forest_regressor",
+                estimator_class=RandomForestRegressor,
+                default_params={"n_estimators": 100},
+                task_type="regression",
+            )
+        )
+        self.register(
+            ModelEntry(
+                name="hist_gradient_boosting_regressor",
+                estimator_class=HistGradientBoostingRegressor,
+                default_params={},
+                task_type="regression",
             )
         )
 
@@ -109,7 +165,8 @@ class ModelRegistry:
 
         entry = self.get(base_name)
         params = dict(entry.default_params)
-        params["random_state"] = seed
+        if "random_state" in entry.estimator_class._get_param_names():
+            params["random_state"] = seed
         if probability and entry.supports_probability:
             if "probability" in entry.estimator_class._get_param_names():
                 params["probability"] = True

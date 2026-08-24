@@ -26,6 +26,12 @@ def _build_parser() -> argparse.ArgumentParser:
     model_parser.add_argument("--seed", required=True, type=int, help="Random seed")
     model_parser.add_argument("--output", required=True, help="Output directory (e.g., runs/)")
     model_parser.add_argument("--dry-run", action="store_true", help="Train in-memory and print metrics without persisting artifacts")
+    model_parser.add_argument(
+        "--task-type",
+        choices=["auto", "classification", "regression"],
+        default="auto",
+        help="Task type (default: auto-infer from target column)",
+    )
     model_parser.add_argument("--try-all", action="store_true", help="Train every registered model and print a comparison table")
 
     batch_parser = run_subparsers.add_parser("batch", help="Run a batch of experiments from a JSON config")
@@ -67,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
                     output=args.output,
                     workspace_root=Path.cwd(),
                     dry_run=args.dry_run,
+                    task_type=args.task_type,
                 )
                 completed = [r for r in results if r["status"] == "completed"]
                 print(f"\nTrained {len(results)} models, {len(completed)} completed.")
@@ -88,6 +95,7 @@ def main(argv: list[str] | None = None) -> int:
                 output=args.output,
                 workspace_root=Path.cwd(),
                 dry_run=args.dry_run,
+                task_type=args.task_type,
             )
             return 0 if result["status"] == "completed" else 1
         except Exception as exc:

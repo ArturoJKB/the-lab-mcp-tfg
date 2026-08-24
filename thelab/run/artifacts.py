@@ -7,7 +7,7 @@ from typing import Any
 
 import joblib
 
-from thelab.contracts import ArtifactRef, RunManifest, RunStatus, ValidationStatus
+from thelab.contracts import ArtifactRef, RunManifest, RunStatus, TaskType, ValidationStatus
 from thelab.workspace import hash_bytes, hash_file
 
 
@@ -57,6 +57,7 @@ def build_manifest(
     started_at: datetime,
     finished_at: datetime,
     task_spec_id: str | None = None,
+    task_type: TaskType | None = None,
 ) -> RunManifest:
     try:
         dataset_hash = hash_file(dataset_path)
@@ -76,6 +77,7 @@ def build_manifest(
         artifact_refs=artifact_refs,
         error_summary=error_summary,
         task_spec_id=task_spec_id,
+        task_type=task_type,
     )
 
 
@@ -99,12 +101,19 @@ def write_model_card(
             "No hyperparameter search, AutoML, or feature engineering.",
         ],
     )
+    task_type = training_config.get("task_type", "classification")
+    purpose = (
+        "Trained regression model produced by The Lab direct run."
+        if task_type == "regression"
+        else "Trained classification model produced by The Lab direct run."
+    )
+    split_desc = "80/20 stratified" if task_type == "classification" else "80/20 shuffle"
 
     lines = [
         "# Model Card",
         "",
         "## Purpose",
-        "Trained classification model produced by The Lab direct run.",
+        purpose,
         "",
         "## Dataset summary",
         f"- Source: `{inputs['dataset']}`",
@@ -117,17 +126,29 @@ def write_model_card(
         "",
         "## Model and preprocessing",
         f"- Model: `{inputs['model']}`",
+        f"- Task type: {task_type}",
         f"- Preprocessing: {', '.join(preprocessing)}",
         f"- Seed: {inputs['seed']}",
         "",
         "## Validation procedure",
-        "- Train/test split: 80/20 stratified",
+        f"- Train/test split: {split_desc}",
         f"- Seed: {inputs['seed']}",
         f"- Valid: {validation_report.get('valid', 'N/A')}",
         "",
         "## Metrics",
-        f"- Test accuracy: {_fmt('test_accuracy')}",
-        f"- Test macro F1: {_fmt('test_f1_macro')}",
+    ]
+    if task_type == "regression":
+        lines.extend([
+            f"- Test RMSE: {_fmt('test_rmse')}",
+            f"- Test MAE: {_fmt('test_mae')}",
+            f"- Test R2: {_fmt('test_r2')}",
+        ])
+    else:
+        lines.extend([
+            f"- Test accuracy: {_fmt('test_accuracy')}",
+            f"- Test macro F1: {_fmt('test_f1_macro')}",
+        ])
+    lines.extend([
         f"- Train samples: {metrics.get('train_samples', 'N/A')}",
         f"- Test samples: {metrics.get('test_samples', 'N/A')}",
         "",
@@ -135,7 +156,7 @@ def write_model_card(
         f"```bash\nthelab run model --dataset {inputs['dataset']} --target {inputs['target']} --model {inputs['model']} --seed {inputs['seed']} --output {inputs['output']}\n```",
         "",
         "## Limitations",
-    ]
+    ])
     for limitation in limitations:
         lines.append(f"- {limitation}")
     lines.extend([
@@ -174,6 +195,7 @@ def write_artifacts(
     error_summary: str | None,
     task_spec_id: str | None = None,
     task_spec_path: Path | None = None,
+    task_type: TaskType | None = None,
 ) -> RunManifest:
     run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -245,6 +267,7 @@ def write_artifacts(
         started_at=started_at,
         finished_at=finished_at,
         task_spec_id=task_spec_id,
+        task_type=task_type,
     )
     manifest_path = run_dir / "manifest.json"
     manifest_path.write_text(manifest.model_dump_json(indent=2), encoding="utf-8")

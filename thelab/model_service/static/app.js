@@ -66,13 +66,20 @@ async function loadModels() {
     show(tbody, `<tr><td colspan="5">No approved models found.</td></tr>`);
     return;
   }
+  function formatModelMetric(m) {
+    const metrics = m.metrics || {};
+    if (m.task_type === "regression") {
+      return metrics.test_r2 != null ? `R2 ${metrics.test_r2.toFixed(4)}` : "—";
+    }
+    return metrics.test_accuracy != null ? `Acc ${metrics.test_accuracy.toFixed(4)}` : "—";
+  }
   tbody.innerHTML = models.map(m => `
     <tr data-run-id="${escapeHtml(m.run_id)}">
       <td>${escapeHtml(m.run_id)}</td>
       <td>${escapeHtml(m.model || "")}</td>
       <td>${escapeHtml(m.target || "")}</td>
-      <td>${m.metrics && m.metrics.test_accuracy != null ? m.metrics.test_accuracy.toFixed(4) : "—"}</td>
-      <td>${m.metrics && m.metrics.test_f1_macro != null ? m.metrics.test_f1_macro.toFixed(4) : "—"}</td>
+      <td>${escapeHtml(m.task_type || "")}</td>
+      <td>${formatModelMetric(m)}</td>
     </tr>
   `).join("");
 
@@ -102,11 +109,15 @@ async function loadRunMetrics(runId) {
   const run = res.data.data;
   activeFeatureColumns = run.feature_columns || [];
   const metrics = run.metrics || {};
+  const isRegression = run.task_type === "regression";
+  const metricLine = isRegression
+    ? `<strong>Test RMSE:</strong> ${metrics.test_rmse != null ? metrics.test_rmse.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test R2:</strong> ${metrics.test_r2 != null ? metrics.test_r2.toFixed(4) : "—"}`
+    : `<strong>Test accuracy:</strong> ${metrics.test_accuracy != null ? metrics.test_accuracy.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test F1:</strong> ${metrics.test_f1_macro != null ? metrics.test_f1_macro.toFixed(4) : "—"}`;
   show(el, `
     <p><strong>Run ID:</strong> ${escapeHtml(run.run_id)}</p>
     <p><strong>Model:</strong> ${escapeHtml(run.model || "")} &nbsp;|&nbsp; <strong>Target:</strong> ${escapeHtml(run.target || "")}</p>
-    <p><strong>Status:</strong> ${escapeHtml(run.final_status)} / ${escapeHtml(run.validation_status)}</p>
-    <p><strong>Test accuracy:</strong> ${metrics.test_accuracy != null ? metrics.test_accuracy.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test F1:</strong> ${metrics.test_f1_macro != null ? metrics.test_f1_macro.toFixed(4) : "—"}</p>
+    <p><strong>Task type:</strong> ${escapeHtml(run.task_type || "")} &nbsp;|&nbsp; <strong>Status:</strong> ${escapeHtml(run.final_status)} / ${escapeHtml(run.validation_status)}</p>
+    <p>${metricLine}</p>
     <p><strong>Feature columns:</strong> ${(run.feature_columns || []).map(c => `<code>${escapeHtml(c)}</code>`).join(", ")}</p>
   `);
 }
@@ -238,13 +249,18 @@ async function loadCodingRun(runId) {
   const run = res.data.data;
   codingArtifacts = run.artifacts || [];
   const metrics = run.metrics || {};
+  const isRegression = run.task_type === "regression";
+  const metricLine = isRegression
+    ? `<strong>Test RMSE:</strong> ${metrics.test_rmse != null ? metrics.test_rmse.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test R2:</strong> ${metrics.test_r2 != null ? metrics.test_r2.toFixed(4) : "—"}`
+    : `<strong>Test accuracy:</strong> ${metrics.test_accuracy != null ? metrics.test_accuracy.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test F1:</strong> ${metrics.test_f1_macro != null ? metrics.test_f1_macro.toFixed(4) : "—"}`;
   show(content, `
     <p><strong>Run ID:</strong> <code>${escapeHtml(run.run_id)}</code></p>
     <p><strong>Status:</strong> ${escapeHtml(run.final_status)} / ${escapeHtml(run.validation_status)}</p>
     <p><strong>Model:</strong> ${escapeHtml(run.model || "")} &nbsp;|&nbsp; <strong>Target:</strong> ${escapeHtml(run.target || "")}</p>
+    <p><strong>Task type:</strong> ${escapeHtml(run.task_type || "")}</p>
     <p><strong>Dataset:</strong> ${escapeHtml(run.dataset || "—")}</p>
     <p><strong>Seed:</strong> ${run.seed != null ? escapeHtml(String(run.seed)) : "—"}</p>
-    <p><strong>Test accuracy:</strong> ${metrics.test_accuracy != null ? metrics.test_accuracy.toFixed(4) : "—"} &nbsp;|&nbsp; <strong>Test F1:</strong> ${metrics.test_f1_macro != null ? metrics.test_f1_macro.toFixed(4) : "—"}</p>
+    <p>${metricLine}</p>
     <p><strong>Feature columns:</strong> ${(run.feature_columns || []).map(c => `<code>${escapeHtml(c)}</code>`).join(", ")}</p>
   `);
   if (codingArtifacts.length) {

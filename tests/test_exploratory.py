@@ -67,7 +67,7 @@ def test_dry_run_does_not_create_run_dir(tmp_path: Path, fixture_csv: Path):
     assert not (tmp_path / "runs").exists()
 
 
-def test_try_all_models_returns_all_registered(tmp_path: Path, fixture_csv: Path):
+def test_try_all_models_returns_all_compatible_models(tmp_path: Path, fixture_csv: Path):
     results = try_all_models(
         dataset="iris.csv",
         target="species",
@@ -75,9 +75,9 @@ def test_try_all_models_returns_all_registered(tmp_path: Path, fixture_csv: Path
         dry_run=True,
         workspace_root=tmp_path,
     )
-    assert len(results) == len(list_models())
-    assert all(r["status"] == "completed" for r in results)
-    assert all("test_accuracy" in r["metrics"] for r in results)
+    completed = [r for r in results if r["status"] == "completed"]
+    assert len(completed) == len([m for m in list_models() if not m.endswith("_regressor") and m not in {"linear_regression", "ridge"}])
+    assert all("test_accuracy" in r["metrics"] for r in completed)
 
 
 def test_try_all_models_sorted_best_first(tmp_path: Path, fixture_csv: Path):
@@ -88,7 +88,8 @@ def test_try_all_models_sorted_best_first(tmp_path: Path, fixture_csv: Path):
         dry_run=True,
         workspace_root=tmp_path,
     )
-    f1_scores = [r["metrics"]["test_f1_macro"] for r in results]
+    completed = [r for r in results if r["status"] == "completed"]
+    f1_scores = [r["metrics"]["test_f1_macro"] for r in completed]
     assert f1_scores == sorted(f1_scores, reverse=True)
 
 
@@ -156,8 +157,10 @@ def test_quick_compare(tmp_path: Path, fixture_csv: Path):
         seed=42,
         workspace_root=tmp_path,
     )
-    assert len(experiments) == len(list_models())
-    assert all(e.status == "completed" for e in experiments)
+    completed = [e for e in experiments if e.status == "completed"]
+    expected = len([m for m in list_models() if not m.endswith("_regressor") and m not in {"linear_regression", "ridge"}])
+    assert len(completed) == expected
+    assert all(e.status == "completed" for e in completed)
 
 
 def test_cli_inspect(tmp_path: Path, fixture_csv: Path):

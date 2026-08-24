@@ -157,6 +157,7 @@ def _agent_coding_run_detail(run_id: str) -> dict[str, Any]:
     metrics = load_json_artifact(runs_root, run_id, "metrics.json") or {}
     target = inputs.get("target")
     cols = feature_columns(data_profile, target) if target else []
+    task_type = manifest.get("task_type") or inputs.get("task_type") or "classification"
 
     artifacts = []
     for name in sorted(_ARTIFACT_ALLOWLIST):
@@ -171,9 +172,13 @@ def _agent_coding_run_detail(run_id: str) -> dict[str, Any]:
         "target": target,
         "dataset": _dataset_basename(inputs.get("dataset")),
         "feature_columns": cols,
+        "task_type": task_type,
         "metrics": {
             "test_accuracy": metrics.get("test_accuracy"),
             "test_f1_macro": metrics.get("test_f1_macro"),
+            "test_rmse": metrics.get("test_rmse"),
+            "test_mae": metrics.get("test_mae"),
+            "test_r2": metrics.get("test_r2"),
         },
         "seed": inputs.get("seed"),
         "artifacts": artifacts,
@@ -193,14 +198,19 @@ def _list_approved_models() -> list[dict[str, Any]]:
             continue
         inputs = load_json_artifact(runs_root, run_id, "inputs.json") or {}
         metrics = load_json_artifact(runs_root, run_id, "metrics.json") or {}
+        task_type = manifest.get("task_type") or inputs.get("task_type") or "classification"
         models.append(
             {
                 "run_id": run_id,
                 "model": inputs.get("model"),
                 "target": inputs.get("target"),
+                "task_type": task_type,
                 "metrics": {
                     "test_accuracy": metrics.get("test_accuracy"),
                     "test_f1_macro": metrics.get("test_f1_macro"),
+                    "test_rmse": metrics.get("test_rmse"),
+                    "test_mae": metrics.get("test_mae"),
+                    "test_r2": metrics.get("test_r2"),
                 },
             }
         )
@@ -227,6 +237,7 @@ def _run_summary(run_id: str) -> dict[str, Any]:
     metrics = load_json_artifact(runs_root, run_id, "metrics.json") or {}
     target = inputs.get("target")
     cols = feature_columns(data_profile, target) if target else []
+    task_type = manifest.get("task_type") or inputs.get("task_type") or "classification"
 
     return {
         "run_id": run_id,
@@ -235,9 +246,13 @@ def _run_summary(run_id: str) -> dict[str, Any]:
         "model": inputs.get("model"),
         "target": target,
         "feature_columns": cols,
+        "task_type": task_type,
         "metrics": {
             "test_accuracy": metrics.get("test_accuracy"),
             "test_f1_macro": metrics.get("test_f1_macro"),
+            "test_rmse": metrics.get("test_rmse"),
+            "test_mae": metrics.get("test_mae"),
+            "test_r2": metrics.get("test_r2"),
         },
         "seed": inputs.get("seed"),
         "dataset": _dataset_basename(inputs.get("dataset")),

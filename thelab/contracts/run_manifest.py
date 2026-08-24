@@ -1,10 +1,12 @@
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .artifact_ref import ArtifactRef
+
+TaskType = Literal["classification", "regression"]
 
 
 class RunStatus(StrEnum):
@@ -51,3 +53,4 @@ class RunManifest(BaseModel):
     artifact_refs: list[ArtifactRef] = Field(default_factory=list)
     error_summary: str | None = None
     task_spec_id: str | None = None
+    task_type: TaskType | None = None

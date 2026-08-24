@@ -116,9 +116,11 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
                 continue
             inputs = load_json_artifact(runs_root, run_id, "inputs.json") or {}
             metrics = load_json_artifact(runs_root, run_id, "metrics.json") or {}
+            task_type = manifest.get("task_type") or inputs.get("task_type") or "classification"
             models.append({
                 "run_id": run_id,
                 "model": inputs.get("model"),
+                "task_type": task_type,
                 "seed": manifest.get("random_seed"),
                 "metrics": {
                     "test_accuracy": metrics.get("test_accuracy"),

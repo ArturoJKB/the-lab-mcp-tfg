@@ -6,8 +6,9 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
+from .inputs import TaskTypeArg
 from .runner import run_model
 
 
@@ -19,6 +20,7 @@ class BatchEntry:
     target: str
     model: str
     seed: int
+    task_type: TaskTypeArg = "auto"
 
 
 @dataclass
@@ -56,6 +58,7 @@ class BatchRunner:
                     target=str(item["target"]),
                     model=str(item["model"]),
                     seed=int(item["seed"]),
+                    task_type=cast(TaskTypeArg, str(item.get("task_type", "auto"))),
                 )
             )
         return entries
@@ -77,6 +80,7 @@ class BatchRunner:
                     seed=entry.seed,
                     output=output,
                     workspace_root=self.workspace_root,
+                    task_type=entry.task_type,
                 )
                 result.run_id = outcome.get("run_id")
                 result.status = outcome.get("status", "unknown")
@@ -106,6 +110,7 @@ class BatchRunner:
                     "target": r.entry.target,
                     "model": r.entry.model,
                     "seed": r.entry.seed,
+                    "task_type": r.entry.task_type,
                     "run_id": r.run_id,
                     "status": r.status,
                     "metrics": r.metrics,
@@ -137,19 +142,25 @@ def write_markdown_report(
         "",
         "## Results",
         "",
-        "| Dataset | Target | Model | Seed | Status | Test Accuracy | Test F1 Macro | Error |",
-        "|---|---|---|---|---|---|---|---|",
+        "| Dataset | Target | Model | Seed | Task Type | Status | Test Metric | Secondary Metric | Error |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for r in results:
         metrics = r.metrics or {}
-        acc = metrics.get("test_accuracy")
-        f1 = metrics.get("test_f1_macro")
-        acc_str = f"{acc:.6f}" if acc is not None else "-"
-        f1_str = f"{f1:.6f}" if f1 is not None else "-"
+        task_type = r.entry.task_type
+        if "test_rmse" in metrics:
+            primary = f"RMSE={metrics['test_rmse']:.6f}"
+            secondary = f"R2={metrics['test_r2']:.6f}"
+        elif "test_accuracy" in metrics:
+            primary = f"Acc={metrics['test_accuracy']:.6f}"
+            secondary = f"F1={metrics['test_f1_macro']:.6f}"
+        else:
+            primary = "-"
+            secondary = "-"
         error = (r.error or "").replace("|", "\\|")
         lines.append(
             f"| {r.entry.dataset} | {r.entry.target} | {r.entry.model} | "
-            f"{r.entry.seed} | {r.status} | {acc_str} | {f1_str} | {error} |"
+            f"{r.entry.seed} | {task_type} | {r.status} | {primary} | {secondary} | {error} |"
         )
 
     if failed:

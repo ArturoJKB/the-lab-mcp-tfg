@@ -34,6 +34,7 @@ scratch/
 # Local context store derivatives
 .thelab/context/
 .thelab/local-logs/
+.thelab/approvals/
 
 # Tool caches
 .mypy_cache/

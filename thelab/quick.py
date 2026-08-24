@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from .run.inputs import TaskTypeArg
 from .run.model_registry import MODEL_REGISTRY
 from .run.prediction import predict
 from .run.runner import run_model
@@ -77,6 +78,7 @@ def experiment(
     output: str = "runs",
     dry_run: bool = False,
     workspace_root: Path | str | None = None,
+    task_type: TaskTypeArg = "auto",
 ) -> Experiment:
     """Train a model and return a lightweight Experiment handle.
 
@@ -96,6 +98,7 @@ def experiment(
         output=output,
         dry_run=dry_run,
         workspace_root=workspace_root,
+        task_type=task_type,
     )
     return Experiment(result, workspace_root=workspace_root)
 
@@ -105,6 +108,7 @@ def compare(
     target: str,
     seed: int = 42,
     workspace_root: Path | str | None = None,
+    task_type: TaskTypeArg = "auto",
 ) -> list[Experiment]:
     """Train every registered model and return the results.
 
@@ -117,6 +121,7 @@ def compare(
         seed=seed,
         dry_run=True,
         workspace_root=workspace_root,
+        task_type=task_type,
     )
     return [Experiment(r, workspace_root=workspace_root) for r in results]
 
@@ -133,11 +138,13 @@ def try_all_models(
     output: str = "scratch",
     workspace_root: Path | str | None = None,
     dry_run: bool = True,
+    task_type: TaskTypeArg = "auto",
 ) -> list[dict[str, Any]]:
     """Train every registered model and return raw result dicts, best first.
 
-    Results are sorted best-first by ``test_f1_macro``. Prefer :func:`compare`
-    for ``Experiment`` handles; this thin wrapper exposes the runner API.
+    Results are sorted best-first by task-appropriate metric. Prefer
+    :func:`compare` for ``Experiment`` handles; this thin wrapper exposes the
+    runner API.
     """
     from .run.runner import try_all_models as _try_all
 
@@ -148,4 +155,5 @@ def try_all_models(
         output=output,
         workspace_root=workspace_root,
         dry_run=dry_run,
+        task_type=task_type,
     )

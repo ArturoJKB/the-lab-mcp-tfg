@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from .errors import RejectedRunError
 from .model_registry import MODEL_REGISTRY
+
+TaskTypeArg = Literal["auto", "classification", "regression"]
 
 
 def _reject_unsafe_path(value: Path, field_name: str, root: Path) -> Path:
@@ -39,6 +41,7 @@ class RunInputs(BaseModel):
     model: str
     seed: int
     output: Path
+    task_type: TaskTypeArg = "auto"
     workspace_root: Path = Field(default_factory=Path.cwd)
 
     @field_validator("dataset", "output", "workspace_root", mode="before")
@@ -56,11 +59,7 @@ class RunInputs(BaseModel):
     @classmethod
     def _supported_model(cls, value: str) -> str:
         base_models = MODEL_REGISTRY.list_models()
-        probability_variants = [
-            f"{name}_probability"
-            for name in base_models
-            if MODEL_REGISTRY.supports_probability(name)
-        ]
+        probability_variants = [f"{name}_probability" for name in base_models]
         supported = set(base_models) | set(probability_variants)
         if value not in supported:
             raise ValueError(
@@ -83,4 +82,5 @@ class RunInputs(BaseModel):
             "model": self.model,
             "seed": self.seed,
             "output": str(self.output),
+            "task_type": self.task_type,
         }

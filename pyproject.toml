@@ -32,6 +32,7 @@ thelab-workspace-mcp = "thelab.mcp.workspace_mcp:main_sync"
 thelab-model-service = "thelab.model_service.cli:main"
 thelab-context-mcp = "thelab.mcp.context_mcp:main_sync"
 thelab-mcp-demo = "thelab.mcp.demo_client:main_sync"
+thelab-agent = "thelab.agents.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

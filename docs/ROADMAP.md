@@ -33,6 +33,9 @@
 | Slice 10 | P0 hardening | done | Refactored dataset validators + edge cases |
 | Slice 11 | P0 hardening | done | Batch runner + final README |
 | Slice 12 | Exploratory UX | done | Inspect, dry-run, try-all, predict, compare, Python/Jupyter API |
+| M1 | P1 Stage 1 | done | Task-type generalization (classification + regression) |
+| L1 | P1 Stage 1 | done | Agent harness + LLM provider protocol (mock provider) |
+| A1 | P1 Stage 1 | done | OpenAI-compatible LLM provider adapter |
 
 ## Slice 0 — Contracts and workspace
 
@@ -206,7 +209,13 @@ See `docs/FUTURE_FEATURES.md` for the full idea parking lot. Highlights:
 | 7 | `thelab sketch` interactive mode | future | Highest exploratory value, medium effort |
 | 8 | Hash-verified `model.joblib` loading | future | Hardens pickle deserialization risk |
 | 9 | Hyperparameter overrides in batch config | future | Natural extension of batch runner |
-| 10 | First LLM provider / agent slice (P1) | future | Connect an AI agent to MCP tools |
+| 10 | First LLM provider / agent slice (P1) | specified | Superseded by `docs/P1_PLAN.md` (slices L1, A1, A2, A3) |
+
+## P1 planning (draft — not activated)
+
+Unified P1 plan: [`docs/P1_PLAN.md`](P1_PLAN.md) (slices M1 → D1, in three
+stages). Slice rows are added to the slice map above only as each slice is
+activated.
 
 ## Active implementation pointer
 

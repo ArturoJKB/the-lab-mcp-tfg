@@ -12,6 +12,6 @@ def build_pipeline(model_name: str, seed: int) -> Pipeline:
     return Pipeline(
         steps=[
             ("scaler", StandardScaler()),
-            ("classifier", estimator),
+            ("estimator", estimator),
         ]
     )
