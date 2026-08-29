@@ -54,6 +54,27 @@ def test_clean_dataset_encodes_categoricals(client: TestClient, cleaning_dirs):
     assert data["columns"] == 4  # num, cat_blue, cat_red, target
 
 
+def test_clean_dataset_imputes_categorical_nan_before_encoding(client: TestClient, cleaning_dirs):
+    """Categorical NaN must be imputed before one-hot encoding (P2 Phase 6 fix)."""
+    uploads, _ = cleaning_dirs
+    (uploads / "data.csv").write_text(
+        "num,cat,target\n1,red,x\n2,red,y\n3,,x\n",
+        encoding="utf-8",
+    )
+
+    response = client.post("/datasets/uploads%2Fdata.csv/clean", json={"target": "target"})
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert data["rows"] == 3
+    assert data["columns"] == 3  # num, cat_red, target
+
+    cleaned = (uploads / "data_cleaned.csv").read_text(encoding="utf-8")
+    assert "cat_red" in cleaned
+    # No missing values may remain after cleaning.
+    for line in cleaned.splitlines()[1:]:
+        assert ",," not in line and not line.endswith(",")
+
+
 def test_clean_requires_target(client: TestClient, cleaning_dirs):
     response = client.post("/datasets/uploads%2Fdata.csv/clean", json={})
     assert response.status_code == 400

@@ -154,6 +154,11 @@ def run_model(
                 f"model '{inputs.model}' is a {model_entry.task_type} model, "
                 f"but the dataset resolves to {resolved_task_type}"
             )
+        if model_entry.max_train_rows is not None and len(df) > model_entry.max_train_rows:
+            raise RejectedRunError(
+                f"model '{inputs.model}' is limited to {model_entry.max_train_rows} training rows "
+                f"(dataset has {len(df)} rows); choose a scalable model or subsample the data"
+            )
 
         data_profile = profile_dataframe(df, inputs.target)
         validation_report = validate_dataset(
@@ -281,6 +286,8 @@ def run_model(
 
     if final_status == RunStatus.completed:
         output_label = "not persisted (dry run)" if dry_run else _relative_output(run_dir, inputs.workspace_root)
+        # All lifecycle output goes to stderr: stdout is the MCP JSON-RPC
+        # transport when the pipeline runs inside a stdio MCP server.
         if resolved_task_type == "regression":
             print(
                 f"Run completed: {run_id}\n"
@@ -290,7 +297,8 @@ def run_model(
                 f"  Task type: {resolved_task_type}\n"
                 f"  Test RMSE: {metrics['test_rmse']:.6f}\n"
                 f"  Test MAE: {metrics['test_mae']:.6f}\n"
-                f"  Test R2: {metrics['test_r2']:.6f}"
+                f"  Test R2: {metrics['test_r2']:.6f}",
+                file=sys.stderr,
             )
         else:
             print(
@@ -300,7 +308,8 @@ def run_model(
                 f"  Seed: {inputs.seed}\n"
                 f"  Task type: {resolved_task_type}\n"
                 f"  Test accuracy: {metrics['test_accuracy']:.6f}\n"
-                f"  Test macro F1: {metrics['test_f1_macro']:.6f}"
+                f"  Test macro F1: {metrics['test_f1_macro']:.6f}",
+                file=sys.stderr,
             )
     elif final_status == RunStatus.rejected:
         print(f"Run rejected: {run_id}\n  Error: {error_summary}", file=sys.stderr)

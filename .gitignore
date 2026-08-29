@@ -14,6 +14,13 @@ env/
 # Secrets — NEVER commit tokens
 .env
 
+# Generated benchmark datasets and results
+data/benchmarks/
+benchmarks/
+
+# Uploaded datasets via the IDE
+data/uploads/
+
 # Jupyter
 .ipynb_checkpoints/
 
@@ -52,3 +59,16 @@ scratch/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local IDE state (jobs, experiments, agent logs)
+.thelab/
+
+# Agent proposals (workspace outputs, keep curated ones only)
+proposals/
+
+# OpenCode agent config (local tooling)
+.opencode/
+opencode.json
+
+# Stray archives
+docs.zip

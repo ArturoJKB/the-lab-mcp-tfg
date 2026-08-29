@@ -10,17 +10,42 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import joblib
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
 from thelab.context.reader import ContextReader, ContextReaderError
+from thelab.ide.cleaning import clean_dataset
+from thelab.ide.datasets import DatasetNotFoundError, UploadError, list_datasets, save_upload
+from thelab.ide.eda_api import EdaError, run_eda
+from thelab.ide.experiment_api import (
+    add_experiment_feedback,
+    get_experiment_events,
+    get_experiment_results,
+    get_experiment_status,
+    list_experiments,
+    start_experiment,
+)
+from thelab.ide.iterate_api import iterate_on_run
+from thelab.ide.jobs import JobError, get_job_manager
+from thelab.ide.proposals_api import (
+    approve_and_run_proposal,
+    approve_proposal,
+    reject_proposal,
+    run_proposal,
+)
+from thelab.ide.train_api import train_model
+from thelab.ide.viewer_api import compare_runs, preview_dataset
+from thelab.ide.worker_api import generate_proposal
 from thelab.mcp.common import discover_run_ids, get_runs_root, load_json_artifact, safe_run_dir
 from thelab.run.inference import feature_columns, normalize_features
+from thelab.run.model_registry import MODEL_REGISTRY
+from thelab.sandbox import run_in_sandbox
+from thelab.sandbox.runner import SandboxError
 
 _DEFAULT_CONTEXT_DB = Path(".thelab") / "context" / "context.db"
 
@@ -74,6 +99,148 @@ def _dataset_basename(dataset_value: Any) -> str | None:
     if isinstance(dataset_value, str):
         return Path(dataset_value).name
     return str(dataset_value)
+
+
+def _is_safe_basename(name: str) -> bool:
+    """Reject names that could escape a directory or reference derived files."""
+    if not name or "/" in name or "\\" in name or name == ".." or ".." in Path(name).parts:
+        return False
+    if name.startswith("."):
+        return False
+    return True
+
+
+def _proposals_dir() -> Path:
+    return Path(os.environ.get("THELAB_PROPOSALS_DIR", "proposals"))
+
+
+def _agent_events_path() -> Path:
+    return Path(os.environ.get("THELAB_AGENT_EVENTS", ".thelab/local-logs/agent-events.jsonl"))
+
+
+def _proposal_status(proposal_id: str, proposals_dir: Path) -> tuple[str, str | None]:
+    """Return (status, batch_config_basename) for a proposal id."""
+    approved_path = proposals_dir / f"{proposal_id}.approved.json"
+    rejected_path = proposals_dir / f"{proposal_id}.rejected.json"
+    batch_path = proposals_dir / f"{proposal_id}.batch.json"
+    if approved_path.is_file():
+        batch_config = batch_path.name if batch_path.is_file() else None
+        return "approved", batch_config
+    if rejected_path.is_file():
+        return "rejected", None
+    return "pending", None
+
+
+def _list_proposals() -> list[dict[str, Any]]:
+    proposals_dir = _proposals_dir()
+    if not proposals_dir.exists() or not proposals_dir.is_dir():
+        return []
+
+    proposals = []
+    for path in proposals_dir.iterdir():
+        if not path.is_file() or path.suffix != ".json":
+            continue
+        name = path.name
+        # Skip derived state files.
+        if name.endswith(".approved.json") or name.endswith(".rejected.json") or name.endswith(".batch.json"):
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        proposal_id = data.get("proposal_id") or path.stem
+        status, batch_config = _proposal_status(proposal_id, proposals_dir)
+        proposals.append(
+            {
+                "proposal_id": proposal_id,
+                "status": status,
+                "goal": data.get("goal"),
+                "dataset": data.get("dataset"),
+                "target": data.get("target"),
+                "model_grid": data.get("model_grid", []),
+                "seeds": data.get("seeds", []),
+                "rationale": data.get("rationale"),
+                "batch_config": batch_config,
+            }
+        )
+    return proposals
+
+
+def _load_proposal(proposal_id: str) -> dict[str, Any] | None:
+    if not _is_safe_basename(proposal_id):
+        return None
+    proposals_dir = _proposals_dir()
+    path = proposals_dir / f"{proposal_id}.json"
+    try:
+        if not path.is_file():
+            return None
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    status, batch_config = _proposal_status(proposal_id, proposals_dir)
+    return {
+        "proposal_id": proposal_id,
+        "status": status,
+        "goal": data.get("goal"),
+        "dataset": data.get("dataset"),
+        "target": data.get("target"),
+        "model_grid": data.get("model_grid", []),
+        "seeds": data.get("seeds", []),
+        "rationale": data.get("rationale"),
+        "batch_config": batch_config,
+        "created_at": data.get("created_at"),
+    }
+
+
+def _agent_session_source(data: dict[str, Any]) -> str:
+    """Infer a human-readable source label from session metadata."""
+    agent = data.get("agent") or {}
+    for tag in data.get("tags", []):
+        if isinstance(tag, str) and tag.startswith("agent_mode:"):
+            return f"agent_{tag.split(':', 1)[1]}"
+    if agent.get("source"):
+        return str(agent["source"])
+    if agent.get("platform"):
+        return str(agent["platform"])
+    event_type = data.get("event_type")
+    return str(event_type) if event_type is not None else "agent"
+
+
+def _list_agent_sessions(limit: int = 50) -> list[dict[str, Any]]:
+    path = _agent_events_path()
+    if not path.is_file():
+        return []
+    sessions: list[dict[str, Any]] = []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    for line in reversed(text.splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            data = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(data, dict) or data.get("event_type") != "agent_session_summary":
+            continue
+        sessions.append(
+            {
+                "event_id": data.get("event_id"),
+                "timestamp": data.get("timestamp"),
+                "source": _agent_session_source(data),
+                "outcome": data.get("outcome", {}),
+                "tags": data.get("tags", []),
+            }
+        )
+        if len(sessions) >= limit:
+            break
+    return sessions
 
 
 def _context_db_path() -> Path:
@@ -319,9 +486,19 @@ def list_models() -> dict[str, Any]:
     return {"ok": True, "data": _list_approved_models()}
 
 
+@app.get("/models/available")
+def list_available_models() -> dict[str, Any]:
+    return {"ok": True, "data": MODEL_REGISTRY.list_models()}
+
+
 @app.post("/predict")
 def predict(request: PredictRequest) -> dict[str, Any]:
     return {"ok": True, "data": _predict(request.run_id, request.features)}
+
+
+@app.get("/runs/comparison")
+def get_runs_comparison() -> dict[str, Any]:
+    return {"ok": True, "data": compare_runs()}
 
 
 @app.get("/runs/{run_id}")
@@ -407,6 +584,371 @@ def agent_research_context_entry(event_id: str) -> dict[str, Any]:
     if entry is None:
         raise HTTPException(status_code=404, detail=f"entry not found: {event_id}")
     return {"ok": True, "data": _context_entry_to_dict(entry)}
+
+
+@app.get("/benchmarks")
+def list_benchmarks() -> dict[str, Any]:
+    manifest_path = Path("benchmarks/b1/benchmark_manifest.json")
+    if not manifest_path.is_file():
+        return {"ok": True, "data": None, "message": "No benchmark manifest found"}
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise HTTPException(status_code=500, detail=f"failed to read benchmark manifest: {exc}") from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/proposals")
+def list_proposals() -> dict[str, Any]:
+    return {"ok": True, "data": _list_proposals()}
+
+
+@app.get("/proposals/{proposal_id}")
+def get_proposal(proposal_id: str) -> dict[str, Any]:
+    proposal = _load_proposal(proposal_id)
+    if proposal is None:
+        raise HTTPException(status_code=404, detail=f"proposal not found: {proposal_id}")
+    return {"ok": True, "data": proposal}
+
+
+@app.get("/agent-sessions")
+def list_agent_sessions(limit: int = 50) -> dict[str, Any]:
+    return {"ok": True, "data": _list_agent_sessions(limit=limit)}
+
+
+@app.post("/datasets/upload")
+def upload_dataset(file: Annotated[UploadFile, File(...)]) -> dict[str, Any]:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="filename is empty")
+    try:
+        metadata = save_upload(file.file, file.filename)
+    except UploadError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": metadata}
+
+
+@app.get("/datasets")
+def get_datasets() -> dict[str, Any]:
+    return {"ok": True, "data": list_datasets()}
+
+
+@app.get("/eda/{dataset_id:path}")
+def get_eda(dataset_id: str, target: str | None = None) -> dict[str, Any]:
+    try:
+        data = run_eda(dataset_id, target=target)
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except EdaError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/datasets/{dataset_id:path}/preview")
+def get_dataset_preview(dataset_id: str, limit: int = 100) -> dict[str, Any]:
+    try:
+        data = preview_dataset(dataset_id, limit=limit)
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.post("/agent/worker")
+async def post_agent_worker(payload: dict[str, Any]) -> dict[str, Any]:
+    dataset_id = payload.get("dataset_id")
+    target = payload.get("target")
+    goal = payload.get("goal", "")
+    if not dataset_id or not target or not goal:
+        raise HTTPException(status_code=400, detail="dataset_id, target, and goal are required")
+    try:
+        proposal = await generate_proposal(
+            dataset_id=dataset_id,
+            target=target,
+            goal=goal,
+            model_grid=payload.get("model_grid"),
+            seeds=payload.get("seeds"),
+        )
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": proposal}
+
+
+@app.post("/agent/iterate")
+async def post_agent_iterate(payload: dict[str, Any]) -> dict[str, Any]:
+    run_id = payload.get("run_id")
+    if not run_id:
+        raise HTTPException(status_code=400, detail="run_id is required")
+    try:
+        proposal = await iterate_on_run(run_id, goal=payload.get("goal"))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": proposal}
+
+
+_SANDBOX_MAX_TIMEOUT_S = 120
+_SANDBOX_MIN_MEMORY_MB = 64
+_SANDBOX_MAX_MEMORY_MB = 2048
+_SANDBOX_MAX_OUTPUT_BYTES = 1024 * 1024
+
+
+@app.post("/sandbox/run")
+def post_sandbox_run(payload: dict[str, Any]) -> dict[str, Any]:
+    code = payload.get("code", "")
+    if not code or not isinstance(code, str):
+        raise HTTPException(status_code=400, detail="code is required")
+    try:
+        # Clamp client-supplied resource knobs so a single request can neither
+        # pin a worker thread for hours nor disable output truncation.
+        timeout = min(max(int(payload.get("timeout", 30)), 1), _SANDBOX_MAX_TIMEOUT_S)
+        memory_limit_mb = min(
+            max(int(payload.get("memory_limit_mb", 512)), _SANDBOX_MIN_MEMORY_MB),
+            _SANDBOX_MAX_MEMORY_MB,
+        )
+        max_output_bytes = min(
+            int(payload.get("max_output_bytes", 64 * 1024)), _SANDBOX_MAX_OUTPUT_BYTES
+        )
+        result = run_in_sandbox(
+            code=code,
+            timeout=timeout,
+            memory_limit_mb=memory_limit_mb,
+            max_output_bytes=max_output_bytes,
+        )
+    except (SandboxError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {
+        "ok": result.status in {"completed"},
+        "data": {
+            "status": result.status,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "return_value": result.return_value,
+            "artifacts": result.artifacts or [],
+            "error": result.error,
+        },
+    }
+
+
+@app.post("/proposals/{proposal_id}/approve")
+def post_proposal_approve(proposal_id: str) -> dict[str, Any]:
+    try:
+        result = approve_proposal(proposal_id, principal="ui")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": result}
+
+
+@app.post("/proposals/{proposal_id}/reject")
+def post_proposal_reject(proposal_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    reason = (payload or {}).get("reason", "")
+    try:
+        result = reject_proposal(proposal_id, principal="ui", reason=reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": result}
+
+
+@app.post("/proposals/{proposal_id}/run")
+def post_proposal_run(proposal_id: str) -> dict[str, Any]:
+    try:
+        result = run_proposal(proposal_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": result}
+
+
+@app.post("/proposals/{proposal_id}/approve-and-run")
+def post_proposal_approve_and_run(proposal_id: str) -> dict[str, Any]:
+    try:
+        result = approve_and_run_proposal(proposal_id, principal="ui")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": result}
+
+
+@app.post("/datasets/{dataset_id:path}/clean")
+def post_clean_dataset(dataset_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    target = payload.get("target")
+    if not target:
+        raise HTTPException(status_code=400, detail="target is required")
+    try:
+        metadata = clean_dataset(
+            dataset_id,
+            target,
+            drop_missing_target=payload.get("drop_missing_target", True),
+            drop_empty_columns=payload.get("drop_empty_columns", True),
+            one_hot_encode=payload.get("one_hot_encode", True),
+            numeric_impute_strategy=payload.get("numeric_impute_strategy", "median"),
+        )
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": metadata}
+
+
+@app.post("/train")
+def post_train(payload: dict[str, Any]) -> dict[str, Any]:
+    dataset_id = payload.get("dataset_id")
+    target = payload.get("target")
+    model = payload.get("model")
+    if not dataset_id or not target or not model:
+        raise HTTPException(status_code=400, detail="dataset_id, target, and model are required")
+    try:
+        outcome = train_model(
+            dataset_id=dataset_id,
+            target=target,
+            model=model,
+            seed=int(payload.get("seed", 42)),
+            task_type=payload.get("task_type", "auto"),
+            hyperparameters=payload.get("hyperparameters"),
+        )
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": outcome}
+
+
+@app.post("/jobs")
+async def post_jobs(payload: dict[str, Any]) -> dict[str, Any]:
+    job_type = payload.get("type")
+    job_payload = payload.get("payload")
+    if not job_type or not isinstance(job_payload, dict):
+        raise HTTPException(status_code=400, detail="type and payload are required")
+    manager = get_job_manager()
+    try:
+        job = await manager.submit(job_type, job_payload)
+    except JobError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": {"job_id": job.job_id, "status": job.status}}
+
+
+@app.get("/jobs")
+async def get_jobs(limit: int = 50) -> dict[str, Any]:
+    manager = get_job_manager()
+    jobs = await manager.list_jobs(limit=limit)
+    return {"ok": True, "data": jobs}
+
+
+@app.get("/jobs/{job_id}")
+async def get_job(job_id: str) -> dict[str, Any]:
+    manager = get_job_manager()
+    job = await manager.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"job not found: {job_id}")
+    return {"ok": True, "data": job.to_dict()}
+
+
+@app.post("/jobs/{job_id}/cancel")
+async def post_job_cancel(job_id: str) -> dict[str, Any]:
+    manager = get_job_manager()
+    job = await manager.cancel(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"job not found: {job_id}")
+    return {"ok": True, "data": {"job_id": job_id, "status": job.status, "cancel_requested": job.cancel_requested}}
+
+
+@app.get("/jobs/{job_id}/events")
+async def get_job_events(job_id: str) -> StreamingResponse:
+    manager = get_job_manager()
+    job = await manager.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"job not found: {job_id}")
+
+    async def event_stream() -> Any:
+        async for event in manager.events(job_id):
+            yield f"data: {json.dumps(event.to_dict())}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.post("/experiment/run")
+async def post_experiment_run(payload: dict[str, Any]) -> dict[str, Any]:
+    goal = payload.get("goal")
+    dataset_id = payload.get("dataset_id")
+    target = payload.get("target")
+    if not goal or not dataset_id or not target:
+        raise HTTPException(status_code=400, detail="goal, dataset_id, and target are required")
+    try:
+        data = await start_experiment(
+            goal=str(goal),
+            dataset_id=str(dataset_id),
+            target=str(target),
+            feedback=payload.get("feedback"),
+        )
+    except DatasetNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/experiment/{experiment_id}/status")
+async def get_experiment_status_endpoint(experiment_id: str) -> dict[str, Any]:
+    try:
+        data = await get_experiment_status(experiment_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/experiment/{experiment_id}/events")
+async def get_experiment_events_endpoint(experiment_id: str) -> StreamingResponse:
+    try:
+        job_id = await get_experiment_events(experiment_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    if not job_id:
+        raise HTTPException(status_code=404, detail=f"experiment has no job: {experiment_id}")
+    manager = get_job_manager()
+    job = await manager.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"job not found: {job_id}")
+
+    async def event_stream() -> Any:
+        async for event in manager.events(job_id):
+            yield f"data: {json.dumps(event.to_dict())}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.post("/experiment/{experiment_id}/feedback")
+async def post_experiment_feedback(experiment_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    feedback = payload.get("feedback")
+    if not feedback or not str(feedback).strip():
+        raise HTTPException(status_code=400, detail="feedback is required")
+    try:
+        data = await add_experiment_feedback(experiment_id, str(feedback))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/experiment/{experiment_id}/results")
+async def get_experiment_results_endpoint(experiment_id: str) -> dict[str, Any]:
+    try:
+        data = await get_experiment_results(experiment_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/experiments")
+async def get_experiments(limit: int = 50) -> dict[str, Any]:
+    return {"ok": True, "data": await list_experiments(limit=limit)}
 
 
 _static_dir = Path(__file__).parent / "static"

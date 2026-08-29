@@ -4,98 +4,434 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Lab — Local Model Dashboard</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=7">
 </head>
 <body>
-  <header>
-    <h1>The Lab</h1>
-    <p>Local model dashboard</p>
-  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>The Lab</h1>
+        <p>Local model dashboard</p>
+      </div>
+      <nav id="sidebar-nav" class="sidebar-nav">
+        <button class="nav-button active" data-panel="panel-datasets">
+          <span class="nav-icon">◫</span> Datasets
+        </button>
 
-  <nav id="tab-nav" class="tab-nav">
-    <button class="tab-button active" data-tab="tab-models">Models</button>
-    <button class="tab-button" data-tab="tab-coding">Coding / Logger</button>
-    <button class="tab-button" data-tab="tab-research">Research / Copilot</button>
-  </nav>
-
-  <main>
-    <section id="tab-models" class="tab-panel active">
-      <section id="panel-status" class="panel">
-        <h2>Status</h2>
-        <div id="status-content">Loading…</div>
-      </section>
-
-      <section id="panel-models" class="panel">
-        <h2>Approved models</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Run ID</th>
-              <th>Model</th>
-              <th>Target</th>
-              <th>Task type</th>
-              <th>Test metric</th>
-            </tr>
-          </thead>
-          <tbody id="models-table-body">
-            <tr><td colspan="5">Loading…</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section id="panel-metrics" class="panel">
-        <h2>Run metrics</h2>
-        <div id="metrics-content">Select an approved model to view details.</div>
-      </section>
-
-      <section id="panel-artifacts" class="panel">
-        <h2>Artifacts</h2>
-        <div id="artifacts-toolbar"></div>
-        <pre id="artifacts-content">Select an approved model to browse artifacts.</pre>
-      </section>
-
-      <section id="panel-predict" class="panel">
-        <h2>Predict</h2>
-        <div id="predict-form-area">Select an approved model to enable prediction.</div>
-        <div id="predict-result"></div>
-      </section>
-    </section>
-
-    <section id="tab-coding" class="tab-panel">
-      <section id="panel-coding" class="panel">
-        <h2>Coding / Logger</h2>
-        <p class="banner read-only-banner">
-          Read-only — no autonomous writes. Approval required before any modification or destructive action.
-        </p>
-        <div id="coding-toolbar">
-          <select id="coding-run-select"></select>
-          <button id="coding-load-run">Load run</button>
+        <div class="nav-group">
+          <span class="nav-group-title">Workflow</span>
+          <button class="nav-button" data-panel="panel-experiment">
+            <span class="nav-icon">✦</span> Experiment
+          </button>
+          <button class="nav-button" data-panel="panel-pipeline">
+            <span class="nav-icon">▣</span> Pipeline
+          </button>
+          <button class="nav-button" data-panel="panel-viewer">
+            <span class="nav-icon">▦</span> Viewer
+          </button>
+          <button class="nav-button" data-panel="panel-models">
+            <span class="nav-icon">◈</span> Models
+          </button>
+          <button class="nav-button" data-panel="panel-benchmarks">
+            <span class="nav-icon">◉</span> Benchmarks
+          </button>
+          <button class="nav-button" data-panel="panel-proposals">
+            <span class="nav-icon">◇</span> Proposals
+          </button>
         </div>
-        <div id="coding-content">
-          <p class="muted">Select a run to view evidence.</p>
-        </div>
-        <div id="coding-artifacts"></div>
-        <pre id="coding-artifact-content">Select an artifact to view.</pre>
-      </section>
-    </section>
 
-    <section id="tab-research" class="tab-panel">
-      <section id="panel-research" class="panel">
-        <h2>Research / Copilot</h2>
-        <p class="banner evidence-banner">
-          Grounded in local runs and context only. No external RAG or generative model.
-        </p>
-        <div id="research-status">Loading…</div>
-        <div id="research-search">
-          <input type="text" id="research-query" placeholder="Search context…">
-          <button id="research-search-button">Search</button>
+        <div class="nav-group">
+          <span class="nav-group-title">Agents</span>
+          <button class="nav-button" data-panel="panel-sessions">
+            <span class="nav-icon">◎</span> Agent Sessions
+          </button>
+          <button class="nav-button" data-panel="panel-research">
+            <span class="nav-icon">◐</span> Context Search
+          </button>
+          <button class="nav-button" data-panel="panel-coding">
+            <span class="nav-icon">▣</span> Coding Agent
+          </button>
+          <button class="nav-button" data-panel="panel-sandbox">
+            <span class="nav-icon">◫</span> Sandbox
+          </button>
         </div>
-        <div id="research-results"></div>
-        <div id="research-entry"></div>
-      </section>
-    </section>
-  </main>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="sidebar-health" class="status-dot" title="Service status"></span>
+        <span id="sidebar-version">v2</span>
+      </div>
+    </aside>
 
-  <script src="/static/app.js"></script>
+    <main class="main-content">
+      <section id="panel-datasets" class="panel-section active">
+        <section class="panel card">
+          <h2>Upload dataset</h2>
+          <p class="muted">Upload a CSV dataset to explore and use for experiments.</p>
+          <div id="dataset-upload-zone" class="upload-zone">
+            <p>Drag & drop a CSV file here, or click to browse.</p>
+            <input type="file" id="dataset-upload-input" accept=".csv,text/csv" hidden>
+          </div>
+          <div id="dataset-upload-status"></div>
+        </section>
+
+        <section class="panel card">
+          <h2>Datasets</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Filename</th>
+                  <th>Source</th>
+                  <th>Rows</th>
+                  <th>Columns</th>
+                </tr>
+              </thead>
+              <tbody id="datasets-table-body">
+                <tr><td colspan="5" class="loading">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel card">
+          <h2>Exploratory Data Analysis</h2>
+          <div id="eda-toolbar">
+            <label for="eda-target">Target column (optional):</label>
+            <input type="text" id="eda-target" placeholder="target">
+            <button type="button" id="eda-run-button">Run EDA</button>
+            <button type="button" id="eda-clean-button" class="secondary">Clean dataset</button>
+          </div>
+          <div id="eda-status"></div>
+          <div id="eda-content" class="empty">Select a dataset and click Run EDA.</div>
+        </section>
+
+        <section class="panel card">
+          <h2>Workflow</h2>
+          <p class="muted">Plan, run, and iterate on experiments in the <strong>Experiment</strong> panel (Plan / Run / History). Datasets are cleaned from the EDA toolbar above; job monitoring lives in the Pipeline panel and proposal details in Proposals.</p>
+        </section>
+      </section>
+
+      </section>
+
+      <section id="panel-experiment" class="panel-section">
+        <div class="exp-tabs">
+          <button type="button" class="exp-tab active" data-exp-tab="plan">Plan</button>
+          <button type="button" class="exp-tab" data-exp-tab="run">Run</button>
+          <button type="button" class="exp-tab" data-exp-tab="history">History</button>
+        </div>
+
+        <section id="exp-tab-plan" class="panel card exp-tab-page active">
+          <h2>Plan experiment</h2>
+          <p class="muted">Describe your goal. Sub-agents (EDAAnalyst, FeatureEngineer, ModelSelector) plan and run the full pipeline deterministically.</p>
+          <div id="experiment-form">
+            <label for="experiment-dataset">Dataset:</label>
+            <select id="experiment-dataset"></select>
+            <label for="experiment-target">Target column:</label>
+            <input type="text" id="experiment-target" placeholder="target">
+            <label for="experiment-goal">Goal:</label>
+            <textarea id="experiment-goal" rows="2" placeholder="Predict the target and compare models"></textarea>
+            <label for="experiment-provider">LLM provider:</label>
+            <select id="experiment-provider">
+              <option value="mock">mock (deterministic)</option>
+              <option value="ollama">ollama</option>
+              <option value="openrouter">openrouter</option>
+            </select>
+            <button id="experiment-start-button">Start experiment</button>
+          </div>
+          <div id="experiment-start-status"></div>
+        </section>
+
+        <section id="exp-tab-run" class="panel card exp-tab-page">
+          <h2>Run</h2>
+          <p class="muted">Live pipeline progress and sub-agent activity for the selected experiment.</p>
+          <div id="experiment-run-header">
+            <span id="experiment-id-label" class="muted">No experiment selected.</span>
+            <span id="experiment-state-badge" class="badge pending">idle</span>
+            <button type="button" id="experiment-cancel-button" class="secondary hidden">Cancel</button>
+          </div>
+          <div id="experiment-stages" class="exp-stages">
+            <div class="exp-stage" data-stage="planning"><div class="exp-stage-node">Plan</div><div class="exp-stage-status pending">pending</div></div>
+            <div class="exp-arrow">→</div>
+            <div class="exp-stage" data-stage="cleaning"><div class="exp-stage-node">Clean</div><div class="exp-stage-status pending">pending</div></div>
+            <div class="exp-arrow">→</div>
+            <div class="exp-stage" data-stage="training"><div class="exp-stage-node">Train</div><div class="exp-stage-status pending">pending</div></div>
+            <div class="exp-arrow">→</div>
+            <div class="exp-stage" data-stage="evaluating"><div class="exp-stage-node">Evaluate</div><div class="exp-stage-status pending">pending</div></div>
+          </div>
+          <div id="experiment-activity" class="exp-feed empty">Agent activity will stream here.</div>
+          <div id="experiment-results-summary"></div>
+          <div id="experiment-feedback-form">
+            <label for="experiment-feedback">Feedback (starts a new iteration):</label>
+            <input type="text" id="experiment-feedback" placeholder="Focus on tree models, drop petal_width">
+            <button id="experiment-feedback-button" class="secondary">Send feedback</button>
+          </div>
+          <div id="experiment-feedback-status"></div>
+        </section>
+
+        <section id="exp-tab-history" class="panel card exp-tab-page">
+          <h2>History</h2>
+          <div id="experiment-history-toolbar">
+            <button type="button" id="experiment-history-refresh">Refresh</button>
+          </div>
+          <div id="experiment-history-content" class="empty">No experiments yet.</div>
+        </section>
+      </section>
+
+      <section id="panel-viewer" class="panel-section">
+        <section class="panel card">
+          <h2>Dataset viewer</h2>
+          <div id="viewer-toolbar">
+            <label for="viewer-dataset">Dataset:</label>
+            <select id="viewer-dataset"></select>
+            <label for="viewer-limit">Rows:</label>
+            <input type="number" id="viewer-limit" value="100" min="1" max="1000">
+            <button type="button" id="viewer-load">Load</button>
+          </div>
+          <div id="viewer-status"></div>
+          <div id="viewer-columns" class="eda-grid"></div>
+          <div id="viewer-table" class="empty">Select a dataset and click Load.</div>
+        </section>
+
+        <section class="panel card">
+          <h2>Distributions</h2>
+          <div id="dist-toolbar">
+            <label for="dist-column">Numeric column:</label>
+            <select id="dist-column"></select>
+            <label for="dist-bins">Bins:</label>
+            <input type="number" id="dist-bins" value="12" min="4" max="50">
+            <button type="button" id="dist-render">Render histogram</button>
+          </div>
+          <div id="dist-content" class="empty">Load a dataset to render distributions.</div>
+        </section>
+
+        <section class="panel card">
+          <h2>Correlation heatmap</h2>
+          <p class="muted">Run EDA with a target on a selected dataset, then render its top correlations.</p>
+          <div id="heatmap-toolbar">
+            <label for="heatmap-dataset">Dataset:</label>
+            <select id="heatmap-dataset"></select>
+            <label for="heatmap-target">Target (optional):</label>
+            <input type="text" id="heatmap-target" placeholder="target">
+            <button type="button" id="heatmap-load">Render heatmap</button>
+          </div>
+          <div id="heatmap-content" class="empty">No correlation data loaded.</div>
+        </section>
+
+        <section class="panel card">
+          <h2>Model comparison</h2>
+          <div id="comparison-status"></div>
+          <div id="comparison-content" class="empty">Loading…</div>
+          <div id="comparison-bars"></div>
+        </section>
+      </section>
+
+      <section id="panel-pipeline" class="panel-section">
+        <section class="panel card">
+          <h2>Pipeline</h2>
+          <p class="muted">Visualize the ML workflow and monitor live execution.</p>
+          <div id="pipeline-diagram" class="pipeline-diagram">
+            <div class="pipeline-step" data-step="upload">
+              <div class="pipeline-node">Upload</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="eda">
+              <div class="pipeline-node">EDA</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="propose">
+              <div class="pipeline-node">Propose</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="approve">
+              <div class="pipeline-node">Approve</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="train">
+              <div class="pipeline-node">Train</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="validate">
+              <div class="pipeline-node">Validate</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step" data-step="evaluate">
+              <div class="pipeline-node">Evaluate</div>
+              <div class="pipeline-status pending">pending</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel card">
+          <h2>Active jobs</h2>
+          <div id="jobs-toolbar">
+            <button type="button" id="jobs-refresh">Refresh</button>
+          </div>
+          <div id="jobs-content" class="empty">No active jobs.</div>
+        </section>
+
+        <section class="panel card">
+          <h2>Job log</h2>
+          <div id="job-log-content" class="job-log empty">Select or start a job to view the live log.</div>
+        </section>
+      </section>
+
+      <section id="panel-models" class="panel-section">
+        <section id="panel-status" class="panel card">
+          <h2>Status</h2>
+          <div id="status-content" class="loading">Loading…</div>
+        </section>
+
+        <section id="panel-models-list" class="panel card">
+          <h2>Approved models</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Model</th>
+                  <th>Target</th>
+                  <th>Task type</th>
+                  <th>Test metric</th>
+                </tr>
+              </thead>
+              <tbody id="models-table-body">
+                <tr><td colspan="5" class="loading">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="panel-metrics" class="panel card">
+          <h2>Run metrics</h2>
+          <div id="metrics-content" class="empty">Select an approved model to view details.</div>
+        </section>
+
+        <section id="panel-artifacts" class="panel card">
+          <h2>Artifacts</h2>
+          <div id="artifacts-toolbar"></div>
+          <pre id="artifacts-content" class="empty">Select an approved model to browse artifacts.</pre>
+        </section>
+
+        <section id="panel-predict" class="panel card">
+          <h2>Predict</h2>
+          <div id="predict-form-area" class="empty">Select an approved model to enable prediction.</div>
+          <div id="predict-result"></div>
+        </section>
+
+        <section id="panel-iterate" class="panel card hidden">
+          <h2>Iterate on run</h2>
+          <p class="muted">Ask the worker agent to propose an improved experiment based on a completed run.</p>
+          <div id="iterate-form">
+            <label for="iterate-run-id">Run ID:</label>
+            <input type="text" id="iterate-run-id" readonly>
+            <label for="iterate-goal">Goal (optional):</label>
+            <input type="text" id="iterate-goal" placeholder="Improve accuracy">
+            <button id="iterate-submit">Propose iteration</button>
+          </div>
+          <div id="iterate-status"></div>
+          <div id="iterate-result"></div>
+        </section>
+      </section>
+
+      <section id="panel-benchmarks" class="panel-section">
+        <section class="panel card">
+          <h2>Benchmarks</h2>
+          <p class="muted">Cross-domain B1 results: deterministic baseline vs. agent-boosted runs.</p>
+          <div id="benchmarks-toolbar">
+            <label for="benchmark-provider">Provider:</label>
+            <select id="benchmark-provider">
+              <option value="">Loading…</option>
+            </select>
+          </div>
+          <div id="benchmarks-content" class="empty">No benchmark manifest loaded.</div>
+        </section>
+      </section>
+
+      <section id="panel-proposals" class="panel-section">
+        <section class="panel card">
+          <h2>Proposals</h2>
+          <p class="muted">Experiment proposals created by the worker agent. Approved proposals include a batch config.</p>
+          <div id="proposals-status"></div>
+          <div id="proposals-content" class="empty">Loading proposals…</div>
+        </section>
+        <section id="panel-proposal-detail" class="panel card hidden">
+          <h2>Proposal detail</h2>
+          <div id="proposal-detail-content"></div>
+        </section>
+      </section>
+
+      <section id="panel-sessions" class="panel-section">
+        <section class="panel card">
+          <h2>Agent Sessions</h2>
+          <p class="muted">Recent agent session summaries from local logs.</p>
+          <div id="sessions-content" class="empty">Loading sessions…</div>
+        </section>
+      </section>
+
+      <section id="panel-coding" class="panel-section">
+        <section id="panel-coding-card" class="panel card">
+          <h2>Coding / Logger</h2>
+          <p class="banner read-only-banner">
+            Read-only — no autonomous writes. Approval required before any modification or destructive action.
+          </p>
+          <div id="coding-toolbar">
+            <select id="coding-run-select"></select>
+            <button id="coding-load-run">Load run</button>
+          </div>
+          <div id="coding-content" class="empty">Select a run to view evidence.</div>
+          <div id="coding-artifacts"></div>
+          <pre id="coding-artifact-content">Select an artifact to view.</pre>
+        </section>
+      </section>
+
+      <section id="panel-research" class="panel-section">
+        <section id="panel-research-card" class="panel card">
+          <h2>Local context search</h2>
+          <p class="banner evidence-banner">
+            Grounded in local runs and context only. No external RAG or generative model.
+          </p>
+          <div id="research-status" class="empty">Loading…</div>
+          <div id="research-search">
+            <input type="text" id="research-query" placeholder="Search context…">
+            <button id="research-search-button">Search</button>
+          </div>
+          <div id="research-results"></div>
+          <div id="research-entry"></div>
+        </section>
+      </section>
+
+      <section id="panel-sandbox" class="panel-section">
+        <section class="panel card">
+          <h2>Code sandbox</h2>
+          <p class="banner read-only-banner">
+            Python runs in a restricted subprocess with an import whitelist. No network, no shell, no arbitrary file writes outside the temp workspace.
+          </p>
+          <label for="sandbox-code">Code:</label>
+          <textarea id="sandbox-code" rows="12" placeholder="import pandas as pd&#10;df = pd.DataFrame({'x': [1,2,3]})&#10;print(df.shape)"></textarea>
+          <button id="sandbox-run-button">Run</button>
+          <div id="sandbox-status"></div>
+        </section>
+
+        <section class="panel card">
+          <h2>Output</h2>
+          <pre id="sandbox-output" class="empty">Run code to see output.</pre>
+        </section>
+
+        <section class="panel card">
+          <h2>Artifacts</h2>
+          <div id="sandbox-artifacts" class="empty">No artifacts produced.</div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js?v=4"></script>
 </body>
 </html>

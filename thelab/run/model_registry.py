@@ -26,6 +26,9 @@ class ModelEntry:
     default_params: dict[str, Any]
     supports_probability: bool = False
     task_type: TaskType = "classification"
+    # Rows above which the model is rejected as impractical (e.g. O(n^2)
+    # kernel methods). ``None`` means no limit.
+    max_train_rows: int | None = None
 
 
 class ModelRegistry:
@@ -62,6 +65,9 @@ class ModelRegistry:
                 default_params={"kernel": "rbf"},
                 supports_probability=True,
                 task_type="classification",
+                # SVC training is super-linear in samples; reject impractical
+                # sizes instead of hanging a run for hours.
+                max_train_rows=50_000,
             )
         )
         self.register(

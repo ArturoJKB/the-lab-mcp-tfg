@@ -419,7 +419,7 @@ def test_cli_success_and_invalid_exit_code(tmp_path: Path, fixture_csv: Path):
         cwd=str(tmp_path),
     )
     assert success.returncode == 0
-    assert "Run completed" in success.stdout
+    assert "Run completed" in success.stderr
 
     # Invalid model should exit non-zero.
     invalid = subprocess.run(

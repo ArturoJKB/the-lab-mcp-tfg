@@ -196,7 +196,7 @@ def test_cli_dry_run(tmp_path: Path, fixture_csv: Path):
         cwd=str(tmp_path),
     )
     assert result.returncode == 0, result.stderr
-    assert "Test accuracy" in result.stdout
+    assert "Test accuracy" in result.stderr
     assert not (tmp_path / "runs").exists()
 
 
@@ -238,7 +238,7 @@ def test_cli_predict_and_compare(tmp_path: Path, fixture_csv: Path):
         cwd=str(tmp_path),
     )
     assert run.returncode == 0, run.stderr
-    run_id = run.stdout.splitlines()[0].replace("Run completed: ", "").strip()
+    run_id = run.stderr.splitlines()[0].replace("Run completed: ", "").strip()
 
     predict_result = subprocess.run(
         [

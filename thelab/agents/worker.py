@@ -343,12 +343,15 @@ class WorkerAgent:
         self.provider = provider
         self.servers = servers
         self.store = ProposalStore(proposals_dir)
-        self.harness = AgentHarness(
-            provider=provider,
-            servers=servers,
-            runs_root=runs_root,
-            max_steps=max_steps,
-        )
+        self.runs_root = Path(runs_root) if runs_root else None
+        self.harness: AgentHarness | None = None
+        if servers:
+            self.harness = AgentHarness(
+                provider=provider,
+                servers=servers,
+                runs_root=runs_root,
+                max_steps=max_steps,
+            )
 
     async def propose(
         self,
@@ -366,13 +369,14 @@ class WorkerAgent:
         not return parseable JSON, the worker falls back to a deterministic
         proposal built from direct EDA calls and prior-run metrics.
         """
+        runs_root = self.runs_root
         dataset_path = Path(dataset)
-        if not dataset_path.is_absolute() and self.harness.runs_root:
-            dataset_path = self.harness.runs_root.parent / dataset_path
+        if not dataset_path.is_absolute() and runs_root:
+            dataset_path = runs_root.parent / dataset_path
 
         prior_runs: list[dict[str, Any]] = []
-        if self.harness.runs_root:
-            prior_runs = _find_prior_runs(self.harness.runs_root, dataset, target)
+        if runs_root:
+            prior_runs = _find_prior_runs(runs_root, dataset, target)
 
         deterministic_rationale = _build_eda_rationale(dataset, target, dataset_path, prior_runs)
 
@@ -404,7 +408,7 @@ class WorkerAgent:
         parsed: dict[str, Any] | None = None
         if turn.text is not None:
             parsed = _extract_json_block(turn.text)
-        elif turn.tool_calls:
+        elif turn.tool_calls and self.harness is not None:
             # The provider decided it needs tool results first; fall back to the
             # harness so the tool calls are executed and the conversation resumes.
             result = await self.harness.run(prompt)

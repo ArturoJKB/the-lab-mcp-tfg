@@ -13,21 +13,11 @@ from typing import Any
 from thelab.run.inputs import TaskTypeArg
 from thelab.run.runner import run_model
 
-from .datasets import DatasetNotFoundError, resolve_dataset_path
+from .datasets import DatasetNotFoundError, dataset_id_to_relative_path
 
 
 def _workspace_root() -> Path:
     return Path(os.environ.get("THELAB_WORKSPACE_ROOT", "."))
-
-
-def _dataset_id_to_relative_path(dataset_id: str) -> str:
-    """Return a workspace-relative path string for the runner."""
-    path = resolve_dataset_path(dataset_id)
-    try:
-        return path.relative_to(_workspace_root().resolve()).as_posix()
-    except ValueError:
-        parts = dataset_id.split("/", 1)
-        return f"data/{parts[0]}/{parts[1]}"
 
 
 def train_model(
@@ -40,7 +30,7 @@ def train_model(
 ) -> dict[str, Any]:
     """Train a single model deterministically and return the run outcome."""
     try:
-        dataset_path = _dataset_id_to_relative_path(dataset_id)
+        dataset_path = dataset_id_to_relative_path(dataset_id)
     except DatasetNotFoundError as exc:
         raise DatasetNotFoundError(str(exc)) from exc
 

@@ -193,6 +193,21 @@ def list_datasets() -> list[dict[str, Any]]:
     return uploads + fixtures
 
 
+def dataset_id_to_relative_path(dataset_id: str) -> str:
+    """Return a workspace-relative path string for the runner/batch runner.
+
+    ``uploads/x.csv`` becomes ``data/uploads/x.csv`` in the default layout;
+    caller-provided roots are honored via the environment overrides.
+    """
+    path = resolve_dataset_path(dataset_id)
+    workspace_root = Path(os.environ.get("THELAB_WORKSPACE_ROOT", ".")).resolve()
+    try:
+        return path.relative_to(workspace_root).as_posix()
+    except ValueError:
+        parts = dataset_id.split("/", 1)
+        return f"data/{parts[0]}/{parts[1]}"
+
+
 def resolve_dataset_path(dataset_id: str) -> Path:
     """Resolve a dataset ID to a contained filesystem path.
 

@@ -17,12 +17,19 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from thelab.ide.experiment import ExperimentState, ExperimentStore
+from thelab.ide.orchestrator import ExperimentOrchestrator, OrchestrationCancelled
 from thelab.ide.proposals_api import run_proposal
 from thelab.ide.train_api import train_model
+from thelab.mcp.common import load_json_artifact
 
 
 class JobError(ValueError):
     """Raised when a job submission or lookup fails."""
+
+
+class JobCancelled(RuntimeError):
+    """Raised internally when a cooperative cancellation completes a job."""
 
 
 @dataclass
@@ -56,6 +63,7 @@ class Job:
     events: list[JobEvent] = field(default_factory=list)
     result: dict[str, Any] | None = None
     error: str | None = None
+    cancel_requested: bool = False
     _event_queue: asyncio.Queue[JobEvent] = field(default_factory=asyncio.Queue)
     _event_subscribers: list[asyncio.Queue[JobEvent]] = field(default_factory=list)
 
@@ -74,6 +82,7 @@ class Job:
             "events": [e.to_dict() for e in self.events],
             "result": self.result,
             "error": self.error,
+            "cancel_requested": self.cancel_requested,
         }
 
     def emit(self, level: str, message: str, data: dict[str, Any] | None = None) -> None:
@@ -125,7 +134,7 @@ class JobManager:
 
     async def submit(self, job_type: str, payload: dict[str, Any]) -> Job:
         """Validate and enqueue a background job."""
-        if job_type not in {"train", "batch"}:
+        if job_type not in {"train", "batch", "experiment"}:
             raise JobError(f"unsupported job type: {job_type}")
 
         job_id = _generate_job_id()
@@ -146,6 +155,16 @@ class JobManager:
     async def get(self, job_id: str) -> Job | None:
         async with self._lock:
             return self._jobs.get(job_id)
+
+    async def cancel(self, job_id: str) -> Job | None:
+        """Request cooperative cancellation of a running job."""
+        job = await self.get(job_id)
+        if job is None:
+            return None
+        if job.status in {"pending", "running"}:
+            job.cancel_requested = True
+            job.emit("warn", "Cancellation requested; stopping at the next entry or stage")
+        return job
 
     async def list_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
         async with self._lock:
@@ -182,16 +201,25 @@ class JobManager:
                 result = await self._run_train(job)
             elif job.job_type == "batch":
                 result = await self._run_batch(job)
+            elif job.job_type == "experiment":
+                result = await self._run_experiment(job)
             else:
                 raise JobError(f"unsupported job type: {job.job_type}")
 
             job.result = result
-            if result.get("status") in {"failed", "partial"} or result.get("failed", 0) > 0:
+            if job.cancel_requested:
+                job.status = "cancelled"
+                job.emit("warn", "Job cancelled by user", {"result": result})
+            elif result.get("status") in {"failed", "partial"} or result.get("failed", 0) > 0:
                 job.status = "failed" if result.get("status") == "failed" else "completed"
                 job.emit("warn", "Job finished with failures", {"result": result})
             else:
                 job.status = "completed"
                 job.emit("info", "Job completed", {"result": result})
+        except OrchestrationCancelled:
+            job.status = "cancelled"
+            job.error = "cancelled by user"
+            job.emit("warn", "Job cancelled by user")
         except Exception as exc:  # noqa: BLE001
             job.status = "failed"
             job.error = str(exc)
@@ -216,7 +244,105 @@ class JobManager:
         proposal_id = job.payload.get("proposal_id")
         if not proposal_id:
             raise JobError("batch job requires proposal_id")
-        return await asyncio.to_thread(run_proposal, proposal_id)
+        return await asyncio.to_thread(
+            run_proposal,
+            proposal_id,
+            should_continue=lambda: not job.cancel_requested,
+            on_result=lambda r: job.emit(
+                "info",
+                f"entry {r.entry.model} (seed {r.entry.seed}): {r.status}",
+                {"stage": "training"},
+            ),
+        )
+
+    async def _run_experiment(self, job: Job) -> dict[str, Any]:
+        """Run a full agent-orchestrated experiment, streaming stage events."""
+        payload = job.payload
+        experiment_id = payload.get("experiment_id")
+        if not experiment_id:
+            raise JobError("experiment job requires experiment_id")
+
+        store = ExperimentStore()
+        experiment = store.load(experiment_id)
+        if experiment is None:
+            raise JobError(f"experiment not found: {experiment_id}")
+
+        runs_root = os.environ.get("THELAB_RUNS_ROOT", "runs")
+        orchestrator = ExperimentOrchestrator(
+            runs_root=runs_root,
+            proposals_dir=os.environ.get("THELAB_PROPOSALS_DIR", "proposals"),
+        )
+
+        state_by_stage = {
+            "planning": ExperimentState.PLANNING,
+            "cleaning": ExperimentState.CLEANING,
+            "training": ExperimentState.TRAINING,
+            "evaluating": ExperimentState.EVALUATING,
+        }
+
+        def on_event(stage: str, message: str) -> None:
+            job.emit("info", message, {"stage": stage, "experiment_id": experiment_id})
+            state = state_by_stage.get(stage)
+            if state is not None:
+                experiment.update_state(state)
+                store.save(experiment)
+
+        job.emit("info", "Experiment started", {"stage": "planning", "experiment_id": experiment_id})
+        try:
+            result = await orchestrator.orchestrate(
+                goal=payload.get("goal", ""),
+                dataset_id=payload.get("dataset_id", ""),
+                target=payload.get("target", ""),
+                feedback=payload.get("feedback"),
+                on_event=on_event,
+                should_continue=lambda: not job.cancel_requested,
+            )
+        except OrchestrationCancelled:
+            experiment.update_state(ExperimentState.CANCELLED)
+            experiment.error = "cancelled by user"
+            store.save(experiment)
+            raise
+
+        # Persist sub-agent findings, plan, and best-run selection.
+        if job.cancel_requested:
+            experiment.update_state(ExperimentState.CANCELLED)
+            experiment.error = "cancelled by user"
+            store.save(experiment)
+            return result
+
+        previous_job_ids = [
+            j for j in experiment.plan.get("previous_job_ids", []) if j
+        ]
+        old_job_id = experiment.plan.get("job_id")
+        if old_job_id and old_job_id != job.job_id and old_job_id not in previous_job_ids:
+            previous_job_ids.append(old_job_id)
+        experiment.plan = {
+            "job_id": job.job_id,
+            "previous_job_ids": previous_job_ids,
+            "recommendation": result.get("model_selection", {}).get("recommendation", {}),
+        }
+        experiment.sub_agent_results = {
+            "EDAAnalyst": result.get("eda", {}),
+            "FeatureEngineer": {
+                "cleaned_dataset_id": result.get("feature_engineering", {}).get("cleaned_dataset_id"),
+                "clean_metadata": result.get("feature_engineering", {}).get("clean_metadata", {}),
+                "top_models": result.get("feature_engineering", {}).get("top_models", []),
+            },
+            "ModelSelector": result.get("model_selection", {}),
+        }
+        training_results = result.get("training_results", [])
+        best = next((r for r in training_results if r.get("status") == "completed"), None)
+        if best is not None and best.get("run_id"):
+            experiment.best_run_id = best["run_id"]
+            metrics = load_json_artifact(Path(runs_root), best["run_id"], "metrics.json")
+            experiment.best_metrics = metrics or {}
+        if result.get("status") == "no_models_found":
+            experiment.update_state(ExperimentState.FAILED)
+            experiment.error = "no candidate models completed"
+        else:
+            experiment.update_state(ExperimentState.COMPLETED)
+        store.save(experiment)
+        return result
 
 
 _manager: JobManager | None = None

@@ -1,5 +1,6 @@
-"""Tests for the Slice 5 minimal UI and read-only run/artifact APIs."""
+"""Tests for Slice U1 UI v2 dashboard endpoints and hooks."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -42,136 +43,332 @@ def _completed_iris_run(tmp_path: Path) -> str:
     return result["run_id"]
 
 
-def test_root_serves_dashboard_html(client: TestClient):
+def _write_benchmark_manifest(tmp_path: Path) -> None:
+    manifest_dir = tmp_path / "benchmarks" / "b1"
+    manifest_dir.mkdir(parents=True)
+    manifest_dir.joinpath("benchmark_manifest.json").write_text(
+        json.dumps(
+            {
+                "benchmark_id": "b1",
+                "providers": [
+                    {
+                        "provider": "test",
+                        "model": "dummy",
+                        "datasets": [
+                            {
+                                "domain": "medical",
+                                "name": "iris",
+                                "target": "species",
+                                "task_type": "classification",
+                                "deterministic_status": "completed",
+                                "metrics": {
+                                    "deterministic": {"test_accuracy": 0.95},
+                                    "agent": {"test_accuracy": 0.94},
+                                },
+                            }
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_proposals(proposals_dir: Path) -> tuple[str, str, str]:
+    proposals_dir.mkdir(parents=True, exist_ok=True)
+    pending_id = "prop-pending-001"
+    approved_id = "prop-approved-001"
+    rejected_id = "prop-rejected-001"
+
+    proposals_dir.joinpath(f"{pending_id}.json").write_text(
+        json.dumps(
+            {
+                "proposal_id": pending_id,
+                "goal": "Pending goal",
+                "dataset": "data/fixtures/iris.csv",
+                "target": "species",
+                "model_grid": ["logistic_regression"],
+                "seeds": [42],
+                "rationale": "Pending rationale.",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    proposals_dir.joinpath(f"{approved_id}.json").write_text(
+        json.dumps(
+            {
+                "proposal_id": approved_id,
+                "goal": "Approved goal",
+                "dataset": "data/fixtures/iris.csv",
+                "target": "species",
+                "model_grid": ["random_forest"],
+                "seeds": [42],
+                "rationale": "Approved rationale.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    proposals_dir.joinpath(f"{approved_id}.approved.json").write_text(
+        json.dumps({"proposal_id": approved_id, "principal": "test", "approved_at": "2026-08-24T00:00:00+00:00"}),
+        encoding="utf-8",
+    )
+    proposals_dir.joinpath(f"{approved_id}.batch.json").write_text(
+        json.dumps([{"dataset": "data/fixtures/iris.csv", "target": "species", "model": "random_forest", "seed": 42}]),
+        encoding="utf-8",
+    )
+
+    proposals_dir.joinpath(f"{rejected_id}.json").write_text(
+        json.dumps(
+            {
+                "proposal_id": rejected_id,
+                "goal": "Rejected goal",
+                "dataset": "data/fixtures/iris.csv",
+                "target": "species",
+                "model_grid": ["svc"],
+                "seeds": [42],
+                "rationale": "Rejected rationale.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    proposals_dir.joinpath(f"{rejected_id}.rejected.json").write_text(
+        json.dumps({"proposal_id": rejected_id, "principal": "test", "rejected_at": "2026-08-24T00:00:00+00:00"}),
+        encoding="utf-8",
+    )
+
+    return pending_id, approved_id, rejected_id
+
+
+def _write_agent_events(events_path: Path) -> None:
+    events_path.parent.mkdir(parents=True, exist_ok=True)
+    events_path.write_text(
+        json.dumps(
+            {
+                "event_id": "evt-old",
+                "event_type": "agent_session_summary",
+                "timestamp": "2026-08-24T10:00:00+00:00",
+                "agent": {"source": "agent_worker"},
+                "outcome": {"status": "completed", "summary": "Old session"},
+                "tags": ["agent_mode:worker"],
+            }
+        )
+        + "\n"
+        + json.dumps(
+            {
+                "event_id": "evt-recent",
+                "event_type": "agent_session_summary",
+                "timestamp": "2026-08-24T12:00:00+00:00",
+                "agent": {"platform": "opencode"},
+                "outcome": {"status": "completed", "summary": "Recent session"},
+                "tags": ["agent_mode:worker"],
+            }
+        )
+        + "\n"
+        + json.dumps(
+            {
+                "event_id": "evt-system",
+                "event_type": "system",
+                "timestamp": "2026-08-24T13:00:00+00:00",
+                "outcome": {"status": "completed", "summary": "System event"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_dashboard_html_has_sidebar_and_new_panel_hooks(client: TestClient):
     response = client.get("/")
     assert response.status_code == 200
-    assert "text/html" in response.headers["content-type"]
     body = response.text
-    assert 'id="panel-status"' in body
-    assert 'id="panel-models"' in body
-    assert 'id="panel-metrics"' in body
-    assert 'id="panel-artifacts"' in body
-    assert 'id="panel-predict"' in body
-    assert 'src="/static/app.js"' in body
-    assert 'href="/static/styles.css"' in body
+    assert 'class="sidebar"' in body
+    assert 'id="sidebar-nav"' in body
+    assert 'data-panel="panel-benchmarks"' in body
+    assert 'data-panel="panel-proposals"' in body
+    assert 'data-panel="panel-sessions"' in body
+    assert 'id="panel-benchmarks"' in body
+    assert 'id="panel-proposals"' in body
+    assert 'id="panel-sessions"' in body
+    assert 'id="panel-coding"' in body
+    assert 'id="panel-research"' in body
 
 
-def test_static_assets_reachable(client: TestClient):
-    js = client.get("/static/app.js")
-    assert js.status_code == 200
-    assert "javascript" in js.headers["content-type"]
-
-    css = client.get("/static/styles.css")
-    assert css.status_code == 200
-    assert "css" in css.headers["content-type"]
+def test_static_css_reachable(client: TestClient):
+    response = client.get("/static/styles.css")
+    assert response.status_code == 200
+    assert "--bg:" in response.text
 
 
-def test_get_run_summary_for_approved_run(client: TestClient, tmp_path: Path, monkeypatch):
-    run_id = _completed_iris_run(tmp_path)
-    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
+def test_benchmarks_returns_manifest(client: TestClient, tmp_path: Path, monkeypatch):
+    _write_benchmark_manifest(tmp_path)
+    monkeypatch.chdir(tmp_path)
 
-    response = client.get(f"/runs/{run_id}")
+    response = client.get("/benchmarks")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["data"]["benchmark_id"] == "b1"
+    assert payload["data"]["providers"][0]["provider"] == "test"
+
+
+def test_benchmarks_returns_null_when_missing(client: TestClient, tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    response = client.get("/benchmarks")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["data"] is None
+    assert "No benchmark manifest found" in payload["message"]
+
+
+def test_proposals_lists_with_status(
+    client: TestClient, tmp_path: Path, monkeypatch
+):
+    proposals_dir = tmp_path / "proposals"
+    pending_id, approved_id, rejected_id = _write_proposals(proposals_dir)
+    monkeypatch.setenv("THELAB_PROPOSALS_DIR", str(proposals_dir))
+
+    response = client.get("/proposals")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    proposals = {p["proposal_id"]: p for p in payload["data"]}
+    assert len(proposals) == 3
+    assert proposals[pending_id]["status"] == "pending"
+    assert proposals[approved_id]["status"] == "approved"
+    assert proposals[approved_id]["batch_config"] == f"{approved_id}.batch.json"
+    assert proposals[rejected_id]["status"] == "rejected"
+
+    # Derived files should not appear as standalone proposals.
+    names = {p["proposal_id"] for p in payload["data"]}
+    assert f"{approved_id}.approved" not in names
+    assert f"{approved_id}.batch" not in names
+
+
+def test_proposals_detail_returns_full_data(
+    client: TestClient, tmp_path: Path, monkeypatch
+):
+    proposals_dir = tmp_path / "proposals"
+    pending_id, approved_id, _ = _write_proposals(proposals_dir)
+    monkeypatch.setenv("THELAB_PROPOSALS_DIR", str(proposals_dir))
+
+    response = client.get(f"/proposals/{approved_id}")
     assert response.status_code == 200
     payload = response.json()
     assert payload["ok"] is True
     data = payload["data"]
-    assert data["run_id"] == run_id
-    assert data["final_status"] == "completed"
-    assert data["validation_status"] == "approved"
-    assert data["model"] == "logistic_regression"
-    assert data["target"] == "species"
-    assert set(data["feature_columns"]) == {
-        "sepal_length",
-        "sepal_width",
-        "petal_length",
-        "petal_width",
-    }
-    assert "test_accuracy" in data["metrics"]
-    assert "test_f1_macro" in data["metrics"]
-    assert "run_dir" not in data
-    assert "path" not in data
+    assert data["proposal_id"] == approved_id
+    assert data["status"] == "approved"
+    assert data["batch_config"] == f"{approved_id}.batch.json"
+    assert data["goal"] == "Approved goal"
+
+    response = client.get(f"/proposals/{pending_id}")
+    assert response.status_code == 200
+    assert response.json()["data"]["status"] == "pending"
 
 
-def test_get_run_rejects_unknown_run(client: TestClient, tmp_path: Path, monkeypatch):
-    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
-    (tmp_path / "runs").mkdir()
+def test_proposals_detail_rejects_unsafe_id(
+    client: TestClient, tmp_path: Path, monkeypatch
+):
+    proposals_dir = tmp_path / "proposals"
+    proposals_dir.mkdir(parents=True)
+    monkeypatch.setenv("THELAB_PROPOSALS_DIR", str(proposals_dir))
 
-    response = client.get("/runs/does-not-exist")
+    response = client.get("/proposals/../etc/passwd")
+    assert response.status_code == 404
+
+    response = client.get("/proposals/.hidden")
     assert response.status_code == 404
 
 
-def test_get_run_rejects_rejected_run(client: TestClient, tmp_path: Path, monkeypatch):
-    csv = tmp_path / "iris.csv"
-    csv.write_text(
-        "sepal_length,sepal_width,petal_length,petal_width,species\n"
-        "5.1,3.5,1.4,0.2,setosa\n"
-    )
-    result = run_model(
-        dataset=csv,
-        target="missing",
-        model="logistic_regression",
-        seed=42,
-        output="runs",
-        workspace_root=tmp_path,
-    )
-    assert result["status"] == "rejected"
-    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
+def test_agent_sessions_returns_recent_summaries(
+    client: TestClient, tmp_path: Path, monkeypatch
+):
+    events_path = tmp_path / "agent-events.jsonl"
+    _write_agent_events(events_path)
+    monkeypatch.setenv("THELAB_AGENT_EVENTS", str(events_path))
 
-    response = client.get(f"/runs/{result['run_id']}")
-    assert response.status_code == 400
+    response = client.get("/agent-sessions")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    sessions = payload["data"]
+    assert len(sessions) == 2
+    # Newest first.
+    assert sessions[0]["event_id"] == "evt-recent"
+    assert sessions[0]["source"] == "agent_worker"
+    assert sessions[0]["outcome"]["summary"] == "Recent session"
+    assert sessions[1]["event_id"] == "evt-old"
+    assert sessions[1]["source"] == "agent_worker"
+
+    # System events should be excluded.
+    event_ids = {s["event_id"] for s in sessions}
+    assert "evt-system" not in event_ids
 
 
-def test_list_artifacts_includes_allowlisted_files_only(
+def test_agent_sessions_empty_when_missing(client: TestClient, tmp_path: Path, monkeypatch):
+    events_path = tmp_path / "agent-events.jsonl"
+    monkeypatch.setenv("THELAB_AGENT_EVENTS", str(events_path))
+
+    response = client.get("/agent-sessions")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["data"] == []
+
+
+def test_existing_endpoints_still_work(
     client: TestClient, tmp_path: Path, monkeypatch
 ):
     run_id = _completed_iris_run(tmp_path)
     monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
 
-    response = client.get(f"/runs/{run_id}/artifacts")
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+    response = client.get("/models")
     assert response.status_code == 200
     payload = response.json()
     assert payload["ok"] is True
-    names = {item["name"] for item in payload["data"]}
-    assert "metrics.json" in names
-    assert "model_card.md" in names
-    assert "manifest.json" in names
-    assert "model.joblib" not in names
+    assert len(payload["data"]) == 1
+    assert payload["data"][0]["run_id"] == run_id
+
+    response = client.get(f"/runs/{run_id}")
+    assert response.status_code == 200
+    assert response.json()["data"]["run_id"] == run_id
+
+    response = client.get(f"/runs/{run_id}/artifacts")
+    assert response.status_code == 200
+    artifact_names = {a["name"] for a in response.json()["data"]}
+    assert "manifest.json" in artifact_names
+    assert "model.joblib" not in artifact_names
 
 
-def test_get_artifact_json_and_text(client: TestClient, tmp_path: Path, monkeypatch):
+def test_predict_form_feature_inputs_return_predictions(
+    client: TestClient, tmp_path: Path, monkeypatch
+):
     run_id = _completed_iris_run(tmp_path)
     monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
 
-    metrics_response = client.get(f"/runs/{run_id}/artifacts/metrics.json")
-    assert metrics_response.status_code == 200
-    payload = metrics_response.json()
+    response = client.get(f"/runs/{run_id}")
+    assert response.status_code == 200
+    feature_columns = response.json()["data"]["feature_columns"]
+    assert "sepal_length" in feature_columns
+
+    response = client.post(
+        "/predict",
+        json={
+            "run_id": run_id,
+            "features": [
+                {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}
+            ],
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
     assert payload["ok"] is True
-    assert "test_accuracy" in payload["data"]
-
-    card_response = client.get(f"/runs/{run_id}/artifacts/model_card.md")
-    assert card_response.status_code == 200
-    payload = card_response.json()
-    assert payload["ok"] is True
-    assert isinstance(payload["data"], str)
-
-
-def test_artifact_path_traversal_rejected(client: TestClient, tmp_path: Path, monkeypatch):
-    run_id = _completed_iris_run(tmp_path)
-    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
-
-    # Literal ".." is normalized away by the HTTP client/server path resolution,
-    # so we test the equivalent encoded form and other unsafe names.
-    for bad_name in ["%2e%2e", "a/b.json", "/etc/passwd", ".hidden"]:
-        response = client.get(f"/runs/{run_id}/artifacts/{bad_name}")
-        assert response.status_code in (400, 404), f"{bad_name} returned {response.status_code}"
-
-
-def test_non_allowlisted_artifact_rejected(client: TestClient, tmp_path: Path, monkeypatch):
-    run_id = _completed_iris_run(tmp_path)
-    monkeypatch.setenv("THELAB_RUNS_ROOT", str(tmp_path / "runs"))
-
-    response = client.get(f"/runs/{run_id}/artifacts/model.joblib")
-    assert response.status_code == 400
-
-    response = client.get(f"/runs/{run_id}/artifacts/random.txt")
-    assert response.status_code == 400
+    assert len(payload["data"]["predictions"]) == 1

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -69,10 +70,20 @@ class BatchRunner:
         self,
         entries: list[BatchEntry],
         output: str = "runs",
+        on_result: Callable[[BatchResult], None] | None = None,
+        should_continue: Callable[[], bool] | None = None,
     ) -> list[BatchResult]:
-        """Execute all entries, continuing past individual failures."""
+        """Execute all entries, continuing past individual failures.
+
+        ``on_result(result)`` fires after every entry so callers can stream
+        progress. ``should_continue()`` returning False stops the loop between
+        entries (cooperative cancellation); the caller inspects the returned
+        results to see what completed.
+        """
         results: list[BatchResult] = []
         for entry in entries:
+            if should_continue is not None and not should_continue():
+                break
             result = BatchResult(entry=entry)
             try:
                 outcome = run_model(
@@ -93,6 +104,8 @@ class BatchRunner:
                 result.status = "failed"
                 result.error = str(exc)
             results.append(result)
+            if on_result is not None:
+                on_result(result)
         return results
 
     def write_summary(

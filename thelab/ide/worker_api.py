@@ -14,7 +14,7 @@ from typing import Any
 from thelab.agents.mock import MockProvider
 from thelab.agents.worker import WorkerAgent
 
-from .datasets import DatasetNotFoundError, resolve_dataset_path
+from .datasets import DatasetNotFoundError, dataset_id_to_relative_path
 
 
 def _workspace_root() -> Path:
@@ -27,17 +27,6 @@ def _runs_root() -> Path:
 
 def _proposals_dir() -> Path:
     return Path(os.environ.get("THELAB_PROPOSALS_DIR", "proposals"))
-
-
-def _dataset_id_to_relative_path(dataset_id: str) -> str:
-    """Return a workspace-relative path string for the worker/batch runner."""
-    path = resolve_dataset_path(dataset_id)
-    try:
-        return path.relative_to(_workspace_root().resolve()).as_posix()
-    except ValueError:
-        # Fallback: use the contained source form that the batch runner expects.
-        parts = dataset_id.split("/", 1)
-        return f"data/{parts[0]}/{parts[1]}"
 
 
 def _parse_string_list(value: Any) -> list[str]:
@@ -81,7 +70,7 @@ async def generate_proposal(
 ) -> dict[str, Any]:
     """Create a deterministic experiment proposal for the given dataset and target."""
     try:
-        dataset_path = _dataset_id_to_relative_path(dataset_id)
+        dataset_path = dataset_id_to_relative_path(dataset_id)
     except DatasetNotFoundError as exc:
         raise DatasetNotFoundError(str(exc)) from exc
 
