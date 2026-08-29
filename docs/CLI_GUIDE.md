@@ -1,8 +1,8 @@
 # The Lab — CLI Guide
 
-This guide covers the `thelab` CLI and the local `thelab-model-service` HTTP service.
-
----
+All command-line entry points. For the UI and HTTP API see
+[`docs/USER_GUIDE.md`](USER_GUIDE.md); for Python usage see
+[`docs/PYTHON_API.md`](PYTHON_API.md).
 
 ## Install
 
@@ -13,18 +13,21 @@ pip install -r requirements.lock
 pip install -e .
 ```
 
-This installs:
+Installed commands:
 
-- `thelab` — main CLI
-- `thelab-model-service` — local HTTP model service
-- `thelab-data-catalog-mcp`, `thelab-model-registry-mcp`, `thelab-workspace-mcp`, `thelab-context-mcp` — MCP servers
-- `thelab-mcp-demo` — MCP demo client
+| Command | Purpose |
+|---|---|
+| `thelab` | main CLI (run, inspect, predict, compare, context, proposals) |
+| `thelab-agent` | agent CLI (mock / worker / researcher / diagnosis modes) |
+| `thelab-model-service` | local HTTP service + dashboard |
+| `thelab-mcp-demo` | MCP demo client |
+| `thelab-{data-catalog,model-registry,workspace,context,context-write,eda,agent}-mcp` | MCP servers (stdio) |
 
 ---
 
 ## `thelab run model`
 
-Train a deterministic classification model from a CSV.
+Train a deterministic model from a CSV.
 
 ```bash
 thelab run model \
@@ -41,52 +44,37 @@ thelab run model \
 |---|---|---|
 | `--dataset` | yes | Relative path to the CSV file |
 | `--target` | yes | Name of the target column |
-| `--model` | yes | Model name (see table below) |
+| `--model` | yes | Model name (see below) |
 | `--seed` | yes | Random seed for reproducibility |
 | `--output` | yes | Relative directory for run outputs |
+| `--task-type` | no | `auto` (default) / `classification` / `regression` |
+| `--dry-run` | no | Train in memory, persist nothing |
+| `--try-all` | no | Compare every registered model (dry run by default) |
 
 ### Supported models
 
-| Name | Scikit-learn estimator | Probability variant |
-|---|---|---|
-| `logistic_regression` | `LogisticRegression` | `logistic_regression_probability` |
-| `random_forest` | `RandomForestClassifier` | `random_forest_probability` |
-| `svc` | `SVC` | `svc_probability` |
-| `sgd_classifier` | `SGDClassifier` | `sgd_classifier_probability` |
+Classification: `logistic_regression`, `random_forest`, `svc` (max 50,000
+training rows), `sgd_classifier`, `hist_gradient_boosting` — each with a
+`_probability` variant.
 
-Use a `_probability` variant when you need `predict_proba` support. Example:
+Regression: `linear_regression`, `ridge`, `random_forest_regressor`,
+`hist_gradient_boosting_regressor`.
 
-```bash
-thelab run model --dataset examples/iris.csv --target species --model svc_probability --seed 42 --output runs
-```
+With `--task-type auto` the task is inferred from the target (≤ 20 distinct
+values → classification). Model/task mismatches and row-count limits are
+**rejected with a reason** — a rejected run is a valid, traceable outcome.
 
 ### Run outputs
 
-Each run creates a directory `runs/<run_id>/` containing:
-
-- `manifest.json` — run metadata and artifact refs
-- `inputs.json` — the CLI inputs
-- `data_profile.json` — dataset profile
-- `dataset_contract.json` — dataset contract
-- `training_config.json` — estimator and preprocessing config
-- `metrics.json` — train/test accuracy and F1
-- `validation_report.json` — validation checks
-- `model.joblib` — serialized pipeline
-- `model_card.md` — human-readable model card
-- `events.jsonl` — lifecycle events
-- `task_spec.json` — persisted task spec
-
-### Path rules
-
-- `--dataset` and `--output` must be relative paths.
-- They cannot contain `..` segments.
-- They must resolve inside the workspace root (current working directory).
+Each run creates `runs/<run_id>/` with `manifest.json`, `inputs.json`,
+`data_profile.json`, `dataset_contract.json`, `training_config.json`,
+`metrics.json`, `validation_report.json`, `model.joblib`, `model_card.md`,
+`events.jsonl`, `task_spec.json`. Path rules: `--dataset`/`--output` must be
+relative, no `..`, resolved inside the workspace root.
 
 ---
 
 ## `thelab run batch`
-
-Run many experiments from a JSON config.
 
 ```bash
 thelab run batch \
@@ -95,142 +83,105 @@ thelab run batch \
   --report batch_report.md
 ```
 
-### Batch config format
+Batch config: a JSON list of `{dataset, target, model, seed, task_type?,
+hyperparameters?}` objects. Outputs `batch_summary.json`, an optional
+Markdown report, and one run directory per entry. The runner continues past
+individual failures.
 
-A JSON list of objects. Each object needs `dataset`, `target`, `model`, and `seed`:
+---
 
-```json
-[
-  {
-    "dataset": "examples/iris.csv",
-    "target": "species",
-    "model": "logistic_regression",
-    "seed": 42
-  },
-  {
-    "dataset": "examples/wine.csv",
-    "target": "class",
-    "model": "random_forest",
-    "seed": 42
-  }
-]
+## `thelab inspect` / `predict` / `compare`
+
+```bash
+# Quick dataset profile, no training
+thelab inspect --dataset examples/iris.csv [--target species]
+
+# One-off prediction from an approved run
+thelab predict --run-id <run_id> --features '5.1,3.5,1.4,0.2'
+
+# Metrics table across completed runs
+thelab compare [--output compare.md]
 ```
-
-### Flags
-
-| Flag | Required | Description |
-|---|---|---|
-| `--config` | yes | Path to batch JSON config |
-| `--output` | yes | Directory for all run outputs and `batch_summary.json` |
-| `--report` | no | Optional Markdown report path |
-
-### Batch outputs
-
-- `batch_summary.json` — status, metrics, and errors for every entry
-- `batch_report.md` — human-readable results table
-- One `run-<timestamp>-<id>/` directory per completed/rejected/failed entry
-
-The runner continues past individual failures.
 
 ---
 
 ## `thelab context`
 
-Index and search local agent-session logs.
-
-### Index
+Index and search local agent-session logs (SQLite + FTS5, redacted,
+read-only retrieval).
 
 ```bash
 thelab context index --source .thelab/local-logs/agent-events.jsonl
-```
-
-### Search
-
-```bash
-thelab context search "reproducibility"
-thelab context search "reproducibility" --run-id run-abc --limit 10
-```
-
-### Show
-
-```bash
+thelab context search "reproducibility" [--run-id run-abc] [--limit 10]
 thelab context show <event_id>
 ```
 
-The context store redacts secrets before indexing and is read-only by default for agent-facing queries.
+---
+
+## `thelab proposals`
+
+Manage worker-agent experiment proposals.
+
+```bash
+thelab proposals list
+thelab proposals show <id>
+thelab proposals approve <id>    # writes approval record (principal: "human")
+thelab proposals reject <id> --reason "..."
+thelab proposals approve <id> --run   # approve + execute as batch
+```
+
+---
+
+## `thelab-agent`
+
+Agent modes over the harness (provider via `--provider mock|openai_compat|ollama|openrouter`):
+
+```bash
+# Mock scripted agent answering a question over run artifacts
+thelab-agent "Why did run X fail?" --provider mock --run-id <run_id>
+
+# Worker: propose an experiment (EDA-grounded, deterministic fallback)
+thelab-agent --mode worker --dataset examples/iris.csv --target species \
+  --model-grid logistic_regression,random_forest --seeds 42,43
+
+# Researcher / diagnosis
+thelab-agent --mode researcher --question "..." --run-id <run_id>
+thelab-agent --mode diagnosis --dataset ... --target ... --error "..." --model-grid ...
+```
+
+Provider env vars: `THELAB_LLM_BASE_URL`/`THELAB_LLM_API_KEY`/`THELAB_LLM_MODEL`
+(openai_compat, openrouter), `OLLAMA_BASE_URL`/`OLLAMA_MODEL` (ollama).
+Answers are grounded: claims must cite run IDs and match recorded metrics.
 
 ---
 
 ## `thelab-model-service`
 
-Serve approved, completed models over local HTTP.
-
 ```bash
 thelab-model-service --host 127.0.0.1 --port 8000
 ```
 
-### Endpoints
+Serves the dashboard at `/` plus the full HTTP API (datasets, EDA, cleaning,
+experiments, jobs, predictions — see [`docs/USER_GUIDE.md`](USER_GUIDE.md)
+for the endpoint tables). A warning is printed if `--host` is not loopback.
 
-| Endpoint | Description |
-|---|---|
-| `GET /health` | Service health |
-| `GET /models` | List approved models |
-| `POST /predict` | Run inference on an approved model |
-| `GET /runs/{run_id}` | Run summary |
-| `GET /runs/{run_id}/artifacts` | List allowlisted artifacts |
-| `GET /runs/{run_id}/artifacts/{artifact_name}` | Read an allowlisted artifact |
-| `GET /agent/coding/overview` | Coding agent overview |
-| `GET /agent/research/context/search` | Context search |
-| `GET /` | Web UI |
-
-### Predict example
+Predict example:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{
-    "run_id": "run-20260816-...",
-    "features": [
-      {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}
-    ]
-  }'
+  -d '{"run_id": "run-20260829-...", "features": [{"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}]}'
 ```
-
-A warning is printed if `--host` is not a loopback address.
 
 ---
 
-## Examples
-
-### Train all base models on Iris
+## MCP smoke tests
 
 ```bash
-for m in logistic_regression random_forest svc sgd_classifier; do
-  thelab run model --dataset examples/iris.csv --target species --model $m --seed 42 --output runs
-done
-```
-
-### Train all probability variants
-
-```bash
-for m in logistic_regression_probability random_forest_probability svc_probability sgd_classifier_probability; do
-  thelab run model --dataset examples/iris.csv --target species --model $m --seed 42 --output runs
-done
-```
-
-### Compare models across datasets
-
-```bash
-thelab run batch --config examples/multi-dataset-batch.json --output runs --report multi_report.md
-```
-
-### Load and predict from a saved artifact
-
-```python
-import joblib
-
-model = joblib.load("runs/run-<id>/model.joblib")
-print(model.predict([[5.1, 3.5, 1.4, 0.2]]))
+thelab-mcp-demo model_registry --run-id <run_id>
+thelab-mcp-demo data_catalog --run-id <run_id>
+thelab-mcp-demo workspace --run-id <run_id>
+thelab-mcp-demo context
 ```
 
 ---
@@ -239,19 +190,20 @@ print(model.predict([[5.1, 3.5, 1.4, 0.2]]))
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `dataset must be a relative path` | Absolute path passed | Use a relative path or run from the workspace root |
-| `unsupported model` | Model name not in registry | Use one of the supported model names |
-| `cannot stratify` | Too few samples per class | Add more rows or reduce the number of classes |
-| `feature columns contain infinite values` | `Inf`/`-Inf` in features | Clean the dataset |
-| Model service returns 404 | Run not completed/approved | Check `manifest.json` final_status and validation_status |
-
----
+| `dataset must be a relative path` | Absolute path passed | Run from the workspace root |
+| `unsupported model` | Name not in registry | See supported models above |
+| `model 'X' is limited to N training rows` | Scale guard | Use a scalable model or subsample |
+| `cannot stratify` | Too few samples per class | More rows or fewer classes |
+| `feature columns contain infinite values` | `Inf` in features | Clean the dataset first |
+| `constant feature columns found` | A feature has one value | Fix the data upstream |
+| Model service returns 404 | Run not completed/approved | Check `manifest.json` statuses |
+| Job stuck `running` | Long stage | Watch the Pipeline panel; use Cancel |
 
 ## Tests
 
 ```bash
-ruff check thelab tests scripts
-mypy thelab
-pytest tests/ -q
-python scripts/evaluate_thesis.py
+.venv/bin/ruff check thelab tests scripts
+.venv/bin/mypy thelab
+.venv/bin/python -m pytest tests/ -q
+PATH=.venv/bin:$PATH .venv/bin/python scripts/evaluate_thesis.py
 ```

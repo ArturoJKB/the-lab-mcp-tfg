@@ -1,40 +1,67 @@
 # The Lab — Agent Onboarding
 
-Before proposing or changing code in this repository, read these documents in order:
+Single source of truth for any coding agent (or human) changing this repository.
 
-1. `docs/PRD_P0.md` — binding product requirements for P0.
-2. `docs/ROADMAP.md` — implementation slice map and current status.
-3. `docs/CODEBASE_GUIDE.md` — how the code is organized by slice.
-4. `docs/Agents.md` — project principles, safety boundaries, and definition of done.
+## Current documentation
 
-## Active scope
+| Doc | Purpose |
+|---|---|
+| [`README.md`](README.md) | Product overview, quick start, architecture diagram |
+| [`docs/THESIS_MAP.md`](docs/THESIS_MAP.md) | Thesis concepts → implementation → demos |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Global roadmap: P0 → P1 → P2, current focus |
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | UI + CLI + HTTP API + MCP usage |
+| [`docs/CODEBASE_GUIDE.md`](docs/CODEBASE_GUIDE.md) | Codebase tour by phase |
+| [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) | CLI reference |
+| [`docs/PYTHON_API.md`](docs/PYTHON_API.md) | Python/notebook API |
+| [`docs/THESIS_EVALUATION.md`](docs/THESIS_EVALUATION.md) | RQ1–RQ3 protocol and results |
 
-Implement only the slice explicitly requested. Do not build future slices early.
+**Everything else** lives in `docs/legacy/` — historical slice/phase records kept as
+source material for the thesis document. They are **not binding** for new code and are
+not updated.
+
+## Working mode
+
+Development is **dynamic**: small, focused changes instead of big planned phases.
+
+- Implement exactly what was asked; smallest surface that works.
+- No binding phase plans or ceremony for small changes. A short written plan is only
+  worth it for multi-file or architectural work.
+- Keep the full test suite green; update docs when behavior changes.
+- Do not build unrequested features, and do not resurrect legacy plans without an
+  explicit request.
 
 ## Core principles
 
 - Local-first, auditable, reproducible, reusable.
-- Prefer small vertical slices over big-bang implementation.
-- Use typed contracts and deterministic pipelines.
-- Keep all persisted run outputs under `runs/<run_id>/`.
-- Use relative workspace paths in persisted references.
-- A rejected validation is a valid and traceable result.
+- Typed contracts and deterministic pipelines.
+- All run outputs stay under `runs/<run_id>/`; persisted references use relative paths.
+- A rejected validation is a valid, traceable result — never swallow it.
 
 ## Safety boundaries
 
-- Do not add arbitrary shell execution or arbitrary LLM-generated code execution.
-- Do not modify repository files outside the requested slice.
-- Do not add cloud services, vector databases, embeddings, fine-tuning,
-  interactive terminals, trading, or broker integrations unless the active plan
-  explicitly requires them.
-- Do not silently change dependencies or architecture.
-- Ask before destructive commands or broad refactors.
+- LLM-generated code executes **only** inside `thelab/sandbox` (AST-restricted
+  subprocess). No arbitrary shell execution or unsandboxed code paths.
+- Local-first by default. External LLM providers are supported through the provider
+  abstraction (Ollama local, OpenAI-compatible, OpenRouter) with explicit user
+  configuration. No other cloud services without an explicit request.
+- Out of thesis scope: trading, brokers, order execution, portfolios.
+- Do not silently change dependencies or architecture; ask before destructive commands
+  or broad refactors.
 
-## Definition of done
+## Definition of done (proportionate)
 
-For every slice:
-1. Implement only the requested requirements.
-2. Add or update tests.
-3. Run the documented tests.
-4. Run the documented example command when available.
-5. Report changed files, test output, limitations, and next suggested slice.
+1. Implement the requested change.
+2. Add or adjust **focused** tests for new behavior — not exhaustive suites.
+3. Run the affected tests, then the full suite:
+   ```bash
+   .venv/bin/ruff check thelab tests scripts
+   .venv/bin/mypy thelab
+   .venv/bin/python -m pytest tests/ -q
+   ```
+4. Run the documented example command when one exists.
+5. Report: changed files, test output, limitations, next step.
+
+## Thesis evaluation
+
+`scripts/evaluate_thesis.py` checks RQ1 (reproducibility), RQ2 (MCP interoperability),
+RQ3 (context retrieval). It must pass before claiming any work is complete.
