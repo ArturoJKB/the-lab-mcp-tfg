@@ -31,12 +31,15 @@ def run_in_sandbox(
     timeout: int = 30,
     memory_limit_mb: int = 512,
     max_output_bytes: int = 64 * 1024,
+    files: dict[str, str] | None = None,
 ) -> SandboxResult:
     """Run *code* in a restricted subprocess and return the result.
 
     The child process is executed via ``python -m thelab.sandbox.child`` so
     that it runs in a fresh interpreter with no access to the parent's
-    memory or file descriptors.
+    memory or file descriptors. Optional *files* are written into the
+    per-run temp workspace (basename keys only) before execution, giving
+    the code read-only access to e.g. a dataset copy.
     """
     if not code or not isinstance(code, str):
         raise SandboxError("code must be a non-empty string")
@@ -46,6 +49,8 @@ def run_in_sandbox(
         "memory_limit_bytes": memory_limit_mb * 1024 * 1024,
         "max_output_bytes": max_output_bytes,
     }
+    if files:
+        request["files"] = files
 
     try:
         proc = subprocess.run(

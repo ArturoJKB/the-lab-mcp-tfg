@@ -20,6 +20,7 @@ async def start_experiment(
     dataset_id: str,
     target: str,
     feedback: str | None = None,
+    provider_name: str = "mock",
 ) -> dict[str, Any]:
     """Create an experiment and queue its orchestration as a background job."""
     resolve_dataset_path(dataset_id)
@@ -40,6 +41,7 @@ async def start_experiment(
             "dataset_id": dataset_id,
             "target": target,
             "feedback": feedback,
+            "provider": provider_name,
         },
     )
     experiment.plan["job_id"] = job.job_id

@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from thelab.agents.mock import MockProvider
-from thelab.agents.provider import LLMProvider
+from thelab.agents.provider import AgentMessage, LLMProvider
 from thelab.agents.worker import ProposalStore, WorkerAgent
 from thelab.ide.cleaning import clean_dataset
 from thelab.ide.datasets import dataset_id_to_relative_path, resolve_dataset_path
@@ -56,6 +58,42 @@ class ExperimentOrchestrator:
             proposals_dir=self.proposals_dir,
             runs_root=self.runs_root,
         )
+
+    @staticmethod
+    def _is_live(provider: LLMProvider | None) -> bool:
+        """Interpretations run only when an explicit provider is passed (mock jobs pass None)."""
+        return provider is not None
+
+    async def _interpret(
+        self, provider: LLMProvider | None, role: str, instruction: str, payload: dict[str, Any]
+    ) -> str | None:
+        """One LLM interpretation over deterministic output; None unless live."""
+        if not self._is_live(provider):
+            return None
+
+        def _complete() -> str | None:
+            turn = provider.complete(  # type: ignore[union-attr]
+                [
+                    AgentMessage(
+                        role="system",
+                        content=(
+                            "You are a concise ML analyst sub-agent for The Lab. "
+                            "Ground every statement in the provided data; no speculation."
+                        ),
+                    ),
+                    AgentMessage(
+                        role="user",
+                        content=f"{instruction}\n\nData:\n{json.dumps(payload, default=str)[:6000]}",
+                    ),
+                ],
+                [],
+            )
+            return turn.text
+
+        try:
+            return await asyncio.to_thread(_complete)
+        except Exception:  # noqa: BLE001
+            return None
 
     async def run_eda_analysis(self, dataset_id: str, target: str, goal: str = "") -> dict[str, Any]:
         """Run EDA analysis using deterministic skills."""
@@ -244,6 +282,12 @@ class ExperimentOrchestrator:
         ensure_not_cancelled()
         emit("planning", "EDAAnalyst analyzing dataset")
         eda_result = await self.run_eda_analysis(dataset_id, target, goal)
+        eda_result["llm_interpretation"] = await self._interpret(
+            provider,
+            "EDAAnalyst",
+            "Summarize the key findings and modeling risks from this EDA report in 3-5 bullets.",
+            eda_result["eda_result"],
+        )
 
         # Step 2: Feature Engineering
         ensure_not_cancelled()
@@ -253,6 +297,16 @@ class ExperimentOrchestrator:
             target=target,
             eda_context=eda_result["eda_context"],
             goal=goal,
+        )
+        fe_result["llm_interpretation"] = await self._interpret(
+            provider,
+            "FeatureEngineer",
+            "Justify the cleaning decisions and what the baseline comparison implies, in 3-5 bullets.",
+            {
+                "clean_metadata": fe_result.get("clean_metadata", {}),
+                "top_models": fe_result.get("top_models", []),
+                "eda_context": eda_result["eda_context"],
+            },
         )
 
         # Step 3: Model Selection
@@ -267,6 +321,15 @@ class ExperimentOrchestrator:
             target=target,
             task_type=task_type,
             eda_context=eda_result["eda_context"],
+        )
+        ms_result["llm_interpretation"] = await self._interpret(
+            provider,
+            "ModelSelector",
+            "Recommend the best model configuration from this comparison and explain why, in 3-5 bullets.",
+            {
+                "task_type": task_type,
+                "top_models": ms_result.get("top_models", []),
+            },
         )
 
         # Step 4: Run training with best models

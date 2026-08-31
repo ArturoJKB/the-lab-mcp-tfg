@@ -287,6 +287,14 @@ class JobManager:
                 experiment.update_state(state)
                 store.save(experiment)
 
+        provider_name = payload.get("provider", "mock")
+        if provider_name != "mock":
+            from thelab.agents.chat import create_provider
+
+            provider = create_provider(provider_name)
+        else:
+            provider = None
+
         job.emit("info", "Experiment started", {"stage": "planning", "experiment_id": experiment_id})
         try:
             result = await orchestrator.orchestrate(
@@ -294,6 +302,7 @@ class JobManager:
                 dataset_id=payload.get("dataset_id", ""),
                 target=payload.get("target", ""),
                 feedback=payload.get("feedback"),
+                provider=provider,
                 on_event=on_event,
                 should_continue=lambda: not job.cancel_requested,
             )

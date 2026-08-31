@@ -34,6 +34,11 @@ they are context for the thesis document, not binding for new code.
 | P2 Phase 5 | P2 | done | CSV viewer, SVG charts (histogram/heatmap), run comparison |
 | P2 Phase 6 | P2 | done | Agent orchestration: `agent_mcp`, `ExperimentOrchestrator`, unified `/experiment/*` API + UI panel |
 | P2 Phase 6.5 | P2 | done | Real-dataset hardening: cleaning policy, model scale guards, per-model progress, job cancellation, UI consolidation, user guide |
+| P3 | P3 | done | Multiagentic features: grounded chat agent, `run_python` sandbox tool, `propose_experiment` tool, LLM-interpreted sub-agents (`docs/P3_PLAN.md`) |
+| P3.5 | P3 | done | Kaggle dataset ingestion + web-context pack for the global agent (`docs/P3_PLAN.md` §P3.5) |
+| P3.6 | P3 | done | Generated experiment notebooks per completed run + read-only UI viewer (`docs/P3_PLAN.md` §P3.6) |
+| P3.7 | P3 | done | Multi-Kaggle pipeline proof: 3 public datasets end-to-end (churn / housing / attrition), each with a generated notebook; cleaning policy gained constant-column drop (`docs/P3_PLAN.md` §P3.7) |
+| P4 | P4 | planned | UI rework: React/TS/Vite workspace, 5 views, Breeze theme, chat UI; P4.E includes the P3.6 notebook viewer (`docs/P4_PLAN.md`) |
 
 ## Phase summaries
 

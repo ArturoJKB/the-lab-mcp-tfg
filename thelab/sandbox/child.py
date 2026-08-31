@@ -156,12 +156,20 @@ def main() -> None:
     code = request.get("code", "")
     memory_limit = request.get("memory_limit_bytes")
     max_output_bytes = request.get("max_output_bytes", 64 * 1024)
+    files = request.get("files") or {}
 
     if memory_limit:
         _set_memory_limit(memory_limit)
 
     with tempfile.TemporaryDirectory(prefix="thelab-sandbox-") as tmp:
         workspace = Path(tmp)
+        # Pre-place trusted files (dataset copies) into the workspace before
+        # restricted execution. Keys are basenames; content is plain text.
+        for name, content in files.items():
+            safe_name = Path(str(name)).name
+            if not safe_name or safe_name.startswith("."):
+                continue
+            (workspace / safe_name).write_text(str(content), encoding="utf-8", errors="replace")
         result = _run_code(code, workspace, max_output_bytes)
         if result["status"] in {"completed", "failed"}:
             result["artifacts"] = _collect_artifacts(workspace)

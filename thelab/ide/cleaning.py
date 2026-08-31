@@ -46,9 +46,10 @@ def _datetime_features(df: pd.DataFrame, column: str) -> pd.DataFrame:
     out[f"{column}_month"] = parsed.dt.month.astype("float64")
     out[f"{column}_day"] = parsed.dt.day.astype("float64")
     out[f"{column}_dayofweek"] = parsed.dt.dayofweek.astype("float64")
-    # Keep a rough cyclical hint for time-of-day when present.
+    # Keep time-of-day only when it actually varies; date-only columns would
+    # otherwise produce a constant hour feature that validation rejects.
     hour = parsed.dt.hour
-    if hour.notna().any():
+    if hour.nunique(dropna=True) > 1:
         out[f"{column}_hour"] = hour.astype("float64")
     return out
 
@@ -181,6 +182,19 @@ def clean_dataset(
                 fill_value = 0
             df[col] = df[col].fillna(fill_value)
             report["actions"].append(f"imputed numeric column '{col}' ({numeric_impute_strategy})")
+
+    # Drop constant feature columns (zero information; the training pipeline
+    # rejects them). Only after encoding, since one-hot can create constants.
+    constant_cols = [
+        c
+        for c in df.columns
+        if c != target and df[c].nunique(dropna=False) <= 1
+    ]
+    if constant_cols:
+        df = df.drop(columns=constant_cols)
+        report["actions"].append(
+            f"dropped constant columns: {', '.join(sorted(constant_cols))}"
+        )
 
     # Ensure target is the last column for readability.
     cols = [c for c in df.columns if c != target] + [target]

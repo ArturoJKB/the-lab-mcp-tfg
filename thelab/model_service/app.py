@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
+from thelab.agents.chat import chat as agent_chat
 from thelab.context.reader import ContextReader, ContextReaderError
 from thelab.ide.cleaning import clean_dataset
 from thelab.ide.datasets import DatasetNotFoundError, UploadError, list_datasets, save_upload
@@ -546,6 +547,18 @@ def get_artifact(run_id: str, artifact_name: str) -> dict[str, Any]:
     return {"ok": True, "data": data}
 
 
+@app.get("/runs/{run_id}/notebook")
+def get_run_notebook(run_id: str) -> dict[str, Any]:
+    """Generate the reproducible research notebook for a run on demand."""
+    from thelab.run.notebook import generate_run_notebook
+
+    try:
+        notebook = generate_run_notebook(run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": notebook}
+
+
 @app.get("/agent/coding/overview")
 def agent_coding_overview() -> dict[str, Any]:
     return {"ok": True, "data": _agent_coding_overview()}
@@ -694,6 +707,63 @@ _SANDBOX_MAX_TIMEOUT_S = 120
 _SANDBOX_MIN_MEMORY_MB = 64
 _SANDBOX_MAX_MEMORY_MB = 2048
 _SANDBOX_MAX_OUTPUT_BYTES = 1024 * 1024
+
+
+@app.post("/datasets/ingest-kaggle")
+def post_ingest_kaggle(payload: dict[str, Any]) -> dict[str, Any]:
+    slug = payload.get("slug")
+    if not slug or "/" not in str(slug):
+        raise HTTPException(status_code=400, detail="slug must be a Kaggle dataset slug like 'owner/dataset'")
+    from thelab.ide.kaggle_api import (
+        KaggleIngestError,
+        build_context_pack,
+        fetch_kaggle_page_context,
+        ingest_kaggle_dataset,
+    )
+
+    try:
+        ingestion = ingest_kaggle_dataset(str(slug), payload.get("file_path"))
+    except KaggleIngestError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 - network/auth failures from kagglehub
+        raise HTTPException(status_code=502, detail=f"kaggle ingestion failed: {exc}") from exc
+
+    page_context = fetch_kaggle_page_context(str(slug))
+    pack = build_context_pack(str(slug), ingestion, page_context)
+    return {
+        "ok": True,
+        "data": {
+            "dataset_id": ingestion["dataset_id"],
+            "profile": ingestion["profile"],
+            "context_pack": pack,
+        },
+    }
+
+
+@app.post("/agent/chat")
+async def post_agent_chat(payload: dict[str, Any]) -> dict[str, Any]:
+    message = payload.get("message")
+    if not message or not str(message).strip():
+        raise HTTPException(status_code=400, detail="message is required")
+    provider_name = payload.get("provider", "mock")
+    if provider_name not in {"mock", "openai_compat", "ollama", "openrouter"}:
+        raise HTTPException(status_code=400, detail=f"unsupported provider: {provider_name}")
+    history = payload.get("history") or []
+    if not isinstance(history, list):
+        raise HTTPException(status_code=400, detail="history must be a list")
+    try:
+        result = await agent_chat(
+            message=str(message),
+            history=history,
+            provider_name=str(provider_name),
+            model=payload.get("model"),
+            dataset_id=payload.get("dataset_id"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"agent failed: {exc}") from exc
+    return {"ok": True, "data": result}
 
 
 @app.post("/sandbox/run")
@@ -884,6 +954,7 @@ async def post_experiment_run(payload: dict[str, Any]) -> dict[str, Any]:
             dataset_id=str(dataset_id),
             target=str(target),
             feedback=payload.get("feedback"),
+            provider_name=str(payload.get("provider", "mock")),
         )
     except DatasetNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
