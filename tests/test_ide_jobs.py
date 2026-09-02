@@ -124,6 +124,48 @@ def test_job_events_stream(client: TestClient, job_dirs):
     assert any("data:" in line for line in lines)
 
 
+def test_try_all_job_completes_with_progress(job_dirs):
+    uploads, fixtures, _, _, _ = job_dirs
+    _write_iris(uploads)
+    (fixtures / "iris.csv").write_text((uploads / "iris.csv").read_text(encoding="utf-8"), encoding="utf-8")
+
+    # A context-managed client keeps the event loop alive so the suspended
+    # to_thread work can finish (see test_real_data_hardening).
+    with TestClient(app) as client:
+        _run_try_all_flow(client, uploads)
+
+
+def _run_try_all_flow(client: TestClient, uploads: Path) -> None:
+    import time
+
+    response = client.post(
+        "/jobs",
+        json={
+            "type": "try_all",
+            "payload": {"dataset_id": "fixtures/iris.csv", "target": "species", "seed": 42},
+        },
+    )
+    assert response.status_code == 200
+    job_id = response.json()["data"]["job_id"]
+
+    deadline = time.time() + 120
+    payload = {}
+    while time.time() < deadline:
+        payload = client.get(f"/jobs/{job_id}").json()["data"]
+        if payload["status"] in {"completed", "failed"}:
+            break
+        time.sleep(0.2)
+    assert payload["status"] == "completed", payload.get("error")
+
+    result = payload["result"]
+    models = {r["model"]: r["status"] for r in result["results"]}
+    assert models["logistic_regression"] == "completed"
+    assert result["best"] is not None
+    # Per-model progress events streamed
+    model_events = [e for e in payload["events"] if e["message"].startswith("model ")]
+    assert len(model_events) >= 1
+
+
 def test_reject_unknown_job_type(client: TestClient, job_dirs):
     response = client.post("/jobs", json={"type": "unknown", "payload": {}})
     assert response.status_code == 400

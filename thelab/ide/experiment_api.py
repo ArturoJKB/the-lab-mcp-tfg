@@ -8,6 +8,8 @@ heavy work runs through the shared ``JobManager``.
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 from thelab.ide.datasets import resolve_dataset_path
@@ -21,9 +23,17 @@ async def start_experiment(
     target: str,
     feedback: str | None = None,
     provider_name: str = "mock",
+    model: str | None = None,
 ) -> dict[str, Any]:
     """Create an experiment and queue its orchestration as a background job."""
     resolve_dataset_path(dataset_id)
+    from thelab.agents.chat import create_provider
+
+    try:
+        create_provider(provider_name)  # fail fast on misconfigured providers
+    except Exception as exc:
+        raise ValueError(f"provider '{provider_name}' is not usable: {exc}") from exc
+
 
     experiment, store = create_experiment(
         goal=goal,
@@ -42,9 +52,12 @@ async def start_experiment(
             "target": target,
             "feedback": feedback,
             "provider": provider_name,
+            "model": model,
         },
     )
     experiment.plan["job_id"] = job.job_id
+    experiment.plan["provider"] = provider_name
+    experiment.plan["model"] = model
     store.save(experiment)
 
     return {
@@ -105,6 +118,8 @@ async def add_experiment_feedback(experiment_id: str, feedback: str) -> dict[str
             "dataset_id": experiment.dataset_id,
             "target": experiment.target,
             "feedback": experiment.feedback,
+            "provider": experiment.plan.get("provider", "mock"),
+            "model": experiment.plan.get("model"),
         },
     )
     experiment.plan["job_id"] = job.job_id
@@ -130,6 +145,47 @@ async def get_experiment_results(experiment_id: str) -> dict[str, Any]:
         data["training_results"] = job.result.get("training_results", [])
     data["job"] = job.to_dict() if job is not None else None
     return data
+
+
+async def run_proposal_as_experiment(proposal_id: str, principal: str = "ui") -> dict[str, Any]:
+    """Approve a proposal and execute it as a first-class, SSE-visible experiment."""
+
+    from thelab.agents.worker import ProposalStore
+
+    proposals_dir = Path(os.environ.get("THELAB_PROPOSALS_DIR", "proposals"))
+    proposal_store = ProposalStore(proposals_dir)
+    if not proposal_store.exists(proposal_id):
+        raise ValueError(f"proposal not found: {proposal_id}")
+
+    proposal = proposal_store.load(proposal_id)
+    experiment, store = create_experiment(
+        goal=proposal.goal or f"Run proposal {proposal_id}",
+        dataset_id=proposal.dataset,
+        target=proposal.target,
+    )
+    experiment.sub_agent_results["Proposal"] = {
+        "rationale": proposal.rationale,
+        "model_grid": proposal.model_grid,
+        "seeds": proposal.seeds,
+        "proposal_id": proposal_id,
+    }
+
+    manager = get_job_manager()
+    job = await manager.submit(
+        "proposal_experiment",
+        {"experiment_id": experiment.experiment_id, "proposal_id": proposal_id},
+    )
+    experiment.plan["job_id"] = job.job_id
+    experiment.plan["proposal_id"] = proposal_id
+    experiment.plan["principal"] = principal
+    store.save(experiment)
+
+    return {
+        "experiment_id": experiment.experiment_id,
+        "job_id": job.job_id,
+        "state": experiment.state.value,
+        "proposal_id": proposal_id,
+    }
 
 
 async def list_experiments(limit: int = 50) -> list[dict[str, Any]]:

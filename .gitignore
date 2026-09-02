@@ -72,3 +72,19 @@ opencode.json
 
 # Stray archives
 docs.zip
+
+# Frontend build output (source in web/, built by scripts/build_ui.sh)
+thelab/model_service/static/*
+!thelab/model_service/static/.gitkeep
+web/node_modules/
+web/*.tsbuildinfo
+
+# LaTeX build artifacts (thesis)
+texput.log
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz

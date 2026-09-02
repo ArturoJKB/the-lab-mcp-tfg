@@ -232,6 +232,6 @@ def test_orchestrator_no_interpretations_without_provider(chat_env):
             target="species",
         )
     )
-    assert result["eda"]["llm_interpretation"] is None
-    assert result["feature_engineering"]["llm_interpretation"] is None
-    assert result["model_selection"]["llm_interpretation"] is None
+    assert result["eda"].get("llm_interpretation") is None
+    assert result["feature_engineering"].get("llm_interpretation") is None
+    assert result["model_selection"].get("llm_interpretation") is None

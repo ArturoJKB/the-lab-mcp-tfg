@@ -38,7 +38,7 @@ they are context for the thesis document, not binding for new code.
 | P3.5 | P3 | done | Kaggle dataset ingestion + web-context pack for the global agent (`docs/P3_PLAN.md` §P3.5) |
 | P3.6 | P3 | done | Generated experiment notebooks per completed run + read-only UI viewer (`docs/P3_PLAN.md` §P3.6) |
 | P3.7 | P3 | done | Multi-Kaggle pipeline proof: 3 public datasets end-to-end (churn / housing / attrition), each with a generated notebook; cleaning policy gained constant-column drop (`docs/P3_PLAN.md` §P3.7) |
-| P4 | P4 | planned | UI rework: React/TS/Vite workspace, 5 views, Breeze theme, chat UI; P4.E includes the P3.6 notebook viewer (`docs/P4_PLAN.md`) |
+| P4 | P4 | in_progress (A–F done) | UI rework: React workspace, 5 views, global-agent chat, flow-cohesion patch (P4.F) — `docs/P4_PLAN.md` |
 
 ## Phase summaries
 
@@ -74,6 +74,36 @@ Experiment panel). Phase 6.5 hardened the whole thing for real data:
 datetime/cardinality-aware cleaning with an audit report, per-model scale
 guards, cooperative cancellation, UI consolidation, and the user guide.
 Details: `docs/legacy/P2_*.md`.
+
+### P4 — UI rework (Agentic ML workspace)
+
+Full frontend rebuild: `web/` (React + TS + Vite, hand-rolled Breeze CSS,
+no component library) served as a static build by FastAPI; node is dev-only.
+Five views + a global-agent drawer, replacing the 11-panel P0 dashboard:
+
+- **P4.A** — scaffold, dock + two-folder sidebar (Deterministic / Agentic),
+  fallback page, vanilla UI deleted.
+- **P4.B** — Data view (upload incl. parquet, Kaggle import + context pack,
+  preview with horizontal scroll, EDA card grid, cleaning with audit report)
+  and Model Lab (deterministic try-all job with per-model SSE + comparison bars).
+- **P4.C** — Experiments (Plan / Run with live sub-agent stage pipeline /
+  History / feedback iteration), provider setup (Ollama model discovery,
+  OpenRouter catalog, loud provider failures with named causes).
+- **P4.D** — Global-agent chat drawer: streaming tool progress, markdown,
+  usage/token/time telemetry, style/role directives, inline proposal approval,
+  conversation persisted across open/close, exchanges indexed into the
+  context store.
+- **P4.E** — Admin: Models (registry + Metrics/Artifacts/Predict/Evidence
+  tabs with the generated-notebook viewer), Context (search + sessions),
+  Sandbox playground, MCP server inventory panel.
+- **P4.F (flow cohesion)** — proposals merged into Experiments; proposal
+  approval runs a **first-class tracked experiment** (SSE stage pipeline,
+  best-run + notebook); chat tool `clean_dataset` (agent-cleaned data lands
+  in Data); dataset context shared across views; target as dropdown; streaming
+  tool progress; `max_steps` raised with per-session tool memoization; pandas-3
+  sandbox memory limit raised.
+
+Details: `docs/P4_PLAN.md`.
 
 ## Current scope
 

@@ -26,6 +26,8 @@ motion — not glassmorphism.
   → Evidence tab), static pipeline diagram, Workflow placeholder card,
   duplicate dataset selects.
 
+## Status: P4.A–F implemented (2026-09-01). See ROADMAP.
+
 ## Phases
 
 ### P4.A — Scaffold
@@ -74,6 +76,23 @@ thelab/ide/jobs.py                      # "try_all" job type (P4.B)
 tests/test_model_service_ui.py          # rewritten contract
 docs/P4_PLAN.md                         # this file
 ```
+
+## P4.F — Flow cohesion (implemented 2026-09-02)
+
+Driven by first-review findings; keeps the app honest and connected:
+
+| # | Work item | Notes |
+|---|---|---|
+| 1 | Streaming chat | `POST /agent/chat/stream` (SSE): tool progress live, `max_steps` 12, EDA/context memoization per session, markdown rendering, expandable drawer, multi-line input, style/role directives, usage+token+time telemetry, **conversation persisted** across drawer open/close, **exchanges indexed** into the context store |
+| 2 | Proposal → Experiment | `POST /proposals/{id}/run-as-experiment`: approval executes a **first-class experiment** (job-backed, SSE stage pipeline, best-run + generated notebook) — replaces the opaque synchronous batch run; inline **Approve & run** button inside chat messages (proposal ids carried in tool trace) |
+| 3 | Proposals merged into Experiments | Tab row: Plan / Run / Proposals / History; actions at top; newest-first; filters by dataset + date; Proposals removed from sidebar |
+| 4 | Dataset context shared | Lifted state in App: Data ↔ Experiments keep the same dataset/target until changed; target dropdowns from dataset columns |
+| 5 | Data additions | Kaggle import form (link/snippet/slug → ingest + context pack); **parquet** upload/list/preview/EDA/clean→CSV (`pyarrow` dep); chat tool `clean_dataset` (agent-cleaned data lands in Data viewer) |
+| 6 | MCP panel | Admin inventory of the 7 stdio servers + tools + how to connect |
+| — | Providers | Ollama model discovery (`/api/tags` probe) + OpenRouter public catalog dropdown; `.env` loader accepts `export KEY=…`; `OPENROUTER_API_KEY` alias; **loud provider failures** (named provider + hint), no silent fallback; provider+model persisted per experiment and reused by feedback iterations |
+
+Deferred: streaming LLM tokens (provider stream support), Kaggle MCP server
+integration, deeper Admin work.
 
 ## Out of scope
 

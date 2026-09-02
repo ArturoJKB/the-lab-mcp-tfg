@@ -248,13 +248,20 @@ class OllamaProvider:
         content = message.get("content") or ""
         tool_calls = self._parse_tool_calls(message) if message.get("tool_calls") else []
 
+        usage = {
+            "provider": "ollama",
+            "model": data.get("model"),
+            "prompt_tokens": data.get("prompt_eval_count"),
+            "completion_tokens": data.get("eval_count"),
+        }
+
         if tool_calls:
-            return AgentTurn(tool_calls=tool_calls)
+            return AgentTurn(tool_calls=tool_calls, usage=usage)
 
         if content == "":
             raise LLMProviderError("empty text turn", code="protocol")
 
-        return AgentTurn(text=content)
+        return AgentTurn(text=content, usage=usage)
 
 
 __all__ = ["OllamaProvider", "_HTTPResponse"]

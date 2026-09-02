@@ -28,6 +28,28 @@ class JobError(ValueError):
     """Raised when a job submission or lookup fails."""
 
 
+def _json_safe(value: Any) -> Any:
+    """Recursively convert job results into JSON-safe primitives.
+
+    Non-finite floats become None; numpy/pandas scalars fall back to str.
+    """
+    import math
+
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, float):
+        return None if math.isnan(value) or math.isinf(value) else value
+    if isinstance(value, (int, str)):
+        return value
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_json_safe(v) for v in value]
+    return str(value)
+
+
 class JobCancelled(RuntimeError):
     """Raised internally when a cooperative cancellation completes a job."""
 
@@ -134,7 +156,7 @@ class JobManager:
 
     async def submit(self, job_type: str, payload: dict[str, Any]) -> Job:
         """Validate and enqueue a background job."""
-        if job_type not in {"train", "batch", "experiment"}:
+        if job_type not in {"train", "batch", "experiment", "try_all", "proposal_experiment"}:
             raise JobError(f"unsupported job type: {job_type}")
 
         job_id = _generate_job_id()
@@ -203,6 +225,10 @@ class JobManager:
                 result = await self._run_batch(job)
             elif job.job_type == "experiment":
                 result = await self._run_experiment(job)
+            elif job.job_type == "try_all":
+                result = await self._run_try_all(job)
+            elif job.job_type == "proposal_experiment":
+                result = await self._run_proposal_experiment(job)
             else:
                 raise JobError(f"unsupported job type: {job.job_type}")
 
@@ -239,6 +265,142 @@ class JobManager:
             task_type=payload.get("task_type", "auto"),
             hyperparameters=payload.get("hyperparameters"),
         )
+
+    async def _run_try_all(self, job: Job) -> dict[str, Any]:
+        """Dry-run every registered model against a dataset; progress per model."""
+        payload = job.payload
+        dataset_id = payload.get("dataset_id", "")
+        target = payload.get("target", "")
+        if not dataset_id or not target:
+            raise JobError("try_all job requires dataset_id and target")
+
+        from thelab.ide.datasets import dataset_id_to_relative_path
+        from thelab.run.runner import try_all_models
+
+        def on_result(result: dict[str, Any]) -> None:
+            job.emit(
+                "info",
+                f"model {result.get('model')}: {result.get('status')}",
+                {"stage": "try_all", "model": result.get("model")},
+            )
+
+        dataset_path = await asyncio.to_thread(dataset_id_to_relative_path, dataset_id)
+        results = await asyncio.to_thread(
+            try_all_models,
+            dataset_path,
+            target,
+            int(payload.get("seed", 42)),
+            "scratch",
+            Path(os.environ.get("THELAB_WORKSPACE_ROOT", ".")),
+            True,  # dry_run
+            payload.get("task_type", "auto"),
+            on_result,
+            lambda: not job.cancel_requested,
+        )
+        safe_results: dict[str, Any] = _json_safe(
+            {
+                "dataset_id": dataset_id,
+                "target": target,
+                "results": results,
+                "best": next((r for r in results if r.get("status") == "completed"), None),
+            }
+        )
+        return safe_results
+
+    async def _run_proposal_experiment(self, job: Job) -> dict[str, Any]:
+        """Execute an approved proposal as a first-class experiment (SSE-visible)."""
+        payload = job.payload
+        experiment_id = payload.get("experiment_id")
+        proposal_id = payload.get("proposal_id")
+        if not experiment_id or not proposal_id:
+            raise JobError("proposal_experiment requires experiment_id and proposal_id")
+
+        store = ExperimentStore()
+        experiment = store.load(experiment_id)
+        if experiment is None:
+            raise JobError(f"experiment not found: {experiment_id}")
+
+        from thelab.agents.worker import ProposalStore
+
+        proposals_dir = os.environ.get("THELAB_PROPOSALS_DIR", "proposals")
+        proposal_store = ProposalStore(proposals_dir)
+        if not proposal_store.exists(proposal_id):
+            raise JobError(f"proposal not found: {proposal_id}")
+        if not proposal_store.is_approved(proposal_id):
+            proposal_store.approve(proposal_id, principal="experiment_run")
+
+        experiment.update_state(ExperimentState.TRAINING)
+        store.save(experiment)
+        job.emit("info", f"Running approved proposal {proposal_id}", {"stage": "training"})
+
+        from thelab.run.batch import BatchRunner
+
+        batch_path = proposal_store.write_batch_config(proposal_id)
+        runner = BatchRunner(
+            workspace_root=Path(os.environ.get("THELAB_WORKSPACE_ROOT", "."))
+        )
+        entries = runner.load_config(batch_path)
+
+        def on_result(result: Any) -> None:
+            job.emit(
+                "info",
+                f"model {result.entry.model} (seed {result.entry.seed}): {result.status}",
+                {"stage": "training", "model": result.entry.model},
+            )
+
+        results = runner.run(
+            entries,
+            on_result=on_result,
+            should_continue=lambda: not job.cancel_requested,
+        )
+        if job.cancel_requested:
+            experiment.update_state(ExperimentState.CANCELLED)
+            experiment.error = "cancelled by user"
+            store.save(experiment)
+            return {
+                "status": "cancelled",
+                "training_results": [
+                    {
+                        "model": r.entry.model,
+                        "seed": r.entry.seed,
+                        "status": r.status,
+                        "run_id": r.run_id,
+                        "error": r.error,
+                    }
+                    for r in results
+                ],
+            }
+
+        training_results = [
+            {
+                "model": r.entry.model,
+                "seed": r.entry.seed,
+                "status": r.status,
+                "run_id": r.run_id,
+                "metrics": r.metrics,
+                "error": r.error,
+            }
+            for r in results
+        ]
+        best = next((r for r in results if r.status == "completed"), None)
+        if best is not None and best.run_id:
+            experiment.best_run_id = best.run_id
+            metrics = load_json_artifact(
+                Path(os.environ.get("THELAB_RUNS_ROOT", "runs")), best.run_id, "metrics.json"
+            )
+            experiment.best_metrics = _json_safe(metrics or {})
+        completed = sum(1 for r in results if r.status == "completed")
+        experiment.update_state(ExperimentState.COMPLETED if completed else ExperimentState.FAILED)
+        if not completed:
+            experiment.error = "no candidate models completed"
+        store.save(experiment)
+
+        return {
+            "status": "completed" if completed else "failed",
+            "completed": completed,
+            "total": len(results),
+            "training_results": training_results,
+        }
 
     async def _run_batch(self, job: Job) -> dict[str, Any]:
         proposal_id = job.payload.get("proposal_id")
@@ -288,12 +450,18 @@ class JobManager:
                 store.save(experiment)
 
         provider_name = payload.get("provider", "mock")
-        if provider_name != "mock":
-            from thelab.agents.chat import create_provider
+        try:
+            if provider_name != "mock":
+                from thelab.agents.chat import create_provider
 
-            provider = create_provider(provider_name)
-        else:
-            provider = None
+                provider = create_provider(provider_name, payload.get("model"))
+            else:
+                provider = None
+        except Exception as exc:  # noqa: BLE001 - provider config errors fail fast
+            experiment.update_state(ExperimentState.FAILED)
+            experiment.error = f"provider '{provider_name}' is not usable: {exc}"
+            store.save(experiment)
+            raise JobError(experiment.error) from exc
 
         job.emit("info", "Experiment started", {"stage": "planning", "experiment_id": experiment_id})
         try:
@@ -311,6 +479,19 @@ class JobManager:
             experiment.error = "cancelled by user"
             store.save(experiment)
             raise
+        except Exception as exc:  # noqa: BLE001 - mark experiment failed, not stuck
+            detail = str(exc)
+            if provider is not None:
+                hint = ""
+                if "Errno 111" in detail or "Connection refused" in detail:
+                    hint = " — is the server running?"
+                elif "timed out" in detail.lower():
+                    hint = " — the server took too long to respond"
+                detail = f"provider '{provider_name}' failed during orchestration: {detail}{hint}"
+            experiment.update_state(ExperimentState.FAILED)
+            experiment.error = detail
+            store.save(experiment)
+            raise JobError(detail) from exc
 
         # Persist sub-agent findings, plan, and best-run selection.
         if job.cancel_requested:

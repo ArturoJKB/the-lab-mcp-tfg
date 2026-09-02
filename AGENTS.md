@@ -30,6 +30,13 @@ Development is **dynamic**: small, focused changes instead of big planned phases
 - Do not build unrequested features, and do not resurrect legacy plans without an
   explicit request.
 
+## Frontend
+
+The UI source lives in `web/` (React + TS + Vite, hand-rolled Breeze CSS).
+Build with `scripts/build_ui.sh`; the FastAPI service serves the dist from
+`/static`. Keep the bundle dependency-light (currently: react, react-dom,
+recharts planned).
+
 ## Core principles
 
 - Local-first, auditable, reproducible, reusable.

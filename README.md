@@ -41,8 +41,13 @@ pip install -e .
 **The UI path (autonomous factory):**
 
 ```bash
+./scripts/build_ui.sh           # once — builds web/ (React) into the service's static dir
 thelab-model-service            # open http://127.0.0.1:8000
 ```
+
+The UI is a React + TypeScript + Vite app in [`web/`](web/); node is only needed
+for the build step. Without a build, the service serves a fallback page and
+everything else (CLI, MCP, HTTP API) works as usual.
 
 Upload a CSV → run EDA → Clean dataset → **Experiment panel**: describe a goal, start the run, watch sub-agents work live (Plan → Clean → Train → Evaluate), send feedback to iterate, compare history.
 

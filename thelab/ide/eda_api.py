@@ -13,7 +13,6 @@ from thelab.eda import (
     outlier_scan,
 )
 from thelab.ide.datasets import resolve_dataset_path
-from thelab.run.profile import read_csv
 
 
 class EdaError(ValueError):
@@ -30,7 +29,9 @@ def run_eda(dataset_id: str, target: str | None = None) -> dict[str, Any]:
     path = resolve_dataset_path(dataset_id)
 
     try:
-        df = read_csv(path)
+        from thelab.ide.datasets import read_tabular
+
+        df = read_tabular(path)
     except Exception as exc:
         raise EdaError(f"cannot read dataset: {exc}") from exc
 

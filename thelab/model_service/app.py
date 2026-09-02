@@ -7,6 +7,7 @@ intended for local human/UI consumption; agentic clients should prefer the
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from pathlib import Path
@@ -47,6 +48,26 @@ from thelab.run.inference import feature_columns, normalize_features
 from thelab.run.model_registry import MODEL_REGISTRY
 from thelab.sandbox import run_in_sandbox
 from thelab.sandbox.runner import SandboxError
+
+
+def _load_dotenv() -> None:
+    """Load KEY=VALUE pairs from a repo-root .env into os.environ (setdefault)."""
+    candidates = [Path.cwd() / ".env", Path(__file__).resolve().parents[2] / ".env"]
+    for env_path in candidates:
+        if not env_path.is_file():
+            continue
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            if key.startswith("export "):
+                key = key[len("export ") :].strip()
+            os.environ.setdefault(key, value.strip().strip("'").strip('"'))
+
+
+_load_dotenv()
 
 _DEFAULT_CONTEXT_DB = Path(".thelab") / "context" / "context.db"
 
@@ -740,30 +761,96 @@ def post_ingest_kaggle(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@app.post("/agent/chat")
-async def post_agent_chat(payload: dict[str, Any]) -> dict[str, Any]:
+@app.get("/agent/providers")
+async def get_agent_providers() -> dict[str, Any]:
+    from thelab.agents.chat import ollama_models, openrouter_models, provider_status
+
+    providers = provider_status()
+    ollama = await asyncio.to_thread(ollama_models)
+    openrouter = await asyncio.to_thread(openrouter_models)
+    for entry in providers:
+        if entry["name"] == "ollama":
+            entry["reachable"] = ollama["reachable"]
+            entry["models"] = [{"id": n, "name": n} for n in ollama["models"]]
+        if entry["name"] == "openrouter":
+            entry["models"] = openrouter.get("models", [])
+    return {"ok": True, "data": providers}
+
+
+_CHAT_PROVIDERS = {"mock", "openai_compat", "ollama", "openrouter"}
+_chat_stream_tasks: set[asyncio.Task[None]] = set()
+
+
+def _validate_chat_payload(payload: dict[str, Any]) -> None:
     message = payload.get("message")
     if not message or not str(message).strip():
         raise HTTPException(status_code=400, detail="message is required")
     provider_name = payload.get("provider", "mock")
-    if provider_name not in {"mock", "openai_compat", "ollama", "openrouter"}:
+    if provider_name not in _CHAT_PROVIDERS:
         raise HTTPException(status_code=400, detail=f"unsupported provider: {provider_name}")
-    history = payload.get("history") or []
-    if not isinstance(history, list):
+    if not isinstance(payload.get("history") or [], list):
         raise HTTPException(status_code=400, detail="history must be a list")
+
+
+@app.post("/agent/chat")
+async def post_agent_chat(payload: dict[str, Any]) -> dict[str, Any]:
+    _validate_chat_payload(payload)
     try:
         result = await agent_chat(
-            message=str(message),
-            history=history,
-            provider_name=str(provider_name),
+            message=str(payload["message"]),
+            history=payload.get("history") or [],
+            provider_name=str(payload.get("provider", "mock")),
             model=payload.get("model"),
             dataset_id=payload.get("dataset_id"),
+            style=payload.get("style"),
+            role_hint=payload.get("role_hint"),
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=f"agent failed: {exc}") from exc
     return {"ok": True, "data": result}
+
+
+@app.post("/agent/chat/stream")
+async def post_agent_chat_stream(payload: dict[str, Any]) -> StreamingResponse:
+    _validate_chat_payload(payload)
+
+    queue: asyncio.Queue[dict[str, Any] | None] = asyncio.Queue()
+
+    async def runner() -> None:
+        try:
+            result = await agent_chat(
+                message=str(payload["message"]),
+                history=payload.get("history") or [],
+                provider_name=str(payload.get("provider", "mock")),
+                model=payload.get("model"),
+                dataset_id=payload.get("dataset_id"),
+                style=payload.get("style"),
+                role_hint=payload.get("role_hint"),
+                on_event=lambda e: queue.put_nowait({"type": "event", **e}),
+            )
+            queue.put_nowait({"type": "result", **result})
+        except Exception as exc:  # noqa: BLE001
+            queue.put_nowait({"type": "result", "status": "failed", "error": str(exc)})
+        queue.put_nowait(None)
+
+    task = asyncio.create_task(runner())
+    _chat_stream_tasks.add(task)
+    task.add_done_callback(_chat_stream_tasks.discard)
+
+    async def gen() -> Any:
+        while True:
+            item = await queue.get()
+            if item is None:
+                break
+            yield f"data: {json.dumps(item, default=str)}\n\n"
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.post("/sandbox/run")
@@ -829,6 +916,20 @@ def post_proposal_run(proposal_id: str) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return {"ok": True, "data": result}
+
+
+@app.post("/proposals/{proposal_id}/run-as-experiment")
+async def post_proposal_run_as_experiment(proposal_id: str) -> dict[str, Any]:
+    """Approve a proposal and execute it as a first-class experiment (SSE-visible)."""
+    from thelab.ide.experiment_api import run_proposal_as_experiment
+
+    try:
+        data = await run_proposal_as_experiment(proposal_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"failed to start: {exc}") from exc
+    return {"ok": True, "data": data}
 
 
 @app.post("/proposals/{proposal_id}/approve-and-run")
@@ -955,6 +1056,7 @@ async def post_experiment_run(payload: dict[str, Any]) -> dict[str, Any]:
             target=str(target),
             feedback=payload.get("feedback"),
             provider_name=str(payload.get("provider", "mock")),
+            model=payload.get("model"),
         )
     except DatasetNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -1023,11 +1125,16 @@ async def get_experiments(limit: int = 50) -> dict[str, Any]:
 
 
 _static_dir = Path(__file__).parent / "static"
+_fallback_path = Path(__file__).parent / "fallback.html"
 
 
 @app.get("/")
 def root() -> HTMLResponse:
-    return HTMLResponse(content=(_static_dir / "index.html").read_text(encoding="utf-8"))
+    """Serve the built UI (web/ dist); fall back to a plain info page."""
+    index = _static_dir / "index.html"
+    if index.is_file():
+        return HTMLResponse(content=index.read_text(encoding="utf-8"))
+    return HTMLResponse(content=_fallback_path.read_text(encoding="utf-8"))
 
 
 app.mount("/static", StaticFiles(directory=_static_dir), name="static")

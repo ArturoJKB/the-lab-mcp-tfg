@@ -66,8 +66,9 @@ class OpenAICompatProvider:
         transport: Transport | None = None,
         extra_headers: dict[str, str] | None = None,
     ) -> None:
-        resolved_base_url = base_url or os.environ.get("THELAB_LLM_BASE_URL")
-        resolved_api_key = api_key or os.environ.get("THELAB_LLM_API_KEY")
+        resolved_base_url = base_url if base_url is not None else os.environ.get("THELAB_LLM_BASE_URL")
+        # An explicitly empty api_key ("") must stay empty: only None defers to env.
+        resolved_api_key = api_key if api_key is not None else os.environ.get("THELAB_LLM_API_KEY")
         if not resolved_base_url:
             raise LLMProviderError(
                 "THELAB_LLM_BASE_URL is required (e.g. http://localhost:11434/v1)",
@@ -265,6 +266,14 @@ class OpenAICompatProvider:
         except (json.JSONDecodeError, ValueError) as exc:
             raise LLMProviderError(f"response is not valid JSON: {exc}", code="protocol") from exc
 
+        raw_usage = data.get("usage") or {}
+        usage = {
+            "provider": "openai_compat",
+            "model": data.get("model"),
+            "prompt_tokens": raw_usage.get("prompt_tokens"),
+            "completion_tokens": raw_usage.get("completion_tokens"),
+        }
+
         choices = data.get("choices")
         if not isinstance(choices, list) or not choices:
             raise LLMProviderError("response missing choices", code="protocol")
@@ -279,7 +288,7 @@ class OpenAICompatProvider:
                 raise LLMProviderError(
                     "finish_reason=tool_calls but no tool_calls returned", code="protocol"
                 )
-            return AgentTurn(tool_calls=tool_calls)
+            return AgentTurn(tool_calls=tool_calls, usage=usage)
 
         if finish_reason == "stop" or finish_reason is None:
             if tool_calls:
@@ -288,7 +297,7 @@ class OpenAICompatProvider:
                 )
             if content == "":
                 raise LLMProviderError("empty text turn", code="protocol")
-            return AgentTurn(text=content)
+            return AgentTurn(text=content, usage=usage)
 
         raise LLMProviderError(f"unsupported finish_reason: {finish_reason}", code="protocol")
 

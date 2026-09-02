@@ -46,6 +46,8 @@ class AgentTurn(BaseModel):
 
     text: str | None = None
     tool_calls: list[ToolCallRequest] = Field(default_factory=list)
+    # Optional observability metadata from the provider (model, token counts).
+    usage: dict[str, Any] | None = None
 
     @model_validator(mode="after")
     def _exactly_one_kind(self) -> AgentTurn:

@@ -192,6 +192,29 @@ artifact-image endpoints (MAJ-02).
 
 ---
 
+## Phase P4 — Agentic ML workspace UI (React)
+
+**Purpose:** the P0-era 11-panel dashboard replaced by a 5-view workspace.
+Source in `web/` (React + TS + Vite, strict TS, hand-rolled Breeze CSS — no
+Tailwind/component library); FastAPI serves the built dist from `/static`
+with a committed fallback page; node is dev-only (`scripts/build_ui.sh`).
+
+| Area | Key files | Notes |
+|---|---|---|
+| Shell | `web/src/App.tsx`, `components/Dock.tsx`, `components/Sidebar.tsx` | mini-dock (brand · chat · admin toggle · health), Deterministic/Agentic folders, Admin group |
+| API client | `web/src/api.ts` | typed `api()` wrapper over the HTTP JSON surface |
+| Data view | `views/DataView.tsx` | upload (CSV + parquet), Kaggle import (link/snippet/slug → `ingest-kaggle` + context pack), preview (horizontal scroll), EDA card grid (missing/class-balance/correlation/outlier charts, leakage banner, stat chips), clean + audit report |
+| Model Lab | `views/ModelLabView.tsx` + `components/ModelLabSection.tsx` | deterministic try-all via `try_all` job type (per-model SSE, cancellation, NaN-safe results, Recharts comparison) |
+| Experiments | `views/ExperimentsView.tsx`, `components/StagePipeline.tsx`, `hooks/useExperimentStream.ts` | Plan (provider setup: Ollama model discovery, OpenRouter catalog) → Run (live stages + activity feed + cancel + best run + LLM interpretation cards) → Proposals tab → History; feedback iterations keep provider+model |
+| Chat drawer | `components/ChatDrawer.tsx`, `hooks/useExperimentStream.ts` | `POST /agent/chat/stream` (SSE tool progress), markdown, directives (role/style), usage telemetry, always-mounted (conversation survives close), exchanges indexed into the context store, inline proposal approval |
+| Admin | `views/ModelsView.tsx`, `ContextView.tsx`, `SandboxView.tsx`, `McpView.tsx` | registry detail tabs (Metrics/Artifacts/Predict/**Evidence** = generated notebook viewer), context search + sessions, restricted playground, MCP inventory |
+| Jobs | `hooks/useJob.ts` | SSE consumption with polling fallback; job types: `train`, `batch`, `experiment`, `try_all`, `proposal_experiment` |
+| Cleaning policy | `thelab/ide/cleaning.py` | datetime → calendar features, cardinality-aware encoding, **constant-column drop**, target-encoded output names (`*_cleaned_<target>.csv`), re-clean rejection |
+
+Details: `docs/P4_PLAN.md`.
+
+---
+
 ## Public surface inventory
 
 ### CLI commands

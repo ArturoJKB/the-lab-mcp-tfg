@@ -32,7 +32,12 @@ class OpenRouterProvider(OpenAICompatProvider):
         resolved_base_url = base_url or os.environ.get("THELAB_LLM_BASE_URL")
         if not resolved_base_url:
             resolved_base_url = "https://openrouter.ai/api/v1"
-        resolved_api_key = api_key or os.environ.get("THELAB_LLM_API_KEY")
+        # An explicitly empty api_key ("") must stay empty: only None defers to env.
+        resolved_api_key = (
+            api_key
+            if api_key is not None
+            else (os.environ.get("THELAB_LLM_API_KEY") or os.environ.get("OPENROUTER_API_KEY"))
+        )
         resolved_model = model or os.environ.get("THELAB_LLM_MODEL", "openai/gpt-3.5-turbo")
 
         extra_headers: dict[str, str] = {}

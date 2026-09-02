@@ -52,14 +52,14 @@ def test_cleaning_parses_datetime_and_encodes_cardinality(tmp_path, monkeypatch)
     assert "event_date" in actions and "datetime" in actions
     assert "frequency-encoded" in actions
 
-    cleaned = pd.read_csv(uploads / "market_cleaned.csv")
+    cleaned = pd.read_csv(uploads / "market_cleaned_accuracy_90d.csv")
     assert "event_date" not in cleaned.columns
     assert "event_date_year" in cleaned.columns
     assert "firm_frequency" in cleaned.columns
     # No dummy explosion and no residual missing values.
     assert len(cleaned.columns) < 30
     assert not cleaned.isna().any().any()
-    assert result["dataset_id"] == "uploads/market_cleaned.csv"
+    assert result["dataset_id"] == "uploads/market_cleaned_accuracy_90d.csv"
 
 
 def test_cleaning_one_hots_low_cardinality_still(tmp_path, monkeypatch):
@@ -74,7 +74,7 @@ def test_cleaning_one_hots_low_cardinality_still(tmp_path, monkeypatch):
         encoding="utf-8",
     )
     clean_dataset("uploads/small.csv", target="target")
-    cleaned = pd.read_csv(uploads / "small_cleaned.csv")
+    cleaned = pd.read_csv(uploads / "small_cleaned_target.csv")
     assert {"cat_red", "cat_blue"}.issubset(cleaned.columns)
     assert not any(c.endswith("_frequency") for c in cleaned.columns)
 

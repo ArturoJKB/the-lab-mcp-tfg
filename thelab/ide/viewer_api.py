@@ -9,7 +9,7 @@ import pandas as pd
 
 from thelab.mcp.common import discover_run_ids, get_runs_root, load_json_artifact
 
-from .datasets import resolve_dataset_path
+from .datasets import read_tabular, resolve_dataset_path
 
 DEFAULT_PREVIEW_LIMIT = 100
 MAX_PREVIEW_LIMIT = 1000
@@ -36,7 +36,7 @@ def preview_dataset(dataset_id: str, limit: int = DEFAULT_PREVIEW_LIMIT) -> dict
     bounded_limit = max(1, min(limit, MAX_PREVIEW_LIMIT))
     path = resolve_dataset_path(dataset_id)
     try:
-        df = pd.read_csv(path)
+        df = read_tabular(path)
     except Exception as exc:  # noqa: BLE001
         raise ValueError(f"cannot read dataset: {exc}") from exc
 

@@ -15,6 +15,7 @@ dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
     "kagglehub[pandas-datasets]>=0.3",
+    "pyarrow>=25",
 ]
 
 [project.optional-dependencies]

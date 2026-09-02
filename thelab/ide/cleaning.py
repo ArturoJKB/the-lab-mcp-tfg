@@ -21,6 +21,7 @@ cleaned dataset, keeping the transformation auditable.
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -82,15 +83,25 @@ def clean_dataset(
     """Create a cleaned CSV from ``dataset_id`` and return metadata.
 
     The cleaned file is stored alongside the original upload with a
-    ``_cleaned`` suffix. Only uploaded datasets can be cleaned; fixtures are
+    ``_cleaned_<target>`` suffix (a cleaned copy is only valid for the target
+    it was built against). Only uploaded datasets can be cleaned; fixtures are
     read-only. The returned metadata includes a per-column ``cleaning_report``
     describing exactly which policy was applied to which column.
     """
     source_path = resolve_dataset_path(dataset_id)
     if not isinstance(dataset_id, str) or not dataset_id.startswith("uploads/"):
         raise ValueError("only uploaded datasets can be cleaned")
+    if "_cleaned" in Path(dataset_id).stem:
+        match = re.search(r"_cleaned_([A-Za-z0-9_-]+?)(?:_\d+)?\.csv$", dataset_id)
+        target_hint = match.group(1) if match else "unknown target (legacy name)"
+        raise ValueError(
+            f"'{dataset_id}' is already cleaned (target: {target_hint}). "
+            "Clean the raw original instead if you need a different target."
+        )
 
-    df = pd.read_csv(source_path)
+    from thelab.ide.datasets import read_tabular
+
+    df = read_tabular(source_path)
     if target not in df.columns:
         raise ValueError(f"target column '{target}' not found")
 
@@ -205,14 +216,17 @@ def clean_dataset(
     basename = source_path.name
     stem = Path(basename).stem
     suffix = Path(basename).suffix
-    cleaned_basename = f"{stem}_cleaned{suffix}"
+    # Encode the target in the name: a cleaned dataset is only valid for the
+    # target it was cleaned against, so changing targets must not collide.
+    safe_target = re.sub(r"[^A-Za-z0-9_-]+", "_", target).strip("_") or "target"
+    cleaned_basename = f"{stem}_cleaned_{safe_target}{suffix}"
     cleaned_path = uploads_root / cleaned_basename
 
     # Avoid overwriting an existing cleaned file by appending a counter.
     if cleaned_path.exists():
         counter = 1
         while True:
-            candidate = uploads_root / f"{stem}_cleaned_{counter}{suffix}"
+            candidate = uploads_root / f"{stem}_cleaned_{safe_target}_{counter}{suffix}"
             if not candidate.exists():
                 cleaned_path = candidate
                 break

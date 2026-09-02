@@ -71,7 +71,7 @@ def _is_safe_basename(name: str) -> bool:
 def sanitize_filename(name: str) -> str:
     """Return a safe basename for an uploaded file.
 
-    Preserves the ``.csv`` extension when present. Rejects unsafe or hidden
+    Preserves the ``.csv``/``.parquet`` extension when present. Rejects unsafe or hidden
     names rather than silently mangling them.
     """
     name = name.strip()
@@ -86,7 +86,7 @@ def sanitize_filename(name: str) -> str:
     basename = Path(name).name
     if not _is_safe_basename(basename):
         raise UploadError(f"unsafe filename: {name}")
-    if not basename.lower().endswith(".csv"):
+    if not basename.lower().endswith((".csv", ".parquet")):
         raise UploadError("only CSV files are supported")
     return basename
 
@@ -95,20 +95,49 @@ def _ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+_ROW_CACHE: dict[Path, tuple[float, tuple[int, int]]] = {}
+
+
+def read_tabular(path: Path) -> pd.DataFrame:
+    """Read a CSV or Parquet file into a DataFrame (by suffix)."""
+    if path.suffix.lower() == ".parquet":
+        return pd.read_parquet(path)
+    return pd.read_csv(path)
+
+
 def _count_rows_columns(path: Path) -> tuple[int, int]:
-    """Return (rows, columns) for a CSV without loading the full frame twice."""
-    df = pd.read_csv(path)
-    return len(df), len(df.columns)
+    """Return (rows, columns) cheaply: header-only parse + newline counting.
+
+    Row counts are approximate for files with embedded newlines inside quoted
+    fields; precise profiling happens in the EDA/profiling paths. Results are
+    cached per file mtime so repeated listings are instant.
+    """
+    mtime = path.stat().st_mtime
+    cached = _ROW_CACHE.get(path)
+    if cached is not None and cached[0] == mtime:
+        return cached[1]
+    if path.suffix.lower() == ".parquet":
+        import pyarrow.parquet as pq  # noqa: PLC0415
+
+        meta = pq.read_metadata(path)
+        return meta.num_rows, meta.num_columns
+    header = pd.read_csv(path, nrows=0)
+    columns = len(header.columns)
+    with path.open("rb") as handle:
+        rows = sum(chunk.count(b"\n") for chunk in iter(lambda: handle.read(1 << 20), b""))
+    result = (max(0, rows - 1), columns)
+    _ROW_CACHE[path] = (mtime, result)
+    return result
 
 
 def validate_csv(path: Path) -> None:
-    """Validate that ``path`` is a readable non-empty CSV."""
+    """Validate that ``path`` is a readable non-empty CSV/Parquet file."""
     if not path.is_file():
         raise UploadError("file not found")
     try:
-        df = pd.read_csv(path)
+        df = read_tabular(path)
     except Exception as exc:
-        raise UploadError(f"cannot parse CSV: {exc}") from exc
+        raise UploadError(f"cannot parse file: {exc}") from exc
     if len(df) == 0:
         raise UploadError("dataset is empty (no rows)")
     if len(df.columns) == 0:
@@ -167,8 +196,9 @@ def _list_csv_files(root: Path, source: str) -> list[dict[str, Any]]:
     if not root.exists() or not root.is_dir():
         return []
     items: list[dict[str, Any]] = []
+    allowed = {".csv", ".parquet"}
     for path in sorted(root.iterdir()):
-        if not path.is_file() or path.suffix.lower() != ".csv":
+        if not path.is_file() or path.suffix.lower() not in allowed:
             continue
         try:
             rows, columns = _count_rows_columns(path)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -335,6 +336,8 @@ def try_all_models(
     workspace_root: Path | str | None = None,
     dry_run: bool = True,
     task_type: TaskTypeArg = "auto",
+    on_result: Callable[[dict[str, Any]], None] | None = None,
+    should_continue: Callable[[], bool] | None = None,
 ) -> list[dict[str, Any]]:
     """Train every registered model and return a comparison list.
 
@@ -342,9 +345,15 @@ def try_all_models(
     ``test_accuracy``, then model name). By default this runs in dry-run mode
     so nothing is persisted; set *dry_run* to False and pick an *output*
     directory if you want to keep the runs.
+
+    ``on_result(result)`` fires after each model for progress streaming;
+    ``should_continue()`` returning False stops between models (cooperative
+    cancellation).
     """
     results = []
     for model_name in MODEL_REGISTRY.list_models():
+        if should_continue is not None and not should_continue():
+            break
         result = run_model(
             dataset=dataset,
             target=target,
@@ -356,6 +365,8 @@ def try_all_models(
             task_type=task_type,
         )
         results.append(result)
+        if on_result is not None:
+            on_result(result)
     return sorted(
         results,
         key=lambda r: (

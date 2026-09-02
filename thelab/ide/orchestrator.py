@@ -66,12 +66,16 @@ class ExperimentOrchestrator:
 
     async def _interpret(
         self, provider: LLMProvider | None, role: str, instruction: str, payload: dict[str, Any]
-    ) -> str | None:
-        """One LLM interpretation over deterministic output; None unless live."""
+    ) -> dict[str, Any] | None:
+        """One LLM interpretation over deterministic output; None unless live.
+
+        Returns ``{"llm_interpretation": str, "llm_usage": {...}}`` or None.
+        One retry: small local models fail intermittently (context, timeout).
+        """
         if not self._is_live(provider):
             return None
 
-        def _complete() -> str | None:
+        def _complete() -> dict[str, Any]:
             turn = provider.complete(  # type: ignore[union-attr]
                 [
                     AgentMessage(
@@ -88,12 +92,17 @@ class ExperimentOrchestrator:
                 ],
                 [],
             )
-            return turn.text
+            usage = dict(turn.usage or {})
+            usage.setdefault("provider", getattr(provider, "__class__", type(provider)).__name__)
+            return {"llm_interpretation": turn.text, "llm_usage": usage}
 
-        try:
-            return await asyncio.to_thread(_complete)
-        except Exception:  # noqa: BLE001
-            return None
+        for attempt in range(2):
+            try:
+                return await asyncio.to_thread(_complete)
+            except Exception:  # noqa: BLE001 - degrade to deterministic, never block
+                if attempt == 1:
+                    return None
+        return None
 
     async def run_eda_analysis(self, dataset_id: str, target: str, goal: str = "") -> dict[str, Any]:
         """Run EDA analysis using deterministic skills."""
@@ -160,21 +169,26 @@ class ExperimentOrchestrator:
         goal: str = "",
         provider: Any = None,
     ) -> dict[str, Any]:
-        """Run feature engineering: cleaning + try-all."""
+        """Run feature engineering: cleaning (skipped if already cleaned) + try-all."""
         _ = resolve_dataset_path(dataset_id)
 
-        # Run cleaning
-        clean_metadata = clean_dataset(
-            dataset_id,
-            target,
-            drop_missing_target=True,
-            drop_empty_columns=True,
-            one_hot_encode=True,
-            numeric_impute_strategy="median",
-            categorical_impute_strategy="mode",
-        )
-
-        cleaned_dataset_id = clean_metadata["dataset_id"]
+        # Already-cleaned datasets are training-ready: re-cleaning is wasteful
+        # and the cleaning API rejects it.
+        clean_metadata: dict[str, Any]
+        if "_cleaned" in dataset_id:
+            cleaned_dataset_id = dataset_id
+            clean_metadata = {"skipped": True, "reason": "dataset already cleaned"}
+        else:
+            clean_metadata = clean_dataset(
+                dataset_id,
+                target,
+                drop_missing_target=True,
+                drop_empty_columns=True,
+                one_hot_encode=True,
+                numeric_impute_strategy="median",
+                categorical_impute_strategy="mode",
+            )
+            cleaned_dataset_id = clean_metadata["dataset_id"]
 
         # Run try-all on cleaned data (relative dataset id + workspace root).
         try_all_results = try_all_models(
@@ -282,23 +296,28 @@ class ExperimentOrchestrator:
         ensure_not_cancelled()
         emit("planning", "EDAAnalyst analyzing dataset")
         eda_result = await self.run_eda_analysis(dataset_id, target, goal)
-        eda_result["llm_interpretation"] = await self._interpret(
+        eda_interp = await self._interpret(
             provider,
             "EDAAnalyst",
             "Summarize the key findings and modeling risks from this EDA report in 3-5 bullets.",
             eda_result["eda_result"],
         )
+        if eda_interp:
+            eda_result.update(eda_interp)
 
         # Step 2: Feature Engineering
         ensure_not_cancelled()
-        emit("cleaning", "FeatureEngineer cleaning dataset and computing baselines")
+        if "_cleaned" in dataset_id:
+            emit("cleaning", "Dataset is already cleaned — skipping cleaning stage")
+        else:
+            emit("cleaning", "FeatureEngineer cleaning dataset and computing baselines")
         fe_result = await self.run_feature_engineering(
             dataset_id=dataset_id,
             target=target,
             eda_context=eda_result["eda_context"],
             goal=goal,
         )
-        fe_result["llm_interpretation"] = await self._interpret(
+        fe_interp = await self._interpret(
             provider,
             "FeatureEngineer",
             "Justify the cleaning decisions and what the baseline comparison implies, in 3-5 bullets.",
@@ -308,6 +327,8 @@ class ExperimentOrchestrator:
                 "eda_context": eda_result["eda_context"],
             },
         )
+        if fe_interp:
+            fe_result.update(fe_interp)
 
         # Step 3: Model Selection
         # Infer task type from EDA
@@ -322,7 +343,7 @@ class ExperimentOrchestrator:
             task_type=task_type,
             eda_context=eda_result["eda_context"],
         )
-        ms_result["llm_interpretation"] = await self._interpret(
+        ms_interp = await self._interpret(
             provider,
             "ModelSelector",
             "Recommend the best model configuration from this comparison and explain why, in 3-5 bullets.",
@@ -331,6 +352,8 @@ class ExperimentOrchestrator:
                 "top_models": ms_result.get("top_models", []),
             },
         )
+        if ms_interp:
+            ms_result.update(ms_interp)
 
         # Step 4: Run training with best models
         best_models = ms_result.get("recommendation", {}).get("model_grid", [])
@@ -341,6 +364,8 @@ class ExperimentOrchestrator:
             emit("training", f"Training {len(best_models)} candidate model(s)")
             worker = self._create_worker(provider)
 
+            # No silent fallback: a provider failure fails the experiment loudly
+            # so the UI can name the provider and the issue.
             proposal = await worker.propose(
                 goal=f"Train best models for {goal}",
                 dataset=dataset_id_to_relative_path(fe_result["cleaned_dataset_id"]),

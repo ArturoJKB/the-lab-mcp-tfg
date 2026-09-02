@@ -29,7 +29,7 @@ class SandboxResult:
 def run_in_sandbox(
     code: str,
     timeout: int = 30,
-    memory_limit_mb: int = 512,
+    memory_limit_mb: int = 2048,
     max_output_bytes: int = 64 * 1024,
     files: dict[str, str] | None = None,
 ) -> SandboxResult:

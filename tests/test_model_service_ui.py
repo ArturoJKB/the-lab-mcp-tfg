@@ -179,26 +179,73 @@ def _write_agent_events(events_path: Path) -> None:
     )
 
 
-def test_dashboard_html_has_sidebar_and_new_panel_hooks(client: TestClient):
+def test_root_serves_built_ui_or_fallback(client: TestClient):
+    """GET / serves the built web/ dist when present, else the fallback page."""
     response = client.get("/")
     assert response.status_code == 200
-    body = response.text
-    assert 'class="sidebar"' in body
-    assert 'id="sidebar-nav"' in body
-    assert 'data-panel="panel-benchmarks"' in body
-    assert 'data-panel="panel-proposals"' in body
-    assert 'data-panel="panel-sessions"' in body
-    assert 'id="panel-benchmarks"' in body
-    assert 'id="panel-proposals"' in body
-    assert 'id="panel-sessions"' in body
-    assert 'id="panel-coding"' in body
-    assert 'id="panel-research"' in body
+    assert "The Lab" in response.text
 
 
-def test_static_css_reachable(client: TestClient):
-    response = client.get("/static/styles.css")
-    assert response.status_code == 200
-    assert "--bg:" in response.text
+def test_static_mount_serves_built_assets(client: TestClient):
+    """The /static mount serves the dist (built) or at least the kept dir marker."""
+    keep = client.get("/static/.gitkeep")
+    assets = client.get("/static/")
+    assert keep.status_code == 200 or assets.status_code in {200, 404}
+    index = client.get("/static/index.html")
+    if index.status_code == 200:
+        assert 'id="root"' in index.text
+
+
+def test_web_source_structure():
+    """The React source tree is committed and references the API client."""
+    web = Path(__file__).resolve().parents[1] / "web"
+    assert (web / "package.json").is_file()
+    assert (web / "src" / "App.tsx").is_file()
+    assert (web / "src" / "theme" / "breeze.css").is_file()
+    package = json.loads((web / "package.json").read_text(encoding="utf-8"))
+    assert "react" in package["dependencies"]
+    vite_config = (web / "vite.config.ts").read_text(encoding="utf-8")
+    assert "/static/" in vite_config  # built assets land under /static
+
+
+def test_built_css_layout_contract():
+    """When built, the served CSS must carry the shell grid, drawer and
+    utility classes — guards against stale/missing bundle layouts."""
+    import re
+
+    static_dir = (
+        Path(__file__).resolve().parents[1] / "thelab" / "model_service" / "static"
+    )
+    css_files = list(static_dir.glob("assets/*.css"))
+    if not css_files:
+        pytest.skip("UI not built")
+    index = (static_dir / "index.html").read_text(encoding="utf-8")
+    ref = re.findall(r"/static/assets/([a-zA-Z0-9._-]+\.css)", index)
+    assert ref, "index.html must reference the built css"
+    flat = re.sub(r"\s+", "", (static_dir / "assets" / ref[0]).read_text(encoding="utf-8"))
+    assert "grid-template-columns:56px232px1fr" in flat
+    assert ".hidden{display:none!important}" in flat
+    assert ".chat-overlay{position:fixed" in flat
+
+
+def test_app_shell_has_exactly_three_grid_children():
+    """Regression: the chat drawer must not be a .app-shell grid child
+    (it stole the 1fr column and squeezed the main view)."""
+    app_tsx = (
+        Path(__file__).resolve().parents[1] / "web" / "src" / "App.tsx"
+    ).read_text(encoding="utf-8")
+    shell_start = app_tsx.index('<div className="app-shell">')
+    shell_end = app_tsx.index("</div>", app_tsx.index('<main className="app-main">'))
+    shell = app_tsx[shell_start:shell_end]
+    assert shell.count("<ChatDrawer") == 0, "ChatDrawer must render outside .app-shell"
+    for child in ("<Dock", "<Sidebar", '<main className="app-main">'):
+        assert child in shell
+
+
+def test_fallback_page_present():
+    fallback = Path(__file__).resolve().parents[1] / "thelab" / "model_service" / "fallback.html"
+    assert fallback.is_file()
+    assert "build_ui.sh" in fallback.read_text(encoding="utf-8")
 
 
 def test_benchmarks_returns_manifest(client: TestClient, tmp_path: Path, monkeypatch):

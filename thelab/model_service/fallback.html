@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lab — UI not built</title>
+  <style>
+    :root { --bg:#1b1e23; --surface:#24272e; --border:#3a3f47; --text:#e6e9ef; --muted:#9da5b4; --accent:#3daee9; --accent-2:#a56de2; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--text);
+           font: 14px/1.5 system-ui, "Noto Sans", sans-serif; }
+    .card { max-width: 620px; background: var(--surface); border:1px solid var(--border); border-radius:6px; padding:32px; }
+    h1 { font-size: 1.2rem; margin: 0 0 4px; }
+    .brand { display:inline-flex; align-items:center; gap:10px; margin-bottom: 16px; }
+    .glyph { width:34px; height:34px; border-radius:4px; display:grid; place-items:center; font-weight:700; color:#fff;
+             background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .muted { color: var(--muted); }
+    code, pre { font-family: ui-monospace, Consolas, monospace; }
+    pre { background: var(--bg); border:1px solid var(--border); border-radius:4px; padding:12px; overflow-x:auto; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><span class="glyph">TL</span><h1>The Lab</h1></div>
+    <p><strong>The web UI build was not found.</strong></p>
+    <p class="muted">The dashboard is a static build produced from <code>web/</code> (React + Vite). Build it once — node is only needed for this step:</p>
+    <pre>./scripts/build_ui.sh        # or: cd web && npm ci && npm run build</pre>
+    <p class="muted">Meanwhile, everything works without the UI:</p>
+    <pre>
+# Train a model deterministically
+thelab run model --dataset examples/iris.csv --target species \
+  --model logistic_regression --seed 42 --output runs
+
+# MCP clients
+thelab-mcp-demo model_registry</pre>
+    <p class="muted">See <a href="https://github.com/ArturoJKB/the-lab-mcp-tfg#readme">the README</a> for the full guide.</p>
+  </main>
+</body>
+</html>

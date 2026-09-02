@@ -146,10 +146,15 @@ present is what counts.
       end-to-end (`tests/test_real_data_hardening.py`)
 - [x] Documentation set: README + architecture diagram, user guide (UI / CLI /
       API / MCP), global roadmap, codebase guide rebalance
-- [ ] Cross-dataset benchmark recorded (iris, titanic-class, S&P) via the B1
-      harness scripts
-- [ ] D1 demos: notebook + scripted demo (direct run → MCP → context search)
-      on both fixture and real datasets
-- [ ] Agent-connected evaluation: experiments driven through Ollama /
-      OpenRouter providers, not only the deterministic fallback
-- [ ] Fresh-venv install verification + demo rehearsal before submission
+- [x] Multi-Kaggle proof (P3.7): churn / housing / attrition end-to-end, each
+      with a generated notebook
+- [x] Generated experiment notebooks (P3.6): verified exact metric
+      reproduction on the S&P dataset
+- [x] Agent-connected runs: experiments driven by local Ollama and OpenRouter
+      (GLM) with per-interpretation token/model telemetry recorded
+- [x] Workspace UI (P4.A–F): React rebuild, streaming agent chat with
+      directives and telemetry, proposal→experiment runs, Kaggle import,
+      parquet support, MCP panel
+- [ ] D1 demos: scripted demo (direct run → MCP → context search) polished
+      for the defense + screenshots of the new UI
+- [ ] Fresh-venv install verification + demo rehearsal

@@ -123,8 +123,8 @@ def test_agent_mcp_run_deterministic_skill_cleaning(agent_env):
         )
         assert result["ok"] is True
         metadata = result["data"]["metadata"]
-        assert metadata["dataset_id"] == "uploads/messy_cleaned.csv"
-        assert (tmp_path / "uploads" / "messy_cleaned.csv").is_file()
+        assert metadata["dataset_id"] == "uploads/messy_cleaned_target.csv"
+        assert (tmp_path / "uploads" / "messy_cleaned_target.csv").is_file()
 
     asyncio.run(_with_agent_server(env, check))
 

@@ -105,18 +105,23 @@ def _index_demo_context(db_path: Path) -> None:
     index_source_file(source, repo)
 
 
-def test_dashboard_html_contains_panel_hooks_and_banners(client: TestClient):
+def test_dashboard_serves_ui_and_agent_routes_remain(client: TestClient):
+    """The dashboard serves the app shell; the read-only agent routes stay mounted.
+
+    The old vanilla panel hooks (panel-coding / panel-research) are replaced by
+    the React views (P4.E); their HTTP endpoints remain server-side here.
+    """
     response = client.get("/")
     assert response.status_code == 200
-    body = response.text
-    assert 'id="panel-coding"' in body
-    assert 'id="panel-research"' in body
-    assert 'id="panel-models"' in body
-    assert "Read-only" in body
-    assert "no autonomous writes" in body
-    assert "Approval required before any modification or destructive action" in body
-    assert "Grounded in local runs and context only" in body
-    assert "No external RAG or generative model" in body
+    assert "The Lab" in response.text
+
+    overview = client.get("/agent/coding/overview")
+    assert overview.status_code == 200
+    assert overview.json()["ok"] is True
+
+    status = client.get("/agent/research/context/status")
+    assert status.status_code == 200
+    assert status.json()["ok"] is True
 
 
 def test_agent_coding_overview_has_counts_no_absolute_paths(
