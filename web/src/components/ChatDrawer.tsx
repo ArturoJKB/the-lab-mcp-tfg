@@ -11,10 +11,12 @@ export type ChatTurn = {
   usage?: Record<string, unknown> | null;
   elapsed?: number | null;
   error?: string | null;
+  streaming?: boolean;
 };
 
 type StreamEvent = {
-  type: "event" | "result";
+  type: "event" | "result" | "token";
+  delta?: string;
   // event payload
   tool?: string;
   ok?: boolean;
@@ -108,12 +110,14 @@ export function ChatDrawer({
       if (!res.ok || !res.body) {
         const detail = await res.text();
         setTurns((prev) => [
-          ...prev,
+          ...prev.filter((t) => !t.streaming || t.content),
           { role: "assistant", content: "", error: detail.slice(0, 300) || "agent failed" },
         ]);
         return;
       }
 
+      // progressive answer bubble
+      setTurns((prev) => [...prev, { role: "assistant", content: "", streaming: true }]);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -133,7 +137,16 @@ export function ChatDrawer({
           } catch {
             continue;
           }
-          if (evt.type === "event" && evt.tool) {
+          if (evt.type === "token" && evt.delta) {
+            setTurns((prev) => {
+              const copy = [...prev];
+              const last = copy[copy.length - 1];
+              if (last && last.role === "assistant" && last.streaming) {
+                copy[copy.length - 1] = { ...last, content: last.content + evt.delta! };
+              }
+              return copy;
+            });
+          } else if (evt.type === "event" && evt.tool) {
             setLiveTrace((prev) => [
               ...prev,
               { tool: evt.tool!, ok: evt.ok ?? false, error: evt.error ?? null },
@@ -141,21 +154,33 @@ export function ChatDrawer({
           } else if (evt.type === "result") {
             done = true;
             if (evt.status === "success") {
-              setTurns((prev) => [
-                ...prev,
-                {
+              setTurns((prev) => {
+                const copy = [...prev];
+                const last = copy[copy.length - 1];
+                const streamed = last && last.role === "assistant" && last.streaming;
+                const finalTurn: ChatTurn = {
                   role: "assistant",
                   content: evt.answer ?? "",
                   toolCalls: evt.tool_calls,
                   usage: evt.usage,
                   elapsed: evt.usage?.elapsed_seconds ?? null,
-                },
-              ]);
+                };
+                if (streamed) {
+                  copy[copy.length - 1] = finalTurn;
+                } else {
+                  copy.push(finalTurn);
+                }
+                return copy;
+              });
             } else {
-              setTurns((prev) => [
-                ...prev,
-                { role: "assistant", content: "", error: evt.error || "agent refused" },
-              ]);
+              setTurns((prev) => {
+                // drop the empty streaming bubble if it appeared
+                const copy = prev.filter((t) => !t.streaming || t.content);
+                return [
+                  ...copy,
+                  { role: "assistant" as const, content: "", error: evt.error || "agent refused" },
+                ];
+              });
             }
           }
         }
@@ -220,6 +245,7 @@ export function ChatDrawer({
           {busy && (
             <div className="chat-turn assistant">
               <div className="chat-role">Agent</div>
+              {!turns.some((t) => t.streaming && t.content) && (
               <div className="chat-bubble">
                 <span className="pulse-dot" /> working…
                 {liveTrace.length > 0 && (
@@ -235,9 +261,10 @@ export function ChatDrawer({
                   </div>
                 )}
                 <div className="muted mono" style={{ fontSize: "0.7rem", marginTop: 4 }}>
-                  {elapsed.toFixed(1)}s — local models can take a while
+                  {elapsed.toFixed(1)}s
                 </div>
               </div>
+              )}
             </div>
           )}
           <div ref={turnsEndRef} />
@@ -399,6 +426,7 @@ function ChatTurnList({
           {t.content && (
             <div className="chat-bubble md">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.content}</ReactMarkdown>
+              {t.streaming && <span className="pulse-dot" />}
             </div>
           )}
           {t.toolCalls && t.toolCalls.length > 0 && (

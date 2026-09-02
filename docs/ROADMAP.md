@@ -38,7 +38,10 @@ they are context for the thesis document, not binding for new code.
 | P3.5 | P3 | done | Kaggle dataset ingestion + web-context pack for the global agent (`docs/P3_PLAN.md` §P3.5) |
 | P3.6 | P3 | done | Generated experiment notebooks per completed run + read-only UI viewer (`docs/P3_PLAN.md` §P3.6) |
 | P3.7 | P3 | done | Multi-Kaggle pipeline proof: 3 public datasets end-to-end (churn / housing / attrition), each with a generated notebook; cleaning policy gained constant-column drop (`docs/P3_PLAN.md` §P3.7) |
-| P4 | P4 | in_progress (A–F done) | UI rework: React workspace, 5 views, global-agent chat, flow-cohesion patch (P4.F) — `docs/P4_PLAN.md` |
+| P4 | P4 | done (A–F) | UI rework: React workspace, 5 views, global-agent chat, flow-cohesion patch (P4.F) — `docs/P4_PLAN.md` |
+| P5.A | P5 | planned | Honesty fixes: real role prompts, single approval gate, feedback wiring, sandbox description accuracy — `docs/P5_PLAN.md` |
+| P5.B | P5 | planned | Agentic round: role-specialized agents over MCP, sandboxed generated code with deterministic validation, human approval gate — `docs/P5_PLAN.md` |
+| P5.C | P5 | planned | RQ4–RQ6 evaluation: grounding ablation, agentic-vs-deterministic, multi-vs-single — `docs/P5_PLAN.md` |
 
 ## Phase summaries
 
@@ -104,6 +107,23 @@ Five views + a global-agent drawer, replacing the 11-panel P0 dashboard:
   sandbox memory limit raised.
 
 Details: `docs/P4_PLAN.md`.
+
+### P5 — Real multi-agent orchestration (grounded autonomy)
+
+Makes the thesis title literally true while keeping the deterministic factory
+byte-for-byte unchanged as the baseline. First-review audit (2026-09-02) found
+the agentic claims overstated (shared sub-agent prompts, self-approving
+orchestrator paths, unread feedback) — P5.A closes every gap before new claims
+are added. P5.B adds an agentic round after the deterministic batch: a context
+pack (EDA brief + baseline metrics + prior-run evidence) seeds role-specialized
+agents (Analyst, FeatureEngineer, ModelSelector) that work through the MCP
+servers with per-role tool allowlists; agent-generated code runs only in
+`thelab/sandbox` and is deterministically validated outside it; execution is
+gated by a single human-approval chokepoint. P5.C turns it into measured
+results: RQ4 (grounded vs ungrounded proposals), RQ5 (agentic capability,
+validity + competitiveness bars), RQ6 (multi vs single-agent ablation) —
+recorded for Ollama and OpenRouter separately, with the mock provider driving
+the suite. Details: `docs/P5_PLAN.md`.
 
 ## Current scope
 

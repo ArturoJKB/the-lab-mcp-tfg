@@ -20,7 +20,7 @@ from typing import Any
 
 from thelab.agents.harness import _METRIC_KEYS, _METRIC_TOLERANCE, _RUN_ID_RE
 from thelab.agents.mock import MockProvider
-from thelab.agents.provider import AgentMessage, LLMProvider, ToolSpec
+from thelab.agents.provider import AgentMessage, AgentTurn, LLMProvider, ToolSpec
 from thelab.context.reader import ContextReader
 from thelab.ide.datasets import resolve_dataset_path
 from thelab.mcp.common import discover_run_ids, get_runs_root, load_json_artifact
@@ -109,6 +109,12 @@ def provider_status() -> list[dict[str, Any]]:
             and bool(os.environ.get("THELAB_LLM_API_KEY")),
             "env": ["THELAB_LLM_BASE_URL", "THELAB_LLM_API_KEY", "THELAB_LLM_MODEL (optional)"],
             "note": "any OpenAI-compatible endpoint",
+        },
+        {
+            "name": "remote_mcp",
+            "configured": bool(__import__("os").environ.get("THELAB_REMOTE_MCP_SERVERS", "").strip()),
+            "env": ["THELAB_REMOTE_MCP_SERVERS (JSON list)"],
+            "note": "remote MCP servers merged into the agent tool set",
         },
         {
             "name": "openrouter",
@@ -602,6 +608,34 @@ async def chat(
     provider = create_provider(provider_name, model)
     specs, registry = _build_tools(dataset_id)
 
+    # Remote MCP servers (e.g. Kaggle): merge discovered tools when reachable.
+    remote_registry: dict[str, Any] = {}
+    try:
+        from thelab.agents.remote_mcp import discover_remote_tools
+
+        remote_registry = await asyncio.to_thread(discover_remote_tools)
+        for full_name, tool in remote_registry.get("tools", {}).items():
+            server = tool.get("remote", "")
+            info = remote_registry.get("servers", {}).get(server, {})
+            specs.append(
+                ToolSpec(
+                    name=full_name,
+                    description=f"[{server}] {tool.get('description', '')}",
+                    input_schema=tool.get("input_schema") or {},
+                )
+            )
+
+            async def remote_executor(
+                args: dict[str, Any], _server: dict[str, Any] = info, _tool: str = tool["name"]
+            ) -> dict[str, Any]:
+                from thelab.agents.remote_mcp import call_remote_tool
+
+                return await call_remote_tool(_server, _tool, args)
+
+            registry[full_name] = remote_executor
+    except Exception:  # noqa: BLE001 - remote layer is optional
+        remote_registry = {}
+
     messages: list[AgentMessage] = [
         AgentMessage(role="system", content=_system_prompt(dataset_id, style, role_hint))
     ]
@@ -621,7 +655,29 @@ async def chat(
     usage_total: dict[str, Any] = {"models": [], "prompt_tokens": 0, "completion_tokens": 0}
 
     for _step in range(max_steps):
-        turn = await asyncio.to_thread(_complete_turn, provider, messages, specs)
+        # Stream the provider turn: token deltas forwarded via on_event, then
+        # the complete turn (text + usage) collected for the loop.
+        turn_holder: list[AgentTurn] = []
+
+        def _run_stream(turn_holder: list[AgentTurn] = turn_holder) -> None:
+            final: AgentTurn | None = None
+            stream_fn = getattr(provider, "stream", None)
+            if stream_fn is not None:
+                try:
+                    for text_delta, complete_turn in stream_fn(messages, specs):
+                        if text_delta is not None and on_event is not None:
+                            on_event({"type": "token", "delta": text_delta})
+                        if complete_turn is not None:
+                            final = complete_turn
+                except Exception as exc:  # noqa: BLE001 - stream path is best-effort
+                    if "empty text turn" not in str(exc) and final is None:
+                        raise
+            if final is None:
+                final = _complete_turn(provider, messages, specs)
+            turn_holder.append(final)
+
+        await asyncio.to_thread(_run_stream)
+        turn = turn_holder[0]
 
         if turn.usage:
             model_name = turn.usage.get("model")
@@ -640,7 +696,7 @@ async def chat(
                     "session_id": session,
                     "tool_calls": tool_trace,
                 }
-            result = {
+            success_result: dict[str, Any] = {
                 "status": "success",
                 "answer": turn.text,
                 "session_id": session,
@@ -652,7 +708,7 @@ async def chat(
             }
             if persist:
                 _persist_chat_event(session, provider_name, message, str(turn.text or ""), tool_trace)
-            return result
+            return success_result
 
         if not turn.tool_calls:
             return {
@@ -667,8 +723,9 @@ async def chat(
             if on_event is not None:
                 on_event({"type": "tool_started", "tool": call.tool})
             executor = registry.get(call.tool)
+            tool_result: dict[str, Any]
             if executor is None:
-                result = {"ok": False, "error": f"unknown tool: {call.tool}"}
+                tool_result = {"ok": False, "error": f"unknown tool: {call.tool}"}
             else:
                 cache_key = json.dumps(
                     {"tool": call.tool, "args": call.arguments, "dataset": dataset_id},
@@ -676,26 +733,26 @@ async def chat(
                     default=str,
                 )
                 if call.tool in {"dataset_eda", "get_dataset_context"} and cache_key in tool_cache:
-                    result = dict(tool_cache[cache_key])
-                    result["cached"] = True
+                    tool_result = dict(tool_cache[cache_key])
+                    tool_result["cached"] = True
                 else:
                     try:
-                        result = await executor(call.arguments)
+                        tool_result = await executor(call.arguments)
                     except Exception as exc:  # noqa: BLE001
-                        result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
-                    if call.tool in {"dataset_eda", "get_dataset_context"} and result.get("ok"):
-                        tool_cache[cache_key] = result
+                        tool_result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+                    if call.tool in {"dataset_eda", "get_dataset_context"} and tool_result.get("ok"):
+                        tool_cache[cache_key] = tool_result
             proposal_id = None
-            if call.tool == "propose_experiment" and result.get("ok"):
-                data = result.get("data") or {}
+            if call.tool == "propose_experiment" and tool_result.get("ok"):
+                data = tool_result.get("data") or {}
                 proposal_id = (data or {}).get("proposal_id")
             if on_event is not None:
                 on_event(
                     {
                         "type": "tool_result",
                         "tool": call.tool,
-                        "ok": result.get("ok", False),
-                        "error": result.get("error"),
+                        "ok": tool_result.get("ok", False),
+                        "error": tool_result.get("error"),
                         "proposal_id": proposal_id,
                     }
                 )
@@ -703,20 +760,21 @@ async def chat(
                 {
                     "tool": call.tool,
                     "arguments": call.arguments,
-                    "ok": result.get("ok", False),
-                    "error": result.get("error"),
+                    "ok": tool_result.get("ok", False),
+                    "error": tool_result.get("error"),
                     "proposal_id": proposal_id,
                 }
             )
+            _ = remote_registry
             messages.append(
                 AgentMessage(
                     role="tool",
-                    content=_truncate(result),
+                    content=_truncate(tool_result),
                     tool_call_id=call.id or f"{call.tool}-{uuid.uuid4().hex[:4]}",
                 )
             )
 
-    result = {
+    result: dict[str, Any] = {
         "status": "refused",
         "answer": None,
         "error": f"agent loop exceeded max_steps ({max_steps})",

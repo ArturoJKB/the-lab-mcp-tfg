@@ -761,6 +761,17 @@ def post_ingest_kaggle(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+@app.get("/mcp/remote")
+async def get_remote_mcp() -> dict[str, Any]:
+    """Probe configured remote MCP servers (fail-soft)."""
+    from thelab.agents.remote_mcp import discover_remote_tools, remote_servers_config
+
+    if not remote_servers_config():
+        return {"ok": True, "data": {"configured": False, "servers": {}}}
+    registry = await asyncio.to_thread(discover_remote_tools)
+    return {"ok": True, "data": {"configured": True, **registry}}
+
+
 @app.get("/agent/providers")
 async def get_agent_providers() -> dict[str, Any]:
     from thelab.agents.chat import ollama_models, openrouter_models, provider_status

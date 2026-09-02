@@ -91,8 +91,17 @@ Driven by first-review findings; keeps the app honest and connected:
 | 6 | MCP panel | Admin inventory of the 7 stdio servers + tools + how to connect |
 | — | Providers | Ollama model discovery (`/api/tags` probe) + OpenRouter public catalog dropdown; `.env` loader accepts `export KEY=…`; `OPENROUTER_API_KEY` alias; **loud provider failures** (named provider + hint), no silent fallback; provider+model persisted per experiment and reused by feedback iterations |
 
-Deferred: streaming LLM tokens (provider stream support), Kaggle MCP server
-integration, deeper Admin work.
+## P4.G — Streaming tokens + Kaggle MCP (implemented 2026-09-02)
+
+| # | Work item | Notes |
+|---|---|---|
+| 1 | Streaming LLM tokens | `LLMProvider.stream()` (Ollama NDJSON + OpenAI-compat SSE, non-streaming fallback in `provider.default_stream`); `chat()` forwards token deltas as `{"type": "token"}` events; the chat drawer renders the answer progressively with a pulse cursor; token streams also cover sub-agent interpretation calls |
+| 2 | Kaggle MCP integration | `thelab/agents/remote_mcp.py`: streamable-HTTP JSON-RPC handshake (initialize → tools/list → tools/call, session-id handling, SSE + JSON body parsing). Configured via `THELAB_REMOTE_MCP_SERVERS` JSON in `.env`. Discovered tools are merged into the chat agent's tool set (name-spaced `kaggle__*`), probed fail-soft; `GET /mcp/remote` reports connection status + tool inventory in the MCP panel. Verified live: 71 Kaggle tools discovered; `kaggle__search_content` called end-to-end |
+
+Deferred: deeper Admin panel work, job eviction/heartbeat, per-session chat
+memory across page reloads.
+
+## Out of scope
 
 ## Out of scope
 

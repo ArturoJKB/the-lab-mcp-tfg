@@ -14,7 +14,7 @@ import json
 import logging
 import os
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from typing import Any
 
 import httpx
@@ -262,6 +262,48 @@ class OllamaProvider:
             raise LLMProviderError("empty text turn", code="protocol")
 
         return AgentTurn(text=content, usage=usage)
+
+
+    def stream(
+        self,
+        messages: list[AgentMessage],
+        tools: list[ToolSpec],
+    ) -> Iterator[tuple[str | None, AgentTurn | None]]:
+        """Stream chat deltas; yields (text_delta, None), then (None, final_turn)."""
+        import httpx as _httpx
+
+        body = self._build_request_body(messages, tools)
+        body["stream"] = True
+        url = f"{self.base_url}/api/chat"
+        text_parts: list[str] = []
+        usage: dict[str, Any] = {}
+
+        with _httpx.Client(timeout=self.timeout_seconds) as client:
+            with client.stream("POST", url, json=body) as response:
+                response.raise_for_status()
+                for line in response.iter_lines():
+                    if not line.strip():
+                        continue
+                    try:
+                        chunk = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    delta = (chunk.get("message") or {}).get("content") or ""
+                    if delta:
+                        text_parts.append(delta)
+                        yield (delta, None)
+                    if chunk.get("done"):
+                        usage = {
+                            "provider": "ollama",
+                            "model": chunk.get("model"),
+                            "prompt_tokens": chunk.get("prompt_eval_count"),
+                            "completion_tokens": chunk.get("eval_count"),
+                        }
+
+        content = "".join(text_parts)
+        if content == "":
+            raise LLMProviderError("empty text turn", code="protocol")
+        yield (None, AgentTurn(text=content, usage=usage))
 
 
 __all__ = ["OllamaProvider", "_HTTPResponse"]

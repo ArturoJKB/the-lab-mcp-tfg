@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -68,6 +69,16 @@ class LLMProvider(Protocol):
         messages: list[AgentMessage],
         tools: list[ToolSpec],
     ) -> AgentTurn: ...
+
+
+def default_stream(
+    provider: LLMProvider,
+    messages: list[AgentMessage],
+    tools: list[ToolSpec],
+) -> Iterator[tuple[str | None, AgentTurn | None]]:
+    """Non-streaming fallback: yield nothing, then the complete turn."""
+    turn = provider.complete(messages, tools)
+    yield (None, turn)
 
 
 class LLMProviderError(Exception):
