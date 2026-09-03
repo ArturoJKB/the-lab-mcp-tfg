@@ -149,12 +149,9 @@ in the parent from disk.
 | # | Work item | Notes |
 |---|---|---|
 | C1 ✅ | RQ4–RQ6 in `scripts/evaluate_thesis.py` (suite: mock, protocol checks chaining from RQ1's verified run; `--live openrouter|ollama [--model]` for recorded runs). Includes the RQ6 ablation switch: `RoundConfig(role_mode="multi"\|"single")` — single mode shares one generic prompt (the pre-P5.A behavior) as the control arm | RQ4: grounded vs stripped-context claim verification; RQ5: gate-blocks + approval-enables + comparison artifact; RQ6: multi vs single over identical evidence |
-| C2 | Recorded results: Ollama + OpenRouter tables in `THESIS_EVALUATION.md`; S&P primary (headroom), iris excluded from RQ5 quality claims | pending — run with `--live` |
-| C3 | D1 demo: deterministic run → MCP discovery → agentic round live (SSE) → approval gate → comparison artifact → context search of the round | pending |
-| C4 | Docs: THESIS_MAP RQ table → 6 rows ✅; README claims updated to measured reality ✅ (updated with C1) | |
-
-**C1 done when:** ✅ evaluator exits 0 with RQ1–RQ6 PASS in suite mode;
-`test_thesis_eval.py` asserts all six.
+| C2 ✅ | Dataset matrix (iris + synthetic regression) + **live OpenRouter recordings**: RQ1–RQ6 PASS both datasets; RQ4 grounded verified-rate 1.0; RQ5 iris validity 1.0 (15/15, post-F2); RQ6 multi=agentic vs single=degraded. Recorded in `THESIS_EVALUATION.md`. Ollama deferred (170 s/grounded-call on the dev laptop) | live-path fixes: F2 per-model filter, F3 grid caps, F4 target-quantization rejection, task-aware selection |
+| C3 ✅ | `scripts/demo_defense.sh`: full six-RQ defense demo — RQ1–R3 scripted, deterministic multi-agent experiment + generated notebook, agentic round with the **human approval gate** (interactive prompt; auto-approves recorded as `ui` when non-interactive), comparison artifact, evaluator matrix, fresh-venv install verification (`--verify-venv`) | demoed end-to-end on churn: agentic best 0.8715 vs deterministic 0.8590 (+1.25 pt), validity 1.0 |
+| C4 ✅ | Docs: THESIS_MAP RQ table → 6 rows; README claims updated; THESIS_EVALUATION RQ tables + live recordings + limitations (iris 30-row caveat, gate trust model) | |
 
 ## Decisions locked
 

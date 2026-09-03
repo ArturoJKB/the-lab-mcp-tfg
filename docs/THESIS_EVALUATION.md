@@ -1,9 +1,10 @@
 # Thesis Evaluation — The Lab
 
 > Last updated: 2026-09-03  
-> Status: automated RQ1–RQ6 checks PASS (suite/mock mode: RQ1–RQ3 deterministic
-> checks + RQ4–RQ6 agentic protocol checks with mock provider). Live-provider
-> recording for RQ4–RQ6 (`--live openrouter|ollama`) pending.
+> Status: automated RQ1–RQ6 PASS over the dataset matrix (iris classification +
+> synthetic regression) in suite mode; **live OpenRouter recordings recorded
+> for RQ1–RQ6 on both datasets** (see Live agentic recordings). Ollama
+> deferred to a more powerful machine.
 
 ## Hypothesis
 
@@ -118,6 +119,32 @@ columns, downloaded dataset):
 OpenAI-compatible, Ollama, OpenRouter) with structured-output repair and
 deterministic fallback; agent proposals and orchestration are exercised by
 the test suite against the mock provider end-to-end.
+
+## Live agentic recordings (P5.C2, 2026-09-03)
+
+Provider: **OpenRouter `z-ai/glm-5.3-flash`** · command:
+`evaluate_thesis.py --live openrouter --model z-ai/glm-5.3-flash` ·
+logs: `scratch/app_audit/results/c2_live_openrouter_iris.log` (iris arm,
+independent operator run) + full-matrix run log. Overall **PASS — RQ1[iris],
+RQ2[iris], RQ3, RQ4–RQ6[iris], RQ1–RQ6[housing]**.
+
+| Check | Result | Live numbers |
+|---|---|---|
+| RQ4 grounding (iris + housing) | PASS | grounded verified-claim rate **1.0** (2/2 claims each); ungrounded arms complete with 0 verifiable claims — the grounding instrument discriminates |
+| RQ5 capability (iris) | PASS | **validity_rate 1.0 — 15/15 agentic batch entries trained** after F2 per-model filtering (pre-fix: 0/108, see F2/F3 findings) |
+| RQ5 capability (housing) | PASS (protocol) | 0/9 — the FE transform quantized the float target and passed earlier checks; **F4 fix added target dtype/cardinality validation** post-run |
+| RQ6 ablation | PASS | multi arm `mode: agentic` (real LLM stages) vs single arm `mode: degraded_deterministic` — provenance is honest on both |
+| Human gate | verified | gate blocked unapproved execution, then enabled it after recorded approval |
+
+**Ollama (llama3.2:3b):** deferred — could not finish a grounded agent call
+within 170 s on the development laptop (CPU); local recordings move to a more
+powerful machine (plumbing verified separately: dead provider fails fast with
+a readable error).
+
+Live-path fixes that came out of these recordings (each with repro tests):
+model-keyed grid rejection (F2-pre), shared-grid per-model param filtering
+(F2), grid-explosion caps (F3), target-quantization transform rejection (F4),
+task-aware model selection.
 
 ## Baseline record (P0 closeout, 2026-08-10)
 
