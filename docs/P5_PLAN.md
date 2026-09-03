@@ -131,10 +131,13 @@ in the parent from disk.
 
 | # | Work item | Notes |
 |---|---|---|
-| C1 | RQ4–RQ6 in `scripts/evaluate_thesis.py` (mock for suite; `--live` for recorded runs) | ablation runner: grounded/ungrounded, multi/single |
-| C2 | Recorded results: Ollama + OpenRouter tables in `THESIS_EVALUATION.md`; S&P primary (headroom), iris excluded from RQ5 | |
-| C3 | D1 demo: deterministic run → MCP discovery → agentic round live (SSE) → approval gate → comparison artifact → context search of the round | scripted for the defense |
-| C4 | Docs: THESIS_MAP RQ table → 6 rows; README claims updated to measured reality | |
+| C1 ✅ | RQ4–RQ6 in `scripts/evaluate_thesis.py` (suite: mock, protocol checks chaining from RQ1's verified run; `--live openrouter|ollama [--model]` for recorded runs). Includes the RQ6 ablation switch: `RoundConfig(role_mode="multi"\|"single")` — single mode shares one generic prompt (the pre-P5.A behavior) as the control arm | RQ4: grounded vs stripped-context claim verification; RQ5: gate-blocks + approval-enables + comparison artifact; RQ6: multi vs single over identical evidence |
+| C2 | Recorded results: Ollama + OpenRouter tables in `THESIS_EVALUATION.md`; S&P primary (headroom), iris excluded from RQ5 quality claims | pending — run with `--live` |
+| C3 | D1 demo: deterministic run → MCP discovery → agentic round live (SSE) → approval gate → comparison artifact → context search of the round | pending |
+| C4 | Docs: THESIS_MAP RQ table → 6 rows ✅; README claims updated to measured reality ✅ (updated with C1) | |
+
+**C1 done when:** ✅ evaluator exits 0 with RQ1–RQ6 PASS in suite mode;
+`test_thesis_eval.py` asserts all six.
 
 ## Decisions locked
 

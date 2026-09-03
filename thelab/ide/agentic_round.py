@@ -86,6 +86,26 @@ class RoundConfig:
     require_approval: bool = True  # binding: never inherit auto-approval
     transform_timeout_s: int = ROUND_TIMEOUT_S
     analyst_max_steps: int = 6
+    # "multi": each stage uses its role-specific prompt contract (the thesis
+    # claim). "single": all stages share one generic analyst prompt — the
+    # pre-P5.A behavior, used as the RQ6 ablation control arm.
+    role_mode: str = "multi"
+
+    def __post_init__(self) -> None:
+        if self.role_mode not in {"multi", "single"}:
+            raise ValueError(f"unknown role_mode: {self.role_mode}")
+
+    def prompt_for(self, role_prompt: str) -> str:
+        """Return the system prompt for a stage under the current role mode."""
+        if self.role_mode == "single":
+            return _GENERIC_ANALYST_PROMPT
+        return role_prompt
+
+
+_GENERIC_ANALYST_PROMPT = (
+    "You are a concise ML analyst sub-agent for The Lab. "
+    "Ground every statement in the provided data; no speculation."
+)
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +215,7 @@ async def _analyst_via_mcp(
             provider=provider,
             servers=connections,
             max_steps=config.analyst_max_steps,
-            system_prompt=ANALYST_SYSTEM_PROMPT,
+            system_prompt=config.prompt_for(ANALYST_SYSTEM_PROMPT),
         )
         outcome = await harness.run(instruction)
 
@@ -308,7 +328,7 @@ def _generate_transform(
         "Write one pandas transform improving on the deterministic cleaning and "
         "save it to 'transformed.csv'."
     )
-    parsed = _single_turn_json(provider, FEATURE_ENGINEER_SYSTEM_PROMPT, instruction)
+    parsed = _single_turn_json(provider, config.prompt_for(FEATURE_ENGINEER_SYSTEM_PROMPT), instruction)
     code = (parsed or {}).get("code")
     record["rationale"] = (parsed or {}).get("rationale", "")
     if not isinstance(code, str) or not code.strip():
@@ -396,6 +416,7 @@ def _generate_selection(
     pack: dict[str, Any],
     brief: dict[str, Any],
     transform_record: dict[str, Any],
+    config: RoundConfig,
 ) -> tuple[dict[str, Any], bool]:
     """Selector stage: returns (selection_dict, llm_used)."""
     registry_models = sorted(MODEL_REGISTRY.list_models())
@@ -408,7 +429,7 @@ def _generate_selection(
             f"Transform outcome: {json.dumps({k: transform_record.get(k) for k in ('status', 'rationale', 'validation')}, default=str)}\n"
             "Propose a small training grid (1-3 models, 1-3 seeds)."
         )
-        parsed = _single_turn_json(provider, MODEL_SELECTOR_SYSTEM_PROMPT, instruction)
+        parsed = _single_turn_json(provider, config.prompt_for(MODEL_SELECTOR_SYSTEM_PROMPT), instruction)
         if parsed and isinstance(parsed.get("model_grid"), list) and parsed["model_grid"]:
             return parsed, True
     return _selection_fallback(pack), False
@@ -468,6 +489,7 @@ async def run_agentic_round(
         require_approval=require_approval,
         transform_timeout_s=config.transform_timeout_s,
         analyst_max_steps=config.analyst_max_steps,
+        role_mode=config.role_mode,
     )
 
     def emit(message: str) -> None:
@@ -485,6 +507,7 @@ async def run_agentic_round(
         "require_approval": require_approval,
         "created_at": datetime.now(UTC).isoformat(),
         "policy": "human_required" if require_approval else "auto_approved_by_operator",
+        "role_mode": config.role_mode,
     }
 
     # Stage 1: Analyst
@@ -534,7 +557,7 @@ async def run_agentic_round(
         record["status"] = "cancelled"
         return record
     emit("ModelSelector proposing training configuration beyond the baseline grid")
-    selection, selector_llm_used = _generate_selection(provider, pack, brief, transform_record)
+    selection, selector_llm_used = _generate_selection(provider, pack, brief, transform_record, config)
     selection["source"] = "llm" if selector_llm_used else "deterministic_fallback"
     record["selector_llm_used"] = selector_llm_used
 

@@ -1,29 +1,39 @@
 # Thesis Evaluation — The Lab
 
-> Last updated: 2026-08-29  
-> Status: automated RQ1–RQ3 checks PASS (fixture baseline + re-run); real-dataset validation recorded.
+> Last updated: 2026-09-03  
+> Status: automated RQ1–RQ6 checks PASS (suite/mock mode: RQ1–RQ3 deterministic
+> checks + RQ4–RQ6 agentic protocol checks with mock provider). Live-provider
+> recording for RQ4–RQ6 (`--live openrouter|ollama`) pending.
 
 ## Hypothesis
 
 A local multi-agent orchestration architecture based on typed contracts and
 MCP capabilities can execute a reproducible data-to-model workflow and expose
 its resulting artifacts to independent agents without being coupled to a
-specific LLM provider.
+specific LLM provider. Beyond the deterministic baseline, bounded
+role-specialized agent rounds — grounded in the baseline's artifacts and gated
+by human approval — can explore beyond it safely, and the orchestration itself
+is measurable.
 
 ## Research questions → checks
 
-| RQ | Method | Pass bar |
-|---|---|---|
-| **RQ1** Reproducible run | Two `thelab run model` executions on the same fixture with identical dataset, model, and seed. | Both runs complete with `approved` validation status. Key metrics match within tolerance. Manifest records seed, config, and dependency versions. |
-| **RQ2** MCP interoperability | Independent stdio MCP client connects to existing `model_registry_mcp`, calls `list_models`, then `predict` on an approved run. | Tool list contains expected tools. `list_models` returns the approved run. `predict` returns typed predictions. Client does not import training pipeline internals. |
-| **RQ3** Context retrieval | Index a small JSONL fixture and search via `ContextReader` / context MCP. | Search returns at least one relevant hit. Result contains stable fields (event_id, summary, tags). Database bytes are unchanged by read-only search. |
+| RQ | Question | Method | Pass bar |
+|---|---|---|---|
+| **RQ1** Reproducible run | Can a training run be reproduced from dataset + config + seed? | Two `run_model` executions, identical config. | Both complete `approved`; metrics match; manifest records seed + dependency versions. |
+| **RQ2** MCP interoperability | Can an independent MCP client discover and use a model? | Stdio MCP client: `list_models` → `predict` on an approved run. | Tools present; run listed; typed predictions; no training-pipeline imports. |
+| **RQ3** Context retrieval | Can local context retrieval recover useful past evidence? | Index JSONL fixture → search → read. | Relevant hit; DB bytes unchanged by read. |
+| **RQ4** Grounding (agentic) | Do context-grounded rounds make more verifiable claims than ungrounded ones? | Ablation: full context pack vs stripped evidence; every metric claim in the round record verified against persisted metrics. | Grounded verified-claim rate ≥ ungrounded (suite: grounded evidence claims verify exactly). |
+| **RQ5** Agentic capability (agentic) | Can the bounded round train valid, competitive models beyond the fixed grid, safely? | Round e2e: gate blocks unapproved execution; approved round executes through the factory; comparison artifact. | 0 silent failures; validity_rate ≥ 0.8 (live); deltas reported. |
+| **RQ6** Orchestration value (agentic) | Does role-specialized orchestration outperform a single shared-prompt agent? | Ablation: `role_mode=multi` vs `role_mode=single` (identical otherwise). | Both complete protocol; role mode recorded; live: multi ≥ single on validity. |
 
-The same three questions are answered at two scales:
+Counting rule: only rounds with `mode == "agentic"` (≥1 stage produced LLM
+content) count toward RQ4–RQ6 agentic tallies; `degraded_deterministic` rounds
+are reported separately (they are the natural control arm).
 
-- **Fixture baseline** — iris fixture, single model, P0 closeout record (kept
-  below as evidence).
-- **Real-dataset scale** — S&P 500 analyst ratings (164k rows), full agent
-  orchestration, recorded in *Current results*.
+The first three questions are answered at two scales (fixture baseline +
+recorded real-dataset validation below); RQ4–RQ6 are answered in suite mode
+(mock provider — protocol + instrumentation verified) with live-provider
+recording pending.
 
 ## Environment
 
@@ -68,12 +78,16 @@ PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py
 Entry point: `scripts/evaluate_thesis.py`
 
 ```bash
-PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py          # suite: RQ1-RQ6 (mock)
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py \
+  --live openrouter --model z-ai/glm-5.3-flash                  # recorded agentic results
 ```
 
 The script uses temporary directories so it does not modify developer state. It
 prints a human-readable pass/fail table and a JSON summary, exiting with code 0
-when all checks pass. Last run: **2026-08-29 — Overall PASS (RQ1/RQ2/RQ3)**.
+when all checks pass. Last run: **2026-09-03 — Overall PASS (RQ1–RQ6, suite
+mode)**. RQ4–RQ6 chain from RQ1's verified run: the round's evidence, the
+grounding target metrics, and the executed batch all derive from it.
 
 ## Current results (P2, 2026-08-29)
 
@@ -128,14 +142,15 @@ RQ3: PASS
 
 ## Limitations (current)
 
-- The automated RQ checks run on the iris fixture; real-dataset claims come
-  from the recorded S&P validation above, not from the evaluator script.
+- RQ1–RQ3 run on the iris fixture; real-dataset claims come from the recorded
+  S&P validation below, not from the evaluator script.
+- RQ4–RQ6 suite results are mock-provider protocol checks (instrument +
+  gating + provenance verified); live-provider quality results are pending
+  (`--live openrouter|ollama`) and will be recorded here per provider.
 - MCP transport is stdio only; the HTTP service is not an MCP transport.
-- Recorded RQ/agent results use the deterministic fallback provider; live
-  Ollama/OpenRouter-driven experiment evaluation is pending (see
-  `docs/THESIS_MAP.md` → Current focus).
 - The code sandbox provides compute isolation, not OS-level filesystem
-  confinement (documented audit finding BLK-01).
+  confinement (documented audit finding BLK-01); sandbox outputs are always
+  validated in the parent.
 - Sub-agents execute in-process (subprocess isolation descoped).
 - Context redaction is best-effort; the evaluation verifies retrieval, not
   exhaustive secret-family coverage.

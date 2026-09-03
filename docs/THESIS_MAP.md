@@ -9,15 +9,21 @@
 
 ## RQ mapping
 
-The thesis answers three research questions, each automated in `scripts/evaluate_thesis.py`:
+The thesis answers six research questions, automated in `scripts/evaluate_thesis.py`:
 
 | RQ | Question | Automated check |
 |---|---|---|
 | RQ1 | Can a model-training run be reproduced from dataset + config + seed? | Two identical trains; metrics match; manifest carries seed + dependency versions |
 | RQ2 | Can an independent MCP client discover and use a model? | Spawns `model_registry_mcp`; `list_models` + `predict` round-trip |
 | RQ3 | Can local context retrieval recover useful past evidence? | Index JSONL → search hit → DB byte-identical after read |
+| RQ4 | Do context-grounded agent rounds make more verifiable claims? | Grounded vs stripped-context round ablation; every claim verified against persisted metrics |
+| RQ5 | Can bounded agent rounds train valid, competitive models safely? | Round e2e: gate blocks unapproved execution; approved round runs through the factory; comparison artifact + validity rate |
+| RQ6 | Does role-specialized orchestration beat a single shared-prompt agent? | `role_mode=multi` vs `single` ablation over identical deterministic evidence |
 
-Current status: **PASS** (see `docs/THESIS_EVALUATION.md`).
+RQ1–RQ3 are deterministic checks; RQ4–RQ6 exercise the P5 agentic round
+(suite mode: mock provider, protocol + instrumentation verified; `--live`
+records provider-specific results). Current status: **PASS** (RQ1–RQ6, suite
+mode — see `docs/THESIS_EVALUATION.md`).
 
 ---
 
