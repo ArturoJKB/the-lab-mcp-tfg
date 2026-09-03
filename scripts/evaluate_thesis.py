@@ -685,7 +685,17 @@ async def main() -> int:
         help="Run the agentic RQ4-RQ6 arms with a live LLM provider (recorded results)",
     )
     parser.add_argument("--model", default=None, help="Model name for the live provider")
+    parser.add_argument(
+        "--datasets",
+        default="all",
+        choices=["all", "iris", "housing"],
+        help="Run the chain on one dataset arm or both (default: all)",
+    )
     args = parser.parse_args()
+
+    from thelab.env import load_dotenv
+
+    load_dotenv()
 
     provider = None
     mode = "suite (mock)"
@@ -696,6 +706,8 @@ async def main() -> int:
         mode = f"live ({args.live}" + (f":{args.model}" if args.model else "") + ")"
 
     specs = [_iris_spec(), _housing_spec()]
+    if args.datasets != "all":
+        specs = [s for s in specs if s.name == args.datasets]
     workspace = Path(tempfile.mkdtemp(prefix="thelab-eval-"))
     previous_env = {}
     report: dict[str, Any] = {"mode": mode, "results": []}
@@ -707,6 +719,20 @@ async def main() -> int:
         env = _agentic_env(workspace, specs)
         previous_env = {k: os.environ.get(k) for k in env}
         try:
+            # Deterministic chain per spec first (sequential — RQ2 depends on
+            # RQ1's run). The three agentic checks per spec are independent of
+            # each other: run them concurrently behind a small semaphore
+            # (provider rate limits) and stream verdicts as they complete
+            # (work order X3).
+            sem = asyncio.Semaphore(2)
+
+            async def _run_check(coro_factory):
+                async with sem:
+                    res = await coro_factory()
+                print(f"  -> {res['rq']}: {res['status']}", flush=True)
+                return res
+
+            agentic_tasks = []
             for spec in specs:
                 rq1 = _check_rq1_reproducibility(workspace, spec)
                 report["results"].append(rq1)
@@ -730,15 +756,27 @@ async def main() -> int:
                 report["results"].append(rq2)
 
                 metrics = rq1.get("metrics", {})
-                report["results"].append(
-                    await _check_rq4_grounding(spec, run_id, metrics, provider)
+                agentic_tasks.append(
+                    _run_check(
+                        lambda s=spec, r=run_id, m=metrics: _check_rq4_grounding(s, r, m, provider)
+                    )
                 )
-                report["results"].append(
-                    await _check_rq5_agentic_capability(workspace, spec, run_id, metrics, provider)
+                agentic_tasks.append(
+                    _run_check(
+                        lambda s=spec, r=run_id, m=metrics: _check_rq5_agentic_capability(
+                            workspace, s, r, m, provider
+                        )
+                    )
                 )
-                report["results"].append(
-                    await _check_rq6_orchestration(spec, run_id, metrics, provider)
+                agentic_tasks.append(
+                    _run_check(
+                        lambda s=spec, r=run_id, m=metrics: _check_rq6_orchestration(s, r, m, provider)
+                    )
                 )
+
+            if agentic_tasks:
+                print("Agentic checks (RQ4-RQ6) running", flush=True)
+                report["results"].extend(await asyncio.gather(*agentic_tasks))
         finally:
             for key, value in previous_env.items():
                 if value is None:

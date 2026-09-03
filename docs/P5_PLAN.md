@@ -114,6 +114,23 @@ hopped executors via `asyncio.to_thread`/`run_in_executor`, which hung
 non-deterministically under the test client's portal loop; the direct pattern
 is stable (3× clean repeat runs, full suite green).
 
+### X1 notes (work order `scratch/app_audit/AGENT_WORK_ORDER_THROUGHPUT.md`)
+
+X0 (F2 per-model param filter + F3 grid caps) landed in `4a4cde9`. X1
+(un-block experiment jobs on a dedicated bounded executor) was attempted and
+**deferred**: two executor-hop variants (module-level `ThreadPoolExecutor`
+and a loop-agnostic bounded semaphore + `to_thread`) both reproduced the
+historical nondeterministic hang — the service's portal loop died silently
+mid-experiment (thread-dump evidence: portal thread gone, executor idle;
+`tests/test_throughput.py` catches it). Root cause not fully isolated; the
+responsiveness contract is pinned by that test — unskip when X1 is retried
+(fresh session, possibly anyio-portal-specific). Measured consequences until
+then: experiment jobs freeze service traffic for their duration (probes:
+45 s train-POST latency during an experiment; 2 experiments serialize at
+117.57 s), and the deterministic stage overhead is ~58 s per experiment
+(dominated by the full-size try-all dry-run — addressed by X2's selection
+diet, which cuts it to seconds without executors).
+
 ### Phase B.2 — B7 sandbox artifact channel + B8 provenance policy — implemented 2026-09-03
 
 | # | Work item | Notes |

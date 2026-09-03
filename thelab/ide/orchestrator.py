@@ -77,6 +77,43 @@ def _workspace_root() -> Path:
     return Path(os.environ.get("THELAB_WORKSPACE_ROOT", "."))
 
 
+_SELECTION_SAMPLE_ROWS = 2000
+
+
+async def run_selection_dry_run(dataset_id: str, target: str) -> dict[str, Any]:
+    """Deterministic selection heuristic (X2): try-all dry-run on a seeded row
+    subsample of the cleaned dataset. Writes the subsample under
+    ``.thelab/selection/`` and records rows/models for traceability. The
+    factory's persisted training is untouched.
+    """
+    import pandas as pd
+
+    from thelab.run.runner import try_all_models
+
+    source = resolve_dataset_path(dataset_id)
+    df = pd.read_csv(source)
+    rows = min(_SELECTION_SAMPLE_ROWS, len(df))
+    sample = df.sample(n=rows, random_state=42)
+    selection_dir = _workspace_root() / ".thelab" / "selection"
+    selection_dir.mkdir(parents=True, exist_ok=True)
+    sample_path = selection_dir / f"{Path(dataset_id).stem}_selection.csv"
+    sample.to_csv(sample_path, index=False)
+
+    results = try_all_models(
+        dataset=str(sample_path),
+        target=target,
+        seed=42,
+        output="scratch",
+        workspace_root=_workspace_root(),
+        dry_run=True,
+    )
+    models = sum(1 for r in results if r.get("status") in {"completed", "rejected"})
+    return {
+        "results": results,
+        "meta": {"rows": int(rows), "dataset_rows": int(len(df)), "models": models},
+    }
+
+
 class ExperimentOrchestrator:
     """Orchestrates multi-agent ML experiments with sub-agents and deterministic skills."""
 
@@ -248,15 +285,13 @@ class ExperimentOrchestrator:
             )
             cleaned_dataset_id = clean_metadata["dataset_id"]
 
-        # Run try-all on cleaned data (relative dataset id + workspace root).
-        try_all_results = try_all_models(
-            dataset=dataset_id_to_relative_path(cleaned_dataset_id),
-            target=target,
-            seed=42,
-            output="scratch",
-            workspace_root=_workspace_root(),
-            dry_run=True,
-        )
+        # Run try-all on a deterministic row subsample as the selection
+        # heuristic (X2 selection diet): the full-size dry-run of all 9 models
+        # dominated experiment wall-clock (~58 s on 10k rows). It feeds LLM
+        # planning only — persisted training still runs full-size through
+        # run_model, so RQ1-RQ3 stay byte-for-byte untouched.
+        selection_rows = await run_selection_dry_run(cleaned_dataset_id, target)
+        try_all_results = selection_rows["results"]
 
         # Get top 3 models
         top_models = [
@@ -269,6 +304,7 @@ class ExperimentOrchestrator:
             "clean_metadata": clean_metadata,
             "try_all_results": try_all_results,
             "top_models": top_models,
+            "selection_dry_run": selection_rows["meta"],
         }
 
     async def run_model_selection(
@@ -279,16 +315,25 @@ class ExperimentOrchestrator:
         eda_context: str,
         goal: str = "",
         provider: Any = None,
+        try_all_results: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Run model selection using try-all and recommend best models."""
-        try_all_results = try_all_models(
-            dataset=dataset_id_to_relative_path(dataset_id),
-            target=target,
-            seed=42,
-            output="scratch",
-            workspace_root=_workspace_root(),
-            dry_run=True,
-        )
+        """Run model selection using try-all and recommend best models.
+
+        ``try_all_results`` reuses the FeatureEngineer stage's dry-run when it
+        already ran on the same dataset (X2 selection diet: one dry-run per
+        experiment instead of two).
+        """
+        if try_all_results is None:
+            try_all_results = try_all_models(
+                dataset=dataset_id_to_relative_path(dataset_id),
+                target=target,
+                seed=42,
+                output="scratch",
+                workspace_root=_workspace_root(),
+                dry_run=True,
+            )
+        else:
+            _ = dataset_id  # reuse is keyed on the caller's FE stage dataset
 
         # Filter completed results
         completed = [r for r in try_all_results if r.get("status") == "completed"]
@@ -425,6 +470,7 @@ class ExperimentOrchestrator:
                 target=target,
                 task_type=task_type,
                 eda_context=eda_result["eda_context"],
+                try_all_results=fe_result.get("try_all_results"),
             ),
             "model selection",
         )

@@ -594,3 +594,33 @@ def test_selector_caps_llm_grid(round_env, experiment, deterministic_result):
         product *= max(len(values), 1)
     assert product <= 4
     assert selection["grid_capped"] is True
+
+
+def test_transform_rejected_on_target_quantization(round_env, experiment):
+    """Live housing failure (2026-09-03): a transform that binned the float
+    target passed every earlier check and flipped the inferred task type."""
+    uploads, _, _, _ = round_env
+    rows = ["median_income,housing_age,median_house_value"]
+    for i in range(200):
+        rows.append(f"{1.0 + (i % 40) * 0.3:.2f},{5 + (i % 30)},{450000 + (i % 50) * 1731.17:.2f}")
+    (uploads / "house_cleaned.csv").write_text("\n".join(rows), encoding="utf-8")
+
+    pack = {
+        "target": "median_house_value",
+        "eda_context": "regression",
+        "cleaned_dataset_id": "uploads/house_cleaned.csv",
+        "baseline_top_models": [],
+    }
+    code = (
+        "import pandas as pd\n"
+        "df = pd.read_csv('dataset.csv')\n"
+        "df['median_house_value'] = (df['median_house_value'] // 50000) * 50000\n"
+        "df.to_csv('transformed.csv', index=False)\n"
+    )
+    record = _generate_transform(
+        _transform_code(code), pack, {"findings": []}, RoundConfig()
+    )
+    assert record["status"] == "rejected", record
+    assert "dtype kind changed" in record["error"] or "cardinality" in record["error"]
+    import glob
+    assert not glob.glob(str(uploads / "house_cleaned_agentic*.csv"))

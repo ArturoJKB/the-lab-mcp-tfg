@@ -448,9 +448,8 @@ class JobManager:
             job.emit("info", message, {"stage": "agentic_round", "experiment_id": experiment_id})
 
         try:
-            # Blocking in the coroutine (same pattern as _run_proposal_experiment):
-            # the round must not hop executors — that is flaky under the test
-            # client's portal loop.
+            # Blocking in the coroutine (proven pattern; executor hops hang
+            # non-deterministically — see P5_PLAN X1 notes).
             result = execute_approved_round(
                 experiment,
                 proposal_id,

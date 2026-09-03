@@ -306,6 +306,27 @@ def _validate_transform(artifact: Path, source: Path, target: str) -> list[str]:
             errors.append("transform introduced NaN values in the target column")
         if src[target].nunique(dropna=True) >= 2 and target_series.nunique(dropna=True) < 2:
             errors.append("target collapsed to a single value (degenerate target)")
+        # Target-semantics checks (live housing run 2026-09-03: an LLM
+        # transform quantized the float target into bins, silently flipping
+        # the inferred task type to classification and failing every batch
+        # entry).
+        if (
+            src[target].dtype.kind != target_series.dtype.kind
+            and not (src[target].dtype.kind in {"i", "u"} and target_series.dtype.kind in {"i", "u", "f"})
+        ):
+            errors.append(
+                f"target dtype kind changed ({src[target].dtype.kind} -> "
+                f"{target_series.dtype.kind}); the transform must not quantize "
+                "or retype the target"
+            )
+        src_uniques = src[target].nunique(dropna=True)
+        if src_uniques >= 10:
+            out_uniques = target_series.nunique(dropna=True)
+            if out_uniques < 0.5 * src_uniques:
+                errors.append(
+                    f"target cardinality dropped sharply ({src_uniques} -> "
+                    f"{out_uniques} uniques); the transform must not bin the target"
+                )
     for column in ("target", "label", "y"):
         if column != target and column in out.columns and out[column].equals(out[target]):
             errors.append(f"column '{column}' duplicates the target column")
@@ -606,9 +627,8 @@ async def run_agentic_round(
         record["analyst_llm_used"] = False
     record["brief"] = brief
 
-    # Stage 2: FeatureEngineer (sandbox). Blocking in the coroutine — the
-    # sandbox subprocess is synchronous and the job loop tolerates it (same
-    # pattern as BatchRunner in the deterministic stage).
+    # Stage 2: FeatureEngineer (sandbox). Blocking in the coroutine (proven
+    # pattern; see P5_PLAN X1 notes).
     if cancelled():
         record["status"] = "cancelled"
         return record
