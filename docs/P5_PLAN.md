@@ -34,6 +34,22 @@ coordinated via MCP with a real human approval boundary. Every agent decision
 is traceable to typed artifacts; every agent output is deterministically
 validated before it can affect training.
 
+## Autonomy policy (binding for all phases)
+
+**Autonomy is proportional to blast radius.** Deterministic, user-initiated
+stages carry the initiator's recorded mandate (`auto:experiment:<id>`);
+agent-initiated execution requires explicit human approval; generated code
+always passes the sandbox and a deterministic validator.
+
+- The agentic round (Phase B) **defaults to human-required approval** — it is
+  where liberty is real (generated code, configs beyond the grid). It must not
+  inherit `allow_auto` from its caller: the approval mode is an explicit
+  parameter of the round.
+- `auto:` approval records mean "a human initiated, no human saw the specific
+  proposal" — there is no auth and no user identity (local-first, single
+  user); documented as a thesis limitation.
+- A rejected proposal can never be executed (gate-enforced).
+
 ## Research questions (agentic)
 
 | RQ | Claim | Instrument | Pass bar |
@@ -51,19 +67,35 @@ OpenRouter separately**; mock provider drives the test suite.
 
 ## Phases
 
-### Phase A — Honesty fixes (pre-req; no new claims)
+### Phase A — Honesty fixes (pre-req; no new claims) — implemented 2026-09-02
 
 | # | Work item | Files |
 |---|---|---|
-| A1 | Per-role system prompts: pass `role` into the sub-agent system prompt; distinct role instruction contract per stage | `thelab/ide/orchestrator.py` |
-| A2 | Delete dead `sub_agents.py`; fix `THESIS_MAP.md` evidence pointers | `thelab/ide/sub_agents.py`, `docs/THESIS_MAP.md` |
-| A3 | Single `ApprovalGate`: human approval default; auto-approve only behind explicit config (`THELAB_AUTO_APPROVE=1`); remove self-approvals; wire harness approval requests to existing UI endpoints | new `thelab/agents/approval.py`; `orchestrator.py:378`, `mcp/agent_mcp.py:248`, `ide/jobs.py:330`, `agents/harness.py` |
-| A4 | Feedback wired into the round planning prompt (real consumer) | `orchestrator.py` |
-| A5 | Sandbox descriptions match reality: "compute-isolated, import-restricted; artifacts validated" (BLK-01) | `agents/chat.py:400-401,578` |
-| A6 | Dedupe grounding logic into one module; fix `agent_mcp` dead locals and private cross-server imports | new `thelab/agents/grounding.py`; `harness.py`, `chat.py`, `global_agents.py`, `agent_mcp.py` |
+| A1 ✅ | Per-role system prompts: pass `role` into the sub-agent system prompt; distinct role instruction contract per stage | `thelab/ide/orchestrator.py` (`ROLE_SYSTEM_PROMPTS`) |
+| A2 ✅ | Delete dead `sub_agents.py`; fix `THESIS_MAP.md` evidence pointers | `thelab/ide/sub_agents.py` (deleted), `docs/THESIS_MAP.md` |
+| A3 ✅ | Single `ApprovalGate`: `ensure_executable` (agent-initiated: human approval required by default; auto only behind `THELAB_AUTO_APPROVE=1`, recorded as `auto:<principal>`) + `record_human_approval` (UI click / CLI; a rejected proposal can never be executed — previously `approve_and_run` could overwrite a rejection). All self-approvals removed: agent-initiated flows return `awaiting_approval` | new `thelab/agents/approval.py`; `mcp/agent_mcp.py`, `ide/jobs.py`, `ide/experiment_api.py`, `ide/proposals_api.py`, `cli.py`, `ide/orchestrator.py` |
+| A4 ✅ | Feedback wired into all three stage interpretations and the proposal goal (real consumer) | `orchestrator.py` (`_apply_feedback`), `agent_mcp.py` |
+| A5 ✅ | Sandbox descriptions match reality: "compute-isolated, import-restricted; not OS-confined" (BLK-01) | `agents/chat.py` (tool description + system prompt) |
+| A6 ✅ | Grounding deduped into one module (harness/chat/global agents share extraction + tolerance); `context_write_mcp` helpers made public; `agent_mcp` dead locals and private cross-server imports removed | new `thelab/agents/grounding.py`; `harness.py`, `chat.py`, `global_agents.py`, `context_write_mcp.py`, `agent_mcp.py` |
 
-**Done when:** ruff + mypy + full suite green; deterministic path unchanged;
-README/THESIS_MAP claims match code.
+Gate semantics note (deviation from the original A3 wording, deliberate): the
+orchestrator's deterministic stage auto-approves only because the caller
+explicitly initiated the experiment — recorded as principal
+`auto:experiment:<id>` so the audit trail shows who initiated and that no human
+saw the specific proposal. True human-in-the-loop mid-run approval for the
+agentic round is a Phase B feature. The critical fix stands: **an agent can no
+longer silently execute training** — `agent_mcp.orchestrate_experiment`
+returns `awaiting_approval` by default.
+
+**Done when:** ✅ ruff + mypy + suite green (497 passed); deterministic path
+unchanged; README/THESIS_MAP claims match code; evaluator RQ1–RQ3 PASS.
+
+### RQ5 Spike (pre-Phase B, done 2026-09-02)
+
+Verified: GLM 5.3 Flash produces 3/3 valid pandas transforms in the sandbox
+(100% validity). Root cause of initial 0/3: sandbox `ast.Lambda` block removed
+(safe, pandas-idiomatic). Ollama 3B untested (server down). Full results:
+`docs/RQ5_SPIKE_RESULTS.md`. **Phase B is a GO.**
 
 ### Phase B — The Agentic Round
 
