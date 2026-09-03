@@ -501,3 +501,96 @@ def test_round_mode_agentic_with_llm_transform(round_env, experiment, determinis
     assert record["status"] == "awaiting_approval"
     # The proposal trains on the transformed dataset, not the cleaned one.
     assert record["proposal"]["dataset"].endswith("_agentic.csv")
+
+
+# ---------------------------------------------------------------------------
+# Task-aware model selection (live-run audit 2026-09-03: LLM picked regression
+# models for a classification task -> guaranteed rejection burst)
+# ---------------------------------------------------------------------------
+
+
+def test_registry_for_task_filters_by_task_type():
+    from thelab.ide.agentic_round import _registry_for_task
+
+    classification = _registry_for_task("classification")
+    regression = _registry_for_task("regression")
+    assert "logistic_regression" in classification
+    assert "linear_regression" not in classification
+    assert "ridge" in regression
+    assert "logistic_regression" not in regression
+    auto = _registry_for_task("auto")
+    assert "logistic_regression" in auto and "ridge" in auto
+
+
+def test_selector_post_filters_wrong_task_models(round_env, experiment, deterministic_result):
+    """A scripted selector proposing a regressor for classification is
+    deterministically filtered instead of producing a rejection burst."""
+    from thelab.ide.agentic_round import _generate_selection, build_context_pack
+
+    pack = build_context_pack(experiment, deterministic_result)
+    assert pack["task_type"] == "classification"
+    scripted = {
+        "model_grid": ["linear_regression", "ridge", "logistic_regression"],
+        "seeds": [42],
+        "hyperparameter_grid": {},
+        "rationale": "llm pick",
+    }
+    selection, llm_used = _generate_selection(
+        MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"}, RoundConfig()
+    )
+    assert llm_used is True
+    assert "linear_regression" not in selection["model_grid"]
+    assert "ridge" not in selection["model_grid"]
+    assert "logistic_regression" in selection["model_grid"]
+
+
+def test_selector_falls_back_when_all_wrong_task(round_env, experiment, deterministic_result):
+    from thelab.ide.agentic_round import _generate_selection, build_context_pack
+
+    pack = build_context_pack(experiment, deterministic_result)
+    scripted = {
+        "model_grid": ["linear_regression"],
+        "seeds": [42],
+        "hyperparameter_grid": {},
+        "rationale": "llm pick",
+    }
+    selection, llm_used = _generate_selection(
+        MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"}, RoundConfig()
+    )
+    assert llm_used is False  # fell back to the deterministic recommendation
+    assert "linear_regression" not in selection["model_grid"]
+
+
+def test_selector_caps_llm_grid(round_env, experiment, deterministic_result):
+    """F3: the round's selector stage caps the LLM grid deterministically
+    (and the task filter keeps classification models only)."""
+    from thelab.ide.agentic_round import (
+        RoundConfig,
+        _generate_selection,
+        build_context_pack,
+    )
+
+    pack = build_context_pack(experiment, deterministic_result)
+    scripted = {
+        "model_grid": [
+            "logistic_regression", "random_forest", "sgd_classifier",
+            "hist_gradient_boosting", "svc",
+        ],
+        "seeds": [42, 43, 44, 45],
+        "hyperparameter_grid": {"C": [0.1, 1.0, 10.0, 100.0, 1000.0], "max_iter": [100, 200]},
+        "rationale": "llm explosion",
+    }
+    selection, llm_used = _generate_selection(
+        MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"},
+        RoundConfig(),
+    )
+    assert llm_used is True
+    assert len(selection["model_grid"]) <= 3
+    assert len(selection["seeds"]) <= 3
+    assert all("linear" not in m and "regressor" not in m and m != "ridge"
+               for m in selection["model_grid"])
+    product = 1
+    for values in selection["hyperparameter_grid"].values():
+        product *= max(len(values), 1)
+    assert product <= 4
+    assert selection["grid_capped"] is True

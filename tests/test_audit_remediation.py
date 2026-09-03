@@ -292,3 +292,62 @@ def test_predict_has_no_feature_name_warning(client):
         str(r.message) for r in records if "feature names" in str(r.message)
     ]
     assert not feature_name_warnings, feature_name_warnings
+
+
+# ---------------------------------------------------------------------------
+# Audit F2/F3 — per-model hyperparameter filtering + grid caps
+# ---------------------------------------------------------------------------
+
+
+def test_shared_grid_params_filtered_per_model(audit_env):
+    """F2: a shared grid with foreign params is filtered per estimator, so
+    every batch entry constructs cleanly (live LLM failure mode)."""
+    tmp_path, uploads, fixtures, runs, proposals = audit_env
+    proposal = ExperimentProposal(
+        proposal_id="prop-f2",
+        goal="audit",
+        dataset="uploads/iris.csv",
+        target="species",
+        model_grid=["logistic_regression", "random_forest"],
+        seeds=[42],
+        hyperparameter_grid={"C": [1.0], "n_estimators": [50]},
+    )
+    store = ProposalStore(proposals)
+    store.save(proposal)
+    store.approve("prop-f2", principal="test")
+    batch_path = store.write_batch_config("prop-f2")
+    entries = json.loads(batch_path.read_text(encoding="utf-8"))
+    by_model = {e["model"]: e for e in entries}
+    assert by_model["logistic_regression"]["hyperparameters"] == {"C": 1.0}
+    assert by_model["random_forest"]["hyperparameters"] == {"n_estimators": 50}
+    notes = json.loads((proposals / "prop-f2.batch.notes.json").read_text(encoding="utf-8"))
+    assert "C" in notes["per_model_filter"]["random_forest"]["dropped_params"]
+    assert "n_estimators" in notes["per_model_filter"]["logistic_regression"]["dropped_params"]
+
+
+def test_grid_caps_reject_explosions():
+    """F3: proposal validators bound models/seeds/hp product."""
+    base = {"goal": "g", "dataset": "uploads/iris.csv", "target": "species"}
+    with pytest.raises(Exception, match="model_grid too large"):
+        ExperimentProposal(
+            proposal_id="p",
+            model_grid=["logistic_regression", "random_forest", "sgd_classifier",
+                        "hist_gradient_boosting", "svc"],
+            seeds=[42],
+            **base,
+        )
+    with pytest.raises(Exception, match="too many seeds"):
+        ExperimentProposal(
+            proposal_id="p",
+            model_grid=["logistic_regression"],
+            seeds=[42, 43, 44, 45],
+            **base,
+        )
+    with pytest.raises(Exception, match="combination count too large"):
+        ExperimentProposal(
+            proposal_id="p",
+            model_grid=["logistic_regression"],
+            seeds=[42],
+            hyperparameter_grid={"C": [0.1, 1.0, 10.0, 100.0, 1000.0]},
+            **base,
+        )

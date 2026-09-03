@@ -131,6 +131,20 @@ class ModelRegistry:
         """Return all registered model names."""
         return sorted(self._entries.keys())
 
+    def valid_param_keys(self, name: str) -> set[str]:
+        """Return the constructor parameter keys accepted by estimator *name*.
+
+        Used by proposal/batch translation to filter shared LLM-proposed
+        hyperparameter grids per model: a param that does not exist on the
+        estimator would raise ``TypeError`` at construction and fail the run
+        (full-app audit F2, 2026-09-03).
+        """
+        import inspect
+
+        entry = self.get(name)
+        signature = inspect.signature(entry.estimator_class.__init__)
+        return set(signature.parameters) - {"self"}
+
     def get(self, name: str) -> ModelEntry:
         """Return the entry for *name* or raise ValueError.
 

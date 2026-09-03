@@ -62,6 +62,17 @@ class ExperimentProposal(BaseModel):
         for name in value:
             if name not in known:
                 raise ValueError(f"unsupported model in proposal grid: {name}")
+        if len(value) > 4:
+            # Grid-explosion cap (audit F3): a live LLM can propose arbitrary
+            # Cartesian batches; bound the deterministic work.
+            raise ValueError(f"model_grid too large ({len(value)} > 4)")
+        return value
+
+    @field_validator("seeds")
+    @classmethod
+    def _bounded_seeds(cls, value: list[int]) -> list[int]:
+        if len(value) > 3:
+            raise ValueError(f"too many seeds ({len(value)} > 3)")
         return value
 
     @field_validator("hyperparameter_grid")
@@ -70,6 +81,7 @@ class ExperimentProposal(BaseModel):
         if not isinstance(value, dict):
             raise ValueError("hyperparameter_grid must be a dict of parameter names to lists")
         known_models = set(MODEL_REGISTRY.list_models())
+        product = 1
         for key, items in value.items():
             if not isinstance(items, list):
                 raise ValueError(f"hyperparameter_grid['{key}'] must be a list")
@@ -83,6 +95,11 @@ class ExperimentProposal(BaseModel):
                     f"hyperparameter_grid is model-keyed ('{key}'); expected "
                     "{{param_name: [values]}} shared by the whole model grid"
                 )
+            product *= max(len(items), 1)
+        # Grid-explosion cap (audit F3): bound the Cartesian product of
+        # hyperparameter values per proposal.
+        if product > 4:
+            raise ValueError(f"hyperparameter_grid combination count too large ({product} > 4)")
         return dict(value)
 
     def safe_dict(self) -> dict[str, Any]:
@@ -184,16 +201,34 @@ class ProposalStore:
         The output is a JSON list that ``thelab run batch --config`` expects.
         If ``hyperparameter_grid`` is non-empty, entries include every Cartesian
         combination of hyperparameter values.
+
+        Per-model filtering (audit F2): the shared hyperparameter grid may
+        contain params that do not exist on every estimator of the grid (a
+        live LLM proposed ``C`` alongside ``n_estimators``); params are
+        filtered against each model's constructor via the registry, and the
+        dropped ones are recorded in a sidecar ``*.batch.notes.json`` so the
+        deterministic epilogue stays auditable.
         """
         proposal = self.load(proposal_id)
         hp_grid = proposal.hyperparameter_grid or {}
 
-        hp_names = list(hp_grid.keys())
-        hp_values = [hp_grid[name] for name in hp_names]
-        hp_combinations = [dict(zip(hp_names, combo, strict=True)) for combo in itertools.product(*hp_values)] or [{}]
-
         entries: list[dict[str, Any]] = []
+        filter_notes: dict[str, dict[str, Any]] = {}
         for model in proposal.model_grid:
+            valid_keys = MODEL_REGISTRY.valid_param_keys(model)
+            model_params = {k: v for k, v in hp_grid.items() if k in valid_keys}
+            dropped = {k: v for k, v in hp_grid.items() if k not in valid_keys}
+            if dropped:
+                filter_notes[model] = {
+                    "dropped_params": {k: list(v) for k, v in dropped.items()},
+                    "reason": "param not in estimator constructor (per-model filter)",
+                }
+            hp_names = list(model_params.keys())
+            hp_values = [model_params[name] for name in hp_names]
+            hp_combinations = [
+                dict(zip(hp_names, combo, strict=True)) for combo in itertools.product(*hp_values)
+            ] or [{}]
+
             for seed in proposal.seeds:
                 for hp in hp_combinations:
                     entry: dict[str, Any] = {
@@ -206,8 +241,22 @@ class ProposalStore:
                     if hp:
                         entry["hyperparameters"] = hp
                     entries.append(entry)
+
+        # Grid-explosion safety net (audit F3): the proposal validators bound
+        # the product; enforce a hard entry cap regardless of source config.
+        max_entries = 48
+        truncated = len(entries) > max_entries
+        entries = entries[:max_entries]
+
         path = self.proposals_dir / f"{proposal_id}.batch.json"
         path.write_text(json.dumps(entries, indent=2), encoding="utf-8")
+        if filter_notes or truncated:
+            notes = {
+                "per_model_filter": filter_notes,
+                "truncated_to": max_entries if truncated else None,
+            }
+            notes_path = self.proposals_dir / f"{proposal_id}.batch.notes.json"
+            notes_path.write_text(json.dumps(notes, indent=2), encoding="utf-8")
         return path
 
 

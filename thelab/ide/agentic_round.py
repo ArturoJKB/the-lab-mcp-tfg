@@ -130,6 +130,7 @@ def build_context_pack(experiment: Any, deterministic_result: dict[str, Any]) ->
         "dataset_id": experiment.dataset_id,
         "target": experiment.target,
         "feedback": experiment.feedback,
+        "task_type": _infer_round_task(deterministic_result),
         "cleaned_dataset_id": fe.get("cleaned_dataset_id"),
         "clean_metadata": fe.get("clean_metadata", {}),
         "baseline_top_models": fe.get("top_models", []),
@@ -137,6 +138,35 @@ def build_context_pack(experiment: Any, deterministic_result: dict[str, Any]) ->
         "best_deterministic": best_det,
         "eda_context": deterministic_result.get("eda", {}).get("eda_context", ""),
     }
+
+
+def _infer_round_task(deterministic_result: dict[str, Any]) -> str:
+    """Infer the round's task type from the deterministic baseline evidence."""
+    training_results = deterministic_result.get("training_results", [])
+    for result in training_results:
+        metrics = result.get("metrics") or {}
+        if "test_accuracy" in metrics or "test_f1_macro" in metrics:
+            return "classification"
+        if "test_rmse" in metrics or "test_r2" in metrics or "test_mae" in metrics:
+            return "regression"
+    class_balance = (deterministic_result.get("eda") or {}).get("eda_result", {}).get(
+        "class_balance", {}
+    )
+    if class_balance.get("classes"):
+        return "classification"
+    return "auto"
+
+
+def _registry_for_task(task_type: str) -> list[str]:
+    """Registry model names appropriate for *task_type* (full list when auto)."""
+    if task_type not in {"classification", "regression"}:
+        return sorted(MODEL_REGISTRY.list_models())
+    names = []
+    for name in sorted(MODEL_REGISTRY.list_models()):
+        entry = MODEL_REGISTRY.get(name)
+        if entry.task_type == task_type:
+            names.append(name)
+    return names
 
 
 def _deterministic_brief(pack: dict[str, Any]) -> dict[str, Any]:
@@ -419,9 +449,11 @@ def _generate_selection(
     config: RoundConfig,
 ) -> tuple[dict[str, Any], bool]:
     """Selector stage: returns (selection_dict, llm_used)."""
-    registry_models = sorted(MODEL_REGISTRY.list_models())
+    task_type = str(pack.get("task_type") or "auto")
+    registry_models = _registry_for_task(task_type)
     if provider is not None:
         instruction = (
+            f"Task type: {task_type} — only models from the list below are valid.\n"
             f"Registry models: {registry_models}\n"
             f"Task target: {pack.get('target')}\n"
             f"Baseline top models: {json.dumps(pack.get('baseline_top_models', []), default=str)[:1500]}\n"
@@ -431,6 +463,38 @@ def _generate_selection(
         )
         parsed = _single_turn_json(provider, config.prompt_for(MODEL_SELECTOR_SYSTEM_PROMPT), instruction)
         if parsed and isinstance(parsed.get("model_grid"), list) and parsed["model_grid"]:
+            # Deterministic post-filter: drop models that do not match the
+            # task type (a wrong-task model is a guaranteed training
+            # rejection, audit live run 2026-09-03).
+            if task_type in {"classification", "regression"}:
+                allowed = set(registry_models)
+                parsed["model_grid"] = [
+                    str(m) for m in parsed["model_grid"] if str(m) in allowed
+                ]
+                if not parsed["model_grid"]:
+                    return _selection_fallback(pack), False
+            # Grid-explosion cap (audit F3): bound the Cartesian product the
+            # LLM can spawn (≤3 models × ≤3 seeds × ≤4 hp combos); the
+            # truncation is deterministic and recorded via "grid_capped".
+            raw_grid = [str(m) for m in parsed["model_grid"]]
+            raw_seeds = [s for s in parsed.get("seeds", [42]) or [42]]
+            raw_hp = {
+                str(k): [x for x in (v if isinstance(v, list) else [v]) if x is not None]
+                for k, v in (parsed.get("hyperparameter_grid") or {}).items()
+            }
+            capped = len(raw_grid) > 3 or len(raw_seeds) > 3 or any(len(v) > 2 for v in raw_hp.values()) or len(raw_hp) > 2
+            seeds: list[int] = []
+            for s in raw_seeds:
+                try:
+                    seeds.append(int(s))
+                except (TypeError, ValueError):
+                    continue
+            hp_items = list(raw_hp.items())[:2]
+            per_list = max(4 // max(len(hp_items), 1), 1)
+            parsed["model_grid"] = raw_grid[:3]
+            parsed["seeds"] = (seeds or [42])[:3]
+            parsed["hyperparameter_grid"] = {k: v[:per_list] for k, v in hp_items}
+            parsed["grid_capped"] = capped
             return parsed, True
     return _selection_fallback(pack), False
 
