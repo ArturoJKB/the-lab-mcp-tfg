@@ -17,7 +17,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from thelab.run.inference import feature_columns, normalize_features
+from thelab.run.inference import feature_columns, normalize_features, predict_features
 
 from .common import (
     discover_run_ids,
@@ -192,7 +192,7 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
         try:
             normalized = normalize_features(features, cols)
             model = joblib.load(model_path)
-            predictions = model.predict(normalized)
+            predictions = predict_features(model, normalized, cols)
             return _ok(
                 {
                     "run_id": run_id,

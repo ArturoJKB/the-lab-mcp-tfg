@@ -584,19 +584,36 @@ async def run_agentic_round(
         proposals_dir if proposals_dir else os.environ.get("THELAB_PROPOSALS_DIR", "proposals")
     )
     proposal_id = f"prop-round-{uuid.uuid4().hex[:12]}"
-    proposal = ExperimentProposal(
-        proposal_id=proposal_id,
-        goal=f"Agentic round for experiment {experiment_id}: {pack['goal']}",
-        dataset=dataset_id_to_relative_path(dataset_id),
-        target=str(pack["target"]),
-        model_grid=[str(m) for m in selection.get("model_grid", [])],
-        seeds=[int(s) for s in selection.get("seeds", [42])],
-        hyperparameter_grid={
-            str(k): list(v) for k, v in (selection.get("hyperparameter_grid") or {}).items()
-        },
-        task_type="auto",
-        rationale=str(selection.get("rationale", "")),
-    )
+    try:
+        proposal = ExperimentProposal(
+            proposal_id=proposal_id,
+            goal=f"Agentic round for experiment {experiment_id}: {pack['goal']}",
+            dataset=dataset_id_to_relative_path(dataset_id),
+            target=str(pack["target"]),
+            model_grid=[str(m) for m in selection.get("model_grid", [])],
+            seeds=[int(s) for s in selection.get("seeds", [42])],
+            hyperparameter_grid={
+                str(k): list(v) for k, v in (selection.get("hyperparameter_grid") or {}).items()
+            },
+            task_type="auto",
+            rationale=str(selection.get("rationale", "")),
+        )
+    except Exception as exc:
+        # e.g. a model-keyed hyperparameter grid from the LLM: fall back to the
+        # deterministic selection rather than losing the whole round.
+        fallback = _selection_fallback(pack)
+        record["selection_validation_error"] = str(exc)
+        proposal = ExperimentProposal(
+            proposal_id=proposal_id,
+            goal=f"Agentic round for experiment {experiment_id}: {pack['goal']}",
+            dataset=dataset_id_to_relative_path(dataset_id),
+            target=str(pack["target"]),
+            model_grid=[str(m) for m in fallback["model_grid"]],
+            seeds=[int(s) for s in fallback["seeds"]],
+            hyperparameter_grid=dict(fallback["hyperparameter_grid"]),
+            task_type="auto",
+            rationale=str(fallback["rationale"]),
+        )
     store.save(proposal)
     record["proposal_id"] = proposal_id
     record["proposal"] = proposal.safe_dict()

@@ -61,3 +61,20 @@ def normalize_features(features: Any, feature_columns: list[str]) -> list[list[f
         else:
             raise ValueError("each feature row must be a dict or list")
     return rows
+
+
+def predict_features(model: Any, normalized: Any, feature_columns: list[str]) -> Any:
+    """Predict on a normalized matrix, preserving feature names when fitted with them.
+
+    Models are trained on ``DataFrame[feature_columns]``, so inference with a
+    plain ndarray triggers sklearn's feature-name UserWarning. Rebuilding the
+    frame fixes that; if the persisted model's fitted names differ (older
+    artifacts), fall back to the ndarray path so behavior never changes.
+    """
+    try:
+        import pandas as pd
+
+        frame = pd.DataFrame(normalized, columns=feature_columns)
+        return model.predict(frame)
+    except Exception:
+        return model.predict(normalized)

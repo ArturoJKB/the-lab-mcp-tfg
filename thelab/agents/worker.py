@@ -69,9 +69,20 @@ class ExperimentProposal(BaseModel):
     def _scalar_lists(cls, value: dict[str, Any]) -> dict[str, list[Any]]:
         if not isinstance(value, dict):
             raise ValueError("hyperparameter_grid must be a dict of parameter names to lists")
+        known_models = set(MODEL_REGISTRY.list_models())
         for key, items in value.items():
             if not isinstance(items, list):
                 raise ValueError(f"hyperparameter_grid['{key}'] must be a list")
+            # Live LLMs sometimes emit a model-keyed grid
+            # ({"logistic_regression": [{...}]}): every entry would then be
+            # passed to *every* model's constructor and all training would
+            # fail silently. Reject it so the worker falls back
+            # deterministically instead of producing zero trained models.
+            if key in known_models and items and all(isinstance(i, dict) for i in items):
+                raise ValueError(
+                    f"hyperparameter_grid is model-keyed ('{key}'); expected "
+                    "{{param_name: [values]}} shared by the whole model grid"
+                )
         return dict(value)
 
     def safe_dict(self) -> dict[str, Any]:

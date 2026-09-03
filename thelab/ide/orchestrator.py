@@ -65,6 +65,14 @@ class OrchestrationCancelled(RuntimeError):
     """Raised when a caller requests cancellation between stages."""
 
 
+class OrchestrationFailed(RuntimeError):
+    """Raised when a deterministic orchestration stage fails.
+
+    Distinct from provider failures so callers can report the real cause
+    instead of blaming the LLM provider (audit BUG 2).
+    """
+
+
 def _workspace_root() -> Path:
     return Path(os.environ.get("THELAB_WORKSPACE_ROOT", "."))
 
@@ -95,6 +103,16 @@ class ExperimentOrchestrator:
             proposals_dir=self.proposals_dir,
             runs_root=self.runs_root,
         )
+
+    @staticmethod
+    async def _run_stage(coroutine_factory: Callable[[], Any], stage: str) -> Any:
+        """Run a deterministic stage; deterministic failures get their own type."""
+        try:
+            return await coroutine_factory()
+        except OrchestrationCancelled:
+            raise
+        except Exception as exc:
+            raise OrchestrationFailed(f"{stage} stage failed: {exc}") from exc
 
     @staticmethod
     def _is_live(provider: LLMProvider | None) -> bool:
@@ -205,11 +223,19 @@ class ExperimentOrchestrator:
         _ = resolve_dataset_path(dataset_id)
 
         # Already-cleaned datasets are training-ready: re-cleaning is wasteful
-        # and the cleaning API rejects it.
+        # and the cleaning API rejects it. Fixtures are clean by construction
+        # and the cleaning API only accepts uploads (audit BUG 2).
         clean_metadata: dict[str, Any]
-        if "_cleaned" in dataset_id:
+        if "_cleaned" in dataset_id or dataset_id.startswith("fixtures/"):
             cleaned_dataset_id = dataset_id
-            clean_metadata = {"skipped": True, "reason": "dataset already cleaned"}
+            clean_metadata = {
+                "skipped": True,
+                "reason": (
+                    "dataset already cleaned"
+                    if "_cleaned" in dataset_id
+                    else "fixture datasets are clean by construction"
+                ),
+            }
         else:
             clean_metadata = clean_dataset(
                 dataset_id,
@@ -301,6 +327,7 @@ class ExperimentOrchestrator:
         provider: LLMProvider | None = None,
         on_event: EventCallback | None = None,
         should_continue: ShouldContinue | None = None,
+        experiment_id: str | None = None,
     ) -> dict[str, Any]:
         """Main orchestration loop: EDA -> Feature Engineering -> Model Selection -> Training.
 
@@ -308,7 +335,9 @@ class ExperimentOrchestrator:
         callers can stream progress (stage is one of ``planning``, ``cleaning``,
         ``training``, ``evaluating``). ``should_continue()`` returning False
         raises :class:`OrchestrationCancelled` at the next stage boundary or
-        batch entry.
+        batch entry. ``experiment_id`` lets the caller pin the audit trail
+        (approval principals) to the persisted experiment; a generated id is
+        used only when the caller did not provide one.
         """
 
         def emit(stage: str, message: str) -> None:
@@ -322,12 +351,21 @@ class ExperimentOrchestrator:
             if check_cancelled():
                 raise OrchestrationCancelled("experiment cancelled by user")
 
-        experiment_id = generate_experiment_id()
+        experiment_id = experiment_id or generate_experiment_id()
+
+        # Fail fast on unknown/unsafe datasets before any stage runs, so
+        # callers see the typed error instead of a stage wrapper (BUG 2).
+        resolve_dataset_path(dataset_id)
 
         # Step 1: EDA Analysis
         ensure_not_cancelled()
         emit("planning", "EDAAnalyst analyzing dataset")
-        eda_result = await self.run_eda_analysis(dataset_id, target, goal)
+        try:
+            eda_result = await self.run_eda_analysis(dataset_id, target, goal)
+        except OrchestrationCancelled:
+            raise
+        except Exception as exc:
+            raise OrchestrationFailed(f"EDA stage failed: {exc}") from exc
         eda_interp = await self._interpret(
             provider,
             "EDAAnalyst",
@@ -346,11 +384,14 @@ class ExperimentOrchestrator:
             emit("cleaning", "Dataset is already cleaned — skipping cleaning stage")
         else:
             emit("cleaning", "FeatureEngineer cleaning dataset and computing baselines")
-        fe_result = await self.run_feature_engineering(
-            dataset_id=dataset_id,
-            target=target,
-            eda_context=eda_result["eda_context"],
-            goal=goal,
+        fe_result = await self._run_stage(
+            lambda: self.run_feature_engineering(
+                dataset_id=dataset_id,
+                target=target,
+                eda_context=eda_result["eda_context"],
+                goal=goal,
+            ),
+            "feature engineering",
         )
         fe_interp = await self._interpret(
             provider,
@@ -375,11 +416,14 @@ class ExperimentOrchestrator:
 
         ensure_not_cancelled()
         emit("training", "ModelSelector comparing registered models")
-        ms_result = await self.run_model_selection(
-            dataset_id=fe_result["cleaned_dataset_id"],
-            target=target,
-            task_type=task_type,
-            eda_context=eda_result["eda_context"],
+        ms_result = await self._run_stage(
+            lambda: self.run_model_selection(
+                dataset_id=fe_result["cleaned_dataset_id"],
+                target=target,
+                task_type=task_type,
+                eda_context=eda_result["eda_context"],
+            ),
+            "model selection",
         )
         ms_interp = await self._interpret(
             provider,

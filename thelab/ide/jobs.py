@@ -18,7 +18,11 @@ from pathlib import Path
 from typing import Any
 
 from thelab.ide.experiment import ExperimentState, ExperimentStore
-from thelab.ide.orchestrator import ExperimentOrchestrator, OrchestrationCancelled
+from thelab.ide.orchestrator import (
+    ExperimentOrchestrator,
+    OrchestrationCancelled,
+    OrchestrationFailed,
+)
 from thelab.ide.proposals_api import run_proposal
 from thelab.ide.train_api import train_model
 from thelab.mcp.common import load_json_artifact
@@ -559,12 +563,19 @@ class JobManager:
                 provider=provider,
                 on_event=on_event,
                 should_continue=lambda: not job.cancel_requested,
+                experiment_id=experiment_id,
             )
         except OrchestrationCancelled:
             experiment.update_state(ExperimentState.CANCELLED)
             experiment.error = "cancelled by user"
             store.save(experiment)
             raise
+        except OrchestrationFailed as exc:
+            # Deterministic-stage failure: the provider is not to blame.
+            experiment.update_state(ExperimentState.FAILED)
+            experiment.error = str(exc)
+            store.save(experiment)
+            raise JobError(str(exc)) from exc
         except Exception as exc:  # noqa: BLE001 - mark experiment failed, not stuck
             detail = str(exc)
             if provider is not None:
@@ -607,14 +618,23 @@ class JobManager:
             "ModelSelector": result.get("model_selection", {}),
         }
         training_results = result.get("training_results", [])
+        completed_runs = sum(1 for r in training_results if r.get("status") == "completed")
         best = next((r for r in training_results if r.get("status") == "completed"), None)
         if best is not None and best.get("run_id"):
             experiment.best_run_id = best["run_id"]
             metrics = load_json_artifact(Path(runs_root), best["run_id"], "metrics.json")
             experiment.best_metrics = metrics or {}
-        if result.get("status") == "no_models_found":
+        if result.get("status") == "no_models_found" or (
+            training_results and completed_runs == 0
+        ):
+            # Honest outcome: a batch where every candidate failed is a failed
+            # experiment, never a green checkmark (audit BUG 1).
             experiment.update_state(ExperimentState.FAILED)
-            experiment.error = "no candidate models completed"
+            experiment.error = (
+                "no candidate models completed"
+                if not training_results
+                else f"all {len(training_results)} candidate training runs failed"
+            )
         else:
             experiment.update_state(ExperimentState.COMPLETED)
 

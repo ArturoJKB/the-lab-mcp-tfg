@@ -11,7 +11,7 @@ import joblib
 
 from thelab.mcp.common import get_runs_root, load_json_artifact, safe_run_dir
 
-from .inference import feature_columns, normalize_features
+from .inference import feature_columns, normalize_features, predict_features
 
 
 def _parse_features(raw: str, feature_columns: list[str]) -> list[list[float]]:
@@ -61,7 +61,7 @@ def predict(run_id: str, features: list[Any], workspace_root: Path | str | None 
 
     normalized = normalize_features(features, cols)
     model = joblib.load(model_path)
-    predictions = model.predict(normalized)
+    predictions = predict_features(model, normalized, cols)
 
     return {
         "run_id": run_id,

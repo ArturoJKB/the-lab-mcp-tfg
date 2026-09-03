@@ -47,7 +47,7 @@ from thelab.ide.train_api import train_model
 from thelab.ide.viewer_api import compare_runs, preview_dataset
 from thelab.ide.worker_api import generate_proposal
 from thelab.mcp.common import discover_run_ids, get_runs_root, load_json_artifact, safe_run_dir
-from thelab.run.inference import feature_columns, normalize_features
+from thelab.run.inference import feature_columns, normalize_features, predict_features
 from thelab.run.model_registry import MODEL_REGISTRY
 from thelab.sandbox import run_in_sandbox
 from thelab.sandbox.runner import SandboxError
@@ -488,7 +488,7 @@ def _predict(run_id: str, features: list[Any]) -> dict[str, Any]:
 
     try:
         model = joblib.load(model_path)
-        predictions = model.predict(normalized)
+        predictions = predict_features(model, normalized, cols)
     except Exception as exc:
         raise HTTPException(status_code=500, detail="prediction failed") from exc
 
@@ -1047,7 +1047,7 @@ async def get_job_events(job_id: str) -> StreamingResponse:
 
     async def event_stream() -> Any:
         async for event in manager.events(job_id):
-            yield f"data: {json.dumps(event.to_dict())}\n\n"
+            yield f"data: {json.dumps(event.to_dict(), default=str)}\n\n"
 
     return StreamingResponse(
         event_stream(),
@@ -1136,7 +1136,7 @@ async def get_experiment_events_endpoint(experiment_id: str) -> StreamingRespons
 
     async def event_stream() -> Any:
         async for event in manager.events(job_id):
-            yield f"data: {json.dumps(event.to_dict())}\n\n"
+            yield f"data: {json.dumps(event.to_dict(), default=str)}\n\n"
 
     return StreamingResponse(
         event_stream(),
