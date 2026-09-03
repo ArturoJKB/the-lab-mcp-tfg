@@ -353,6 +353,9 @@ class ExperimentOrchestrator:
 
         experiment_id = experiment_id or generate_experiment_id()
 
+        # Cancellation is honored before any work, including input validation.
+        ensure_not_cancelled()
+
         # Fail fast on unknown/unsafe datasets before any stage runs, so
         # callers see the typed error instead of a stage wrapper (BUG 2).
         resolve_dataset_path(dataset_id)
