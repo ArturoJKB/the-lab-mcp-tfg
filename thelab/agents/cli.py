@@ -439,6 +439,9 @@ def _print_exception_group(eg: BaseExceptionGroup) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from thelab.env import load_dotenv
+
+    load_dotenv()
     parser = _build_parser()
     args = parser.parse_args(argv)
     try:

@@ -159,3 +159,12 @@ RQ3: PASS
   search by design decision).
 - Dependency lock is a `pip freeze` style pin without hashes; reproducibility
   relies on PyPI package availability.
+- The iris fixture is 30 rows (6-row test splits): quoted 1.0000 accuracies
+  are fixture artifacts, not model quality claims — a single misclassification
+  would drop them visibly. Real-dataset results (S&P, Kaggle) carry the
+  evidence weight.
+- Approval-gate trust model: the gate guarantees recorded provenance and
+  default-deny for agent-native surfaces (MCP tools); it cannot
+  cryptographically verify that a CLI approval was typed by a human (a
+  shell-capable agent could self-approve). Documented as a boundary, not a
+  security claim.

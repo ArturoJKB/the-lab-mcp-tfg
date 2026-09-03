@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from thelab.agents.chat import chat as agent_chat
 from thelab.context.reader import ContextReader, ContextReaderError
+from thelab.env import load_dotenv
 from thelab.ide.cleaning import clean_dataset
 from thelab.ide.datasets import DatasetNotFoundError, UploadError, list_datasets, save_upload
 from thelab.ide.eda_api import EdaError, run_eda
@@ -52,25 +53,7 @@ from thelab.run.model_registry import MODEL_REGISTRY
 from thelab.sandbox import run_in_sandbox
 from thelab.sandbox.runner import SandboxError
 
-
-def _load_dotenv() -> None:
-    """Load KEY=VALUE pairs from a repo-root .env into os.environ (setdefault)."""
-    candidates = [Path.cwd() / ".env", Path(__file__).resolve().parents[2] / ".env"]
-    for env_path in candidates:
-        if not env_path.is_file():
-            continue
-        for line in env_path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            key = key.strip()
-            if key.startswith("export "):
-                key = key[len("export ") :].strip()
-            os.environ.setdefault(key, value.strip().strip("'").strip('"'))
-
-
-_load_dotenv()
+load_dotenv()
 
 _DEFAULT_CONTEXT_DB = Path(".thelab") / "context" / "context.db"
 

@@ -105,13 +105,21 @@ The model service exposes a local JSON API. Responses are
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/datasets/upload` | multipart CSV upload |
+| POST | `/datasets/ingest-kaggle` | ingest a public Kaggle dataset |
 | GET | `/eda/{dataset_id}?target=` | EDA report |
 | POST | `/datasets/{dataset_id}/clean` | cleaning policy; body: `{"target": "..."}` |
-| POST | `/experiment/run` | start an orchestrated experiment |
+| POST | `/experiment/run` | start an orchestrated experiment (`"agentic_round": true` opts into the round) |
 | GET | `/experiment/{id}/status` / `/events` / `/results` | state, SSE stream, best run |
+| GET | `/experiment/{id}/agentic-round` | round record (brief, transform, proposal, comparison) |
+| POST | `/experiment/{id}/agentic-round/approve` / `/reject` | human gate for the agentic round |
 | POST | `/experiment/{id}/feedback` | queue a new iteration |
-| POST | `/jobs` / `POST /jobs/{id}/cancel` | submit / cancel background jobs |
+| POST | `/proposals/{id}/approve` / `/reject` / `/run` / `/run-as-experiment` / `/approve-and-run` | proposal lifecycle |
+| POST | `/jobs` / `POST /jobs/{id}/cancel` | submit / cancel background jobs (`train`, `batch`, `experiment`, `try_all`, `proposal_experiment`, `agentic_round_execute`) |
+| GET | `/jobs/{id}` / `/jobs/{id}/events` | job status / SSE event stream |
+| POST | `/agent/chat` / `/agent/chat/stream` | grounded chat agent (JSON / SSE) |
+| POST | `/sandbox/run` | run Python in the restricted sandbox |
 | POST | `/predict` | inference on approved runs |
+| GET | `/runs/{id}/notebook` | generated experiment notebook |
 
 Example:
 
@@ -124,6 +132,20 @@ curl -s -X POST localhost:8000/train \
 
 Note: HTTP paths reference datasets by id (`uploads/<file>` or
 `fixtures/<basename>`), not by arbitrary path.
+
+**Notes and known boundaries:**
+
+- The **EDA MCP server** reads only files under `runs/` (path-contained by
+  design). To run standalone EDA on another CSV, stage it into `runs/` first.
+- The **agent CLI** (`thelab-agent`) and the model service both auto-load a
+  repo-root `.env` — live providers (`THELAB_LLM_API_KEY`,
+  `OPENROUTER_API_KEY`, `OLLAMA_BASE_URL`) work without `source .env`.
+- Agent-initiated experiments (via `agent_mcp` from an external MCP client
+  such as opencode or Claude Code) stop at the approval gate: the tool returns
+  the proposal as `awaiting_approval` and a human approves it in the UI or
+  with `thelab proposals approve`. For trusted dev loops,
+  `THELAB_AUTO_APPROVE=1` (env) opts the local operator in — recorded as
+  `auto:<principal>` in the audit trail.
 
 ---
 

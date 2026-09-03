@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -161,8 +162,9 @@ class AgentHarness:
                 )
 
     def _persist_approval_request(self, tool: str, arguments: dict[str, Any]) -> Path:
-        """Persist a disallowed tool request under .thelab/approvals/."""
-        approvals_dir = Path(".thelab") / "approvals"
+        """Persist a disallowed tool request under <workspace>/.thelab/approvals/."""
+        workspace_root = Path(os.environ.get("THELAB_WORKSPACE_ROOT", "."))
+        approvals_dir = workspace_root / ".thelab" / "approvals"
         approvals_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now(UTC).isoformat()
         filename = f"{self.session_id}_{timestamp.replace(':', '_')}.json"
