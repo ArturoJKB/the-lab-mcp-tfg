@@ -24,6 +24,7 @@ async def start_experiment(
     feedback: str | None = None,
     provider_name: str = "mock",
     model: str | None = None,
+    agentic_round: bool = False,
 ) -> dict[str, Any]:
     """Create an experiment and queue its orchestration as a background job."""
     resolve_dataset_path(dataset_id)
@@ -53,6 +54,7 @@ async def start_experiment(
             "feedback": feedback,
             "provider": provider_name,
             "model": model,
+            "agentic_round": bool(agentic_round),
         },
     )
     experiment.plan["job_id"] = job.job_id
@@ -158,6 +160,17 @@ async def run_proposal_as_experiment(proposal_id: str, principal: str = "ui") ->
         raise ValueError(f"proposal not found: {proposal_id}")
 
     proposal = proposal_store.load(proposal_id)
+
+    # The HTTP call itself is the human approval (the UI click); record it
+    # through the single approval gate before the job is queued. A rejected
+    # proposal is never executed.
+    from thelab.agents.approval import ApprovalDenied, record_human_approval
+
+    try:
+        record_human_approval(proposal_store, proposal_id, principal="ui")
+    except ApprovalDenied as exc:
+        raise ValueError(str(exc)) from exc
+
     experiment, store = create_experiment(
         goal=proposal.goal or f"Run proposal {proposal_id}",
         dataset_id=proposal.dataset,
@@ -191,3 +204,101 @@ async def run_proposal_as_experiment(proposal_id: str, principal: str = "ui") ->
 async def list_experiments(limit: int = 50) -> list[dict[str, Any]]:
     """List recent experiments."""
     return ExperimentStore().list_experiments(limit=limit)
+
+
+async def approve_agentic_round(experiment_id: str, principal: str = "ui") -> dict[str, Any]:
+    """Record the human approval of an agentic-round proposal and queue execution.
+
+    The gate records the UI principal; the execution job itself never approves.
+    """
+    experiment, store = _load_or_raise(experiment_id)
+    round_info = experiment.plan.get("agentic_round") or {}
+    proposal_id = round_info.get("proposal_id")
+    if not proposal_id:
+        raise ValueError(f"experiment {experiment_id} has no agentic-round proposal")
+
+    from thelab.agents.approval import ApprovalDenied, record_human_approval
+    from thelab.agents.worker import ProposalStore
+
+    proposal_store = ProposalStore(os.environ.get("THELAB_PROPOSALS_DIR", "proposals"))
+    if not proposal_store.exists(proposal_id):
+        raise ValueError(f"round proposal not found: {proposal_id}")
+    try:
+        record_human_approval(proposal_store, proposal_id, principal=principal)
+    except ApprovalDenied as exc:
+        raise ValueError(str(exc)) from exc
+
+    manager = get_job_manager()
+    job = await manager.submit(
+        "agentic_round_execute",
+        {"experiment_id": experiment_id, "proposal_id": proposal_id},
+    )
+    # Rotate the streamed job so the UI SSE stream follows the execution.
+    previous_job_ids = [j for j in experiment.plan.get("previous_job_ids", []) if j]
+    old_job_id = experiment.plan.get("job_id")
+    if old_job_id and old_job_id != job.job_id and old_job_id not in previous_job_ids:
+        previous_job_ids.append(old_job_id)
+    experiment.plan["job_id"] = job.job_id
+    experiment.plan["previous_job_ids"] = previous_job_ids
+    experiment.plan["agentic_round"]["execution_job_id"] = job.job_id
+    experiment.plan["agentic_round"]["status"] = "approved"
+    experiment.update_state(ExperimentState.TRAINING)
+    store.save(experiment)
+    return {
+        "experiment_id": experiment_id,
+        "proposal_id": proposal_id,
+        "job_id": job.job_id,
+        "state": experiment.state.value,
+    }
+
+
+async def reject_agentic_round(
+    experiment_id: str, principal: str = "ui", reason: str = ""
+) -> dict[str, Any]:
+    """Reject the agentic-round proposal; the deterministic result stands."""
+    experiment, store = _load_or_raise(experiment_id)
+    round_info = experiment.plan.get("agentic_round") or {}
+    proposal_id = round_info.get("proposal_id")
+    if not proposal_id:
+        raise ValueError(f"experiment {experiment_id} has no agentic-round proposal")
+
+    from thelab.agents.worker import ProposalStore
+
+    proposal_store = ProposalStore(os.environ.get("THELAB_PROPOSALS_DIR", "proposals"))
+    if not proposal_store.exists(proposal_id):
+        raise ValueError(f"round proposal not found: {proposal_id}")
+    proposal_store.reject(proposal_id, principal=principal, reason=reason)
+
+    round_info["status"] = "rejected"
+    round_info["rejection_reason"] = reason
+    experiment.plan["agentic_round"] = round_info
+    # Rejection is a first-class outcome: the deterministic result stands.
+    experiment.update_state(ExperimentState.COMPLETED)
+    store.save(experiment)
+    return {
+        "experiment_id": experiment_id,
+        "proposal_id": proposal_id,
+        "state": experiment.state.value,
+        "status": "rejected",
+    }
+
+
+async def get_agentic_round(experiment_id: str) -> dict[str, Any]:
+    """Return the agentic-round record (brief, transform, proposal, comparison)."""
+    experiment, _ = _load_or_raise(experiment_id)
+    experiments_dir = Path(os.environ.get("THELAB_EXPERIMENTS_DIR", Path(".thelab") / "experiments"))
+    record_path = experiments_dir / f"{experiment_id}.agentic_round.json"
+    record = None
+    if record_path.is_file():
+        import json
+
+        try:
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            record = None
+    return {
+        "experiment_id": experiment_id,
+        "plan": experiment.plan.get("agentic_round", {}),
+        "state": experiment.state.value,
+        "record": record,
+    }

@@ -156,7 +156,14 @@ class JobManager:
 
     async def submit(self, job_type: str, payload: dict[str, Any]) -> Job:
         """Validate and enqueue a background job."""
-        if job_type not in {"train", "batch", "experiment", "try_all", "proposal_experiment"}:
+        if job_type not in {
+            "train",
+            "batch",
+            "experiment",
+            "try_all",
+            "proposal_experiment",
+            "agentic_round_execute",
+        }:
             raise JobError(f"unsupported job type: {job_type}")
 
         job_id = _generate_job_id()
@@ -229,6 +236,8 @@ class JobManager:
                 result = await self._run_try_all(job)
             elif job.job_type == "proposal_experiment":
                 result = await self._run_proposal_experiment(job)
+            elif job.job_type == "agentic_round_execute":
+                result = await self._run_agentic_round_execute(job)
             else:
                 raise JobError(f"unsupported job type: {job.job_type}")
 
@@ -320,14 +329,24 @@ class JobManager:
         if experiment is None:
             raise JobError(f"experiment not found: {experiment_id}")
 
+        from thelab.agents.approval import ApprovalDenied, HumanApprovalRequired, ensure_executable
         from thelab.agents.worker import ProposalStore
 
         proposals_dir = os.environ.get("THELAB_PROPOSALS_DIR", "proposals")
         proposal_store = ProposalStore(proposals_dir)
         if not proposal_store.exists(proposal_id):
             raise JobError(f"proposal not found: {proposal_id}")
-        if not proposal_store.is_approved(proposal_id):
-            proposal_store.approve(proposal_id, principal="experiment_run")
+        # The job executor never approves. Human approval happens upstream
+        # (UI click on /run-as-experiment or /approve-and-run, or the CLI).
+        try:
+            ensure_executable(
+                proposal_store,
+                proposal_id,
+                principal=f"proposal_experiment:{experiment_id}",
+                allow_auto=False,
+            )
+        except (ApprovalDenied, HumanApprovalRequired) as exc:
+            raise JobError(str(exc)) from exc
 
         experiment.update_state(ExperimentState.TRAINING)
         store.save(experiment)
@@ -401,6 +420,73 @@ class JobManager:
             "total": len(results),
             "training_results": training_results,
         }
+
+    async def _run_agentic_round_execute(self, job: Job) -> dict[str, Any]:
+        """Execute an approved agentic-round proposal through the factory (human-gated)."""
+        payload = job.payload
+        experiment_id = payload.get("experiment_id")
+        proposal_id = payload.get("proposal_id")
+        if not experiment_id or not proposal_id:
+            raise JobError("agentic_round_execute requires experiment_id and proposal_id")
+
+        store = ExperimentStore()
+        experiment = store.load(experiment_id)
+        if experiment is None:
+            raise JobError(f"experiment not found: {experiment_id}")
+
+        from thelab.agents.approval import ApprovalDenied, HumanApprovalRequired
+        from thelab.ide.agentic_round import execute_approved_round
+
+        experiment.update_state(ExperimentState.TRAINING)
+        store.save(experiment)
+
+        def on_event(_stage: str, message: str) -> None:
+            job.emit("info", message, {"stage": "agentic_round", "experiment_id": experiment_id})
+
+        try:
+            # Blocking in the coroutine (same pattern as _run_proposal_experiment):
+            # the round must not hop executors — that is flaky under the test
+            # client's portal loop.
+            result = execute_approved_round(
+                experiment,
+                proposal_id,
+                on_event=on_event,
+                should_continue=lambda: not job.cancel_requested,
+                runs_root=os.environ.get("THELAB_RUNS_ROOT", "runs"),
+            )
+        except (ApprovalDenied, HumanApprovalRequired) as exc:
+            experiment.update_state(ExperimentState.AWAITING_APPROVAL)
+            experiment.error = str(exc)
+            store.save(experiment)
+            job.emit("warn", str(exc), {"stage": "agentic_round"})
+            return {"status": "awaiting_approval", "proposal_id": proposal_id, "error": str(exc)}
+
+        if result.get("status") == "completed":
+            comparison = result.get("comparison", {})
+            agentic_best = (comparison.get("agentic_best") or {})
+            experiment.sub_agent_results = {
+                **experiment.sub_agent_results,
+                "AgenticRound": {
+                    "proposal_id": proposal_id,
+                    "comparison": comparison,
+                },
+            }
+            # Keep the overall best across deterministic and agentic runs,
+            # recording which arm produced it.
+            det_metrics = experiment.best_metrics or {}
+            agent_metrics = agentic_best.get("metrics") or {}
+            det_acc = det_metrics.get("test_accuracy", -1.0)
+            agent_acc = agent_metrics.get("test_accuracy", -1.0)
+            if isinstance(agent_acc, (int, float)) and agent_acc > (det_acc if isinstance(det_acc, (int, float)) else -1.0):
+                experiment.best_run_id = agentic_best.get("run_id")
+                experiment.best_metrics = _json_safe(agent_metrics)
+                experiment.plan["best_source"] = "agentic_round"
+            experiment.update_state(ExperimentState.COMPLETED)
+        else:
+            experiment.update_state(ExperimentState.FAILED)
+            experiment.error = "agentic round training produced no completed runs"
+        store.save(experiment)
+        return result
 
     async def _run_batch(self, job: Job) -> dict[str, Any]:
         proposal_id = job.payload.get("proposal_id")
@@ -531,7 +617,51 @@ class JobManager:
             experiment.error = "no candidate models completed"
         else:
             experiment.update_state(ExperimentState.COMPLETED)
+
+        # Agentic round (opt-in): runs after the deterministic batch, grounded
+        # in its artifacts. Always human-gated (require_approval=True is a
+        # binding policy — the round never inherits auto-approval).
+        round_record: dict[str, Any] | None = None
+        if payload.get("agentic_round") and not job.cancel_requested:
+            from thelab.ide.agentic_round import run_agentic_round
+
+            job.emit(
+                "info",
+                "Starting agentic round (analyst -> sandboxed transform -> selection)",
+                {"stage": "agentic_round", "experiment_id": experiment_id},
+            )
+            try:
+                round_record = await run_agentic_round(
+                    experiment,
+                    result,
+                    provider=provider,
+                    require_approval=True,
+                    on_event=on_event,
+                    should_continue=lambda: not job.cancel_requested,
+                    runs_root=runs_root,
+                    proposals_dir=os.environ.get("THELAB_PROPOSALS_DIR", "proposals"),
+                )
+            except Exception as exc:  # noqa: BLE001 - round failure never breaks the experiment
+                round_record = {"status": "failed", "error": str(exc)}
+                job.emit(
+                    "warn",
+                    f"Agentic round failed (deterministic result stands): {exc}",
+                    {"stage": "agentic_round", "experiment_id": experiment_id},
+                )
+            experiment.plan["agentic_round"] = {
+                k: round_record.get(k)
+                for k in ("round_id", "status", "proposal_id", "approval_error", "error")
+            }
+            experiment.sub_agent_results = {
+                **experiment.sub_agent_results,
+                "AgenticRound": round_record,
+            }
+            if round_record.get("status") == "awaiting_approval":
+                experiment.update_state(ExperimentState.AWAITING_APPROVAL)
+
         store.save(experiment)
+        if round_record is not None:
+            result = {**result, "agentic_round": round_record}
         return result
 
 

@@ -19,6 +19,7 @@ class ExperimentState(StrEnum):
     CLEANING = "cleaning"         # FeatureEngineer running cleaning
     TRAINING = "training"         # ModelSelector running training
     EVALUATING = "evaluating"     # EDAAnalyst reviewing results
+    AWAITING_APPROVAL = "awaiting_approval"  # Agentic round proposed; human gate
     COMPLETED = "completed"       # Best model found, experiment done
     ITERATING = "iterating"       # User gave feedback, re-planning
     FAILED = "failed"             # Experiment failed

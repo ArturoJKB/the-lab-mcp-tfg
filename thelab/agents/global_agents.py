@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from thelab.agents.grounding import METRIC_TOLERANCE, extract_metric_claims, extract_run_ids
 from thelab.context.reader import ContextReader
 from thelab.eda import class_balance, outlier_scan
 from thelab.mcp.common import load_json_artifact, load_text_artifact
@@ -28,48 +29,13 @@ _ALLOWLISTED_ARTIFACTS = {
     "model_card": "model_card.md",
 }
 
-_RUN_ID_RE = re.compile(r"run-\d{8}-\d{6}-[0-9a-f]{8}")
-
-_METRIC_KEYS = [
-    "test_accuracy",
-    "test_f1_macro",
-    "train_accuracy",
-    "train_f1_macro",
-    "test_rmse",
-    "test_mae",
-    "test_r2",
-    "train_rmse",
-    "train_mae",
-    "train_r2",
-]
-
-_METRIC_TOLERANCE = 1e-3
-
-
-def _extract_run_ids(text: str) -> list[str]:
-    return _RUN_ID_RE.findall(text)
-
-
-def _extract_metric_claims(text: str) -> dict[str, float]:
-    claims: dict[str, float] = {}
-    for key in _METRIC_KEYS:
-        pattern = rf"{re.escape(key)}" + r"[^0-9\n]{0,30}(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)"
-        match = re.search(pattern, text)
-        if match:
-            try:
-                claims[key] = float(match.group(1))
-            except ValueError:
-                continue
-    return claims
-
-
 def _is_citable(text: str, runs_root: Path) -> tuple[bool, dict[str, Any]]:
     """Return (citable, citation_map) for *text* against workspace artifacts.
 
     A claim is citable when every run_id it mentions exists and every metric
     claim matches the corresponding metrics.json within tolerance.
     """
-    run_ids = _extract_run_ids(text)
+    run_ids = extract_run_ids(text)
     if not run_ids:
         return False, {}
 
@@ -79,12 +45,12 @@ def _is_citable(text: str, runs_root: Path) -> tuple[bool, dict[str, Any]]:
         if manifest is None:
             return False, {}
         metrics = load_json_artifact(runs_root, run_id, "metrics.json")
-        claims = _extract_metric_claims(text)
+        claims = extract_metric_claims(text)
         for key, claimed in claims.items():
             if metrics is None or key not in metrics:
                 continue
             actual = float(metrics[key])
-            if abs(claimed - actual) > _METRIC_TOLERANCE:
+            if abs(claimed - actual) > METRIC_TOLERANCE:
                 return False, {}
             citations[f"{run_id}:{key}"] = {"run_id": run_id, "source": "metrics.json", "value": actual}
         if not claims:

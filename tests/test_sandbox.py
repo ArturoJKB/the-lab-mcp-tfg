@@ -142,3 +142,66 @@ def test_oversize_artifact_replaced_with_marker():
     artifacts = {a["name"]: a for a in (result.artifacts or [])}
     assert "big.txt" in artifacts
     assert "too large" in (artifacts["big.txt"]["content"] or "")
+
+
+def test_lambda_allowed_for_pandas():
+    """ast.Lambda removed from blocked nodes: groupby().transform(lambda ...) is
+    a core pandas idiom the FeatureEngineer sub-agent needs. Lambdas cannot
+    import, access blocked builtins, or escape scope."""
+    from thelab.sandbox import run_in_sandbox
+
+    result = run_in_sandbox(
+        "f = lambda x: x * 2\n"
+        "print(f(21))\n"
+        "\n"
+        "import pandas as pd\n"
+        "df = pd.DataFrame({'v': [1, 2, 3]})\n"
+        "df['double'] = df['v'].apply(lambda x: x * 2)\n"
+        "print(df['double'].tolist())\n"
+    )
+    assert result.status == "completed"
+    assert "42" in result.stdout
+    assert "[2, 4, 6]" in result.stdout
+
+
+def test_artifact_dir_spills_large_outputs(tmp_path):
+    """Outputs larger than the 1MiB inline cap arrive on disk via artifact_dir."""
+    out_dir = tmp_path / "out"
+    code = (
+        "from pathlib import Path\n"
+        "rows = ','.join(f'v{i}' for i in range(200))\n"
+        "Path('big.csv').write_text('\\n'.join([rows] * 3000))\n"
+    )
+    result = run_in_sandbox(code, artifact_dir=out_dir)
+    assert result.status == "completed"
+    assert result.spilled is not None
+    spilled = next(s for s in result.spilled if s["name"] == "big.csv")
+    path = __import__("pathlib").Path(spilled["path"])
+    assert path.is_file()
+    assert path.stat().st_size > 1024 * 1024  # exceeds the inline cap
+    # Inline artifact is capped with a placeholder; the spill is the real copy.
+    inline = next(a for a in result.artifacts if a["name"] == "big.csv")
+    assert inline["content"].startswith("[artifact too large")
+
+
+def test_input_dir_places_files_in_workspace(tmp_path):
+    """input_dir files land in the workspace and are readable by user code."""
+    in_dir = tmp_path / "in"
+    in_dir.mkdir()
+    (in_dir / "dataset.csv").write_text("a,b\n1,2\n3,4\n", encoding="utf-8")
+    code = "import pandas as pd\ndf = pd.read_csv('dataset.csv')\nprint(len(df))"
+    result = run_in_sandbox(code, input_dir=in_dir)
+    assert result.status == "completed"
+    assert "2" in result.stdout
+
+
+def test_relative_artifact_dir_is_rejected():
+    """Non-absolute dirs are trusted-config violations, rejected up front."""
+    import pytest
+
+    from thelab.sandbox.runner import SandboxError
+
+    with pytest.raises(SandboxError, match="artifact_dir must be an absolute path"):
+        run_in_sandbox("print('x')", artifact_dir="relative/dir")
+    with pytest.raises(SandboxError, match="input_dir must be an absolute path"):
+        run_in_sandbox("print('x')", input_dir="relative/in")

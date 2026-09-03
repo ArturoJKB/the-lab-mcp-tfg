@@ -179,8 +179,14 @@ def main(argv: list[str] | None = None) -> int:
         try:
             store = ProposalStore()
             if args.proposals_command == "approve":
+                from .agents.approval import ApprovalDenied, record_human_approval
+
                 proposal = store.load(args.proposal_id)
-                store.approve(args.proposal_id, principal=args.principal)
+                try:
+                    record_human_approval(store, args.proposal_id, principal=args.principal)
+                except ApprovalDenied as exc:
+                    print(f"error: {exc}", file=sys.stderr)
+                    return 1
                 batch_path = store.write_batch_config(args.proposal_id)
                 print(f"Approved proposal: {args.proposal_id}")
                 print(f"  Batch config: {batch_path}")

@@ -26,10 +26,13 @@ from thelab.ide.datasets import DatasetNotFoundError, UploadError, list_datasets
 from thelab.ide.eda_api import EdaError, run_eda
 from thelab.ide.experiment_api import (
     add_experiment_feedback,
+    approve_agentic_round,
+    get_agentic_round,
     get_experiment_events,
     get_experiment_results,
     get_experiment_status,
     list_experiments,
+    reject_agentic_round,
     start_experiment,
 )
 from thelab.ide.iterate_api import iterate_on_run
@@ -1068,11 +1071,44 @@ async def post_experiment_run(payload: dict[str, Any]) -> dict[str, Any]:
             feedback=payload.get("feedback"),
             provider_name=str(payload.get("provider", "mock")),
             model=payload.get("model"),
+            agentic_round=bool(payload.get("agentic_round", False)),
         )
     except DatasetNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.get("/experiment/{experiment_id}/agentic-round")
+async def get_agentic_round_endpoint(experiment_id: str) -> dict[str, Any]:
+    try:
+        data = await get_agentic_round(experiment_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.post("/experiment/{experiment_id}/agentic-round/approve")
+async def post_agentic_round_approve(experiment_id: str) -> dict[str, Any]:
+    """Human approval of the round proposal; queues gated execution."""
+    try:
+        data = await approve_agentic_round(experiment_id, principal="ui")
+    except ValueError as exc:
+        status = 404 if "not found" in str(exc) else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
+    return {"ok": True, "data": data}
+
+
+@app.post("/experiment/{experiment_id}/agentic-round/reject")
+async def post_agentic_round_reject(experiment_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Reject the round proposal; the deterministic result stands."""
+    reason = (payload or {}).get("reason", "")
+    try:
+        data = await reject_agentic_round(experiment_id, principal="ui", reason=str(reason))
+    except ValueError as exc:
+        status = 404 if "not found" in str(exc) else 400
+        raise HTTPException(status_code=status, detail=str(exc)) from exc
     return {"ok": True, "data": data}
 
 

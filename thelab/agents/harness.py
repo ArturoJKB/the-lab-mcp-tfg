@@ -1,9 +1,8 @@
-"""Agent harness: connect an LLM provider to the four read-only MCP servers."""
+"""Agent harness: connect an LLM provider to the read-only MCP servers."""
 
 from __future__ import annotations
 
 import json
-import re
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -12,26 +11,10 @@ from typing import Any
 
 from mcp import ClientSession
 
+from thelab.agents.grounding import extract_run_ids, metric_mismatches
 from thelab.mcp.common import get_runs_root
 
 from .provider import AgentMessage, LLMProvider, ToolCallRequest, ToolSpec
-
-_RUN_ID_RE = re.compile(r"run-\d{8}-\d{6}-[0-9a-f]{8}")
-
-_METRIC_KEYS = [
-    "test_accuracy",
-    "test_f1_macro",
-    "train_accuracy",
-    "train_f1_macro",
-    "test_rmse",
-    "test_mae",
-    "test_r2",
-    "train_rmse",
-    "train_mae",
-    "train_r2",
-]
-
-_METRIC_TOLERANCE = 1e-3
 
 
 class GroundingError(Exception):
@@ -71,6 +54,7 @@ class AgentHarness:
         runs_root: Path | str | None = None,
         max_steps: int = 8,
         session_id: str | None = None,
+        system_prompt: str | None = None,
     ) -> None:
         if not servers:
             raise ValueError("at least one MCP server connection is required")
@@ -79,6 +63,11 @@ class AgentHarness:
         self.runs_root = Path(runs_root) if runs_root else Path(get_runs_root())
         self.max_steps = max(1, max_steps)
         self.session_id = session_id or f"sess-{uuid.uuid4().hex[:8]}"
+        self.system_prompt = system_prompt or (
+            "You are a grounded assistant for The Lab. "
+            "Use only the provided read-only tools. "
+            "Cite run_ids and metrics only when you can verify them."
+        )
         self._tools: list[ToolSpec] = []
         self._allowlist: set[str] = set()
         self._tool_to_session: dict[str, ClientSession] = {}
@@ -149,26 +138,9 @@ class AgentHarness:
         except json.JSONDecodeError:
             return None
 
-    def _extract_run_ids(self, text: str) -> list[str]:
-        """Return all run-id-like substrings found in *text*."""
-        return _RUN_ID_RE.findall(text)
-
-    def _extract_metric_claims(self, text: str) -> dict[str, float]:
-        """Scan *text* for numeric claims tied to known metric keys."""
-        claims: dict[str, float] = {}
-        for key in _METRIC_KEYS:
-            pattern = rf"{re.escape(key)}" + r"[^0-9\n]{0,30}(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)"
-            match = re.search(pattern, text)
-            if match:
-                try:
-                    claims[key] = float(match.group(1))
-                except ValueError:
-                    continue
-        return claims
-
     async def _check_grounding(self, text: str) -> None:
         """Verify every cited run_id exists and every metric claim matches evidence."""
-        run_ids = self._extract_run_ids(text)
+        run_ids = extract_run_ids(text)
         if not run_ids:
             return
 
@@ -181,17 +153,12 @@ class AgentHarness:
             metrics = await self._run_metrics(run_id)
             if metrics is None:
                 continue
-            claims = self._extract_metric_claims(text)
-            for key, claimed in claims.items():
-                if key not in metrics:
-                    continue
-                actual = float(metrics[key])
-                if abs(claimed - actual) > _METRIC_TOLERANCE:
-                    raise GroundingError(
-                        f"metric claim {key}={claimed} for run {run_id} "
-                        f"does not match evidence ({actual})",
-                        run_id=run_id,
-                    )
+            for key, (claimed, actual) in metric_mismatches(text, metrics).items():
+                raise GroundingError(
+                    f"metric claim {key}={claimed} for run {run_id} "
+                    f"does not match evidence ({actual})",
+                    run_id=run_id,
+                )
 
     def _persist_approval_request(self, tool: str, arguments: dict[str, Any]) -> Path:
         """Persist a disallowed tool request under .thelab/approvals/."""
@@ -214,14 +181,7 @@ class AgentHarness:
         await self._discover_tools()
 
         messages: list[AgentMessage] = [
-            AgentMessage(
-                role="system",
-                content=(
-                    "You are a grounded assistant for The Lab. "
-                    "Use only the provided read-only tools. "
-                    "Cite run_ids and metrics only when you can verify them."
-                ),
-            ),
+            AgentMessage(role="system", content=self.system_prompt),
             AgentMessage(role="user", content=goal),
         ]
 

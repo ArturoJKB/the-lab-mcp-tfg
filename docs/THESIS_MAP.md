@@ -71,10 +71,10 @@ thelab-mcp-demo context
 
 | Evidence | Location |
 |---|---|
-| Sub-agent prompt contracts | `thelab/ide/sub_agents.py` |
+| Per-role sub-agent prompt contracts (EDAAnalyst, FeatureEngineer, ModelSelector) | `thelab/ide/orchestrator.py` (`ROLE_SYSTEM_PROMPTS`) |
 | Orchestration loop (EDA → clean → try-all → approved batch training) | `thelab/ide/orchestrator.py` |
 | Experiment state machine (`pending → planning → … → completed`) | `thelab/ide/experiment.py` |
-| Approval records (`principal`, timestamp) | `thelab/agents/worker.py` (`ProposalStore`) |
+| Single approval gate (agent-initiated: human required; user-initiated: recorded mandate; rejection final) | `thelab/agents/approval.py`, `thelab/agents/worker.py` (`ProposalStore`) |
 | Agent harness + provider abstraction (mock, Ollama, OpenAI-compatible, OpenRouter) | `thelab/agents/` |
 
 **Demo (UI):** `thelab-model-service` → Experiment panel → start a run on an uploaded dataset → watch stage pipeline and agent activity stream (SSE) → send feedback to iterate → compare in History.

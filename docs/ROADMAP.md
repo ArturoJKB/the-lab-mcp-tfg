@@ -42,7 +42,7 @@ they are context for the thesis document, not binding for new code.
 | P3.7 | P3 | done | Multi-Kaggle pipeline proof: 3 public datasets end-to-end (churn / housing / attrition), each with a generated notebook; cleaning policy gained constant-column drop (`docs/P3_PLAN.md` §P3.7) |
 | P4 | P4 | done (A–F) | UI rework: React workspace, 5 views, global-agent chat, flow-cohesion patch (P4.F) — `docs/P4_PLAN.md` |
 | P5.A | P5 | done (2026-09-02) | Honesty fixes: real role prompts, single approval gate (agents can no longer self-execute training), feedback wiring, sandbox description accuracy — `docs/P5_PLAN.md` |
-| P5.B | P5 | planned | Agentic round: role-specialized agents over MCP, sandboxed generated code with deterministic validation, human approval gate — `docs/P5_PLAN.md` |
+| P5.B | P5 | done (2026-09-03) | Agentic round: role agents over MCP, sandboxed generated code with deterministic validation, human approval gate, comparison artifact + UI approval flow; B7 sandbox artifact channel (large-dataset transforms) + B8 provenance policy (`mode: agentic\|degraded_deterministic`) — `docs/P5_PLAN.md` |
 | P5.C | P5 | planned | RQ4–RQ6 evaluation: grounding ablation, agentic-vs-deterministic, multi-vs-single — `docs/P5_PLAN.md` |
 
 ## Phase summaries

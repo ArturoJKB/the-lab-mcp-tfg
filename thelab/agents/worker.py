@@ -152,6 +152,10 @@ class ProposalStore:
     def is_rejected(self, proposal_id: str) -> bool:
         return self._rejection_path(proposal_id).is_file()
 
+    def approval_path(self, proposal_id: str) -> Path:
+        """Return the path of the approval record for *proposal_id*."""
+        return self._approval_path(proposal_id)
+
     def list_proposals(self) -> list[str]:
         """Return all proposal ids with a stored proposal file."""
         ids: list[str] = []

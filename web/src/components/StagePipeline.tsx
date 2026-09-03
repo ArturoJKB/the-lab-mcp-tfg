@@ -1,4 +1,4 @@
-export type StageStatus = "pending" | "running" | "done" | "failed";
+export type StageStatus = "pending" | "running" | "done" | "failed" | "awaiting";
 
 const ORDER: { id: string; label: string }[] = [
   { id: "planning", label: "Plan" },
@@ -10,13 +10,27 @@ const ORDER: { id: string; label: string }[] = [
 type Props = {
   stageStatus: Record<string, StageStatus>;
   finalState?: string | null;
+  showAgentic?: boolean;
+  agenticStatus?: StageStatus;
 };
 
-export function StagePipeline({ stageStatus, finalState }: Props) {
+export function StagePipeline({ stageStatus, finalState, showAgentic = false, agenticStatus }: Props) {
+  const stages = showAgentic
+    ? [...ORDER, { id: "agentic_round", label: "Agent round" }]
+    : ORDER;
   return (
     <div className="exp-stages">
-      {ORDER.map((stage, i) => {
-        const status = finalState === "completed" ? "done" : stageStatus[stage.id] ?? "pending";
+      {stages.map((stage, i) => {
+        let status: StageStatus =
+          stage.id === "agentic_round" ? (agenticStatus ?? stageStatus[stage.id] ?? "pending") : stageStatus[stage.id] ?? "pending";
+        if (stage.id === "agentic_round") {
+          if (finalState === "awaiting_approval") status = "awaiting";
+          else if (finalState === "completed" && status === "running") status = "done";
+        } else if (finalState === "completed") {
+          status = "done";
+        } else if (finalState === "failed" && status === "running") {
+          status = "failed";
+        }
         return (
           <span key={stage.id} style={{ display: "contents" }}>
             {i > 0 && <span className="exp-arrow">→</span>}

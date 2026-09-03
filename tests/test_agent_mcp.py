@@ -183,8 +183,37 @@ def test_agent_mcp_spawn_subagent_rejects_unknown_type(agent_env):
     asyncio.run(_with_agent_server(env, check))
 
 
-def test_agent_mcp_orchestrate_experiment(agent_env):
+def test_agent_mcp_orchestrate_experiment_awaits_approval(agent_env):
+    """MCP clients are agents: default is awaiting_approval, no silent training."""
     env, tmp_path = agent_env
+
+    async def check(session: ClientSession):
+        result = await _call_tool(
+            session,
+            "orchestrate_experiment",
+            {
+                "goal": "Predict the iris species",
+                "dataset_id": "uploads/iris.csv",
+                "target": "species",
+            },
+        )
+        assert result["ok"] is True
+        data = result["data"]
+        assert data["status"] == "awaiting_approval"
+        assert data["proposal"]["proposal_id"]
+        assert "approve" in data
+        # Nothing executed, nothing approved silently.
+        assert not list((tmp_path / "proposals").glob("*.approved.json"))
+        assert not list((tmp_path / "proposals").glob("*.batch.json"))
+        assert not list((tmp_path / "runs").glob("*"))
+
+    asyncio.run(_with_agent_server(env, check))
+
+
+def test_agent_mcp_orchestrate_experiment_with_auto_approve(agent_env):
+    """THELAB_AUTO_APPROVE=1 lets a local operator opt into agent-executed runs."""
+    env, tmp_path = agent_env
+    env["THELAB_AUTO_APPROVE"] = "1"
 
     async def check(session: ClientSession):
         result = await _call_tool(
@@ -201,9 +230,11 @@ def test_agent_mcp_orchestrate_experiment(agent_env):
         assert data["status"] in {"completed", "partial"}
         assert data["proposal"]["proposal_id"]
         assert data["results"], "expected batch results"
-        # Approved proposal recorded with the agent principal.
+        # Approval recorded through the gate with the auto principal.
         approved = list((tmp_path / "proposals").glob("*.approved.json"))
         assert approved
+        record = json.loads(approved[0].read_text(encoding="utf-8"))
+        assert record["principal"].startswith("auto:agent_mcp")
 
     asyncio.run(_with_agent_server(env, check))
 

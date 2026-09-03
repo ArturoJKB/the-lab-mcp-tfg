@@ -97,40 +97,35 @@ Verified: GLM 5.3 Flash produces 3/3 valid pandas transforms in the sandbox
 (safe, pandas-idiomatic). Ollama 3B untested (server down). Full results:
 `docs/RQ5_SPIKE_RESULTS.md`. **Phase B is a GO.**
 
-### Phase B — The Agentic Round
-
-New orchestrator stage executed **after** the deterministic batch, seeded by
-its artifacts:
-
-```
-Deterministic batch (existing, untouched)
-  EDA → clean → try_all dry-run → baseline runs → artifacts → indexed to context
-        ↓ context pack (EDA brief + baseline metrics + prior-run evidence)
-AGENTIC ROUND — ExperimentOrchestrator.run_agentic_round()
-  1. Analyst   → reads EDA + baseline + context via MCP → typed findings brief
-  2. FeatureEngineer → generates transform code → sandbox → dataset artifact
-                 → deterministic post-check (shape, no leakage, target intact)
-  3. ModelSelector   → proposes configs/code beyond the fixed grid
-                 → ProposalStore → ApprovalGate (human default)
-  4. Executor  → run_model with approved configs (seeded, provenance intact)
-                 + sandbox training scripts where agents write code
-  5. Validator → recomputes metrics outside sandbox; rejections = first-class
-  6. Loop bounded by max_iterations + token budget + per-role tool allowlists
-        ↓
-Comparison artifact (best agentic vs best deterministic) → runs/ + context store
-```
+### Phase B — The Agentic Round — implemented 2026-09-03 (backend + UI)
 
 | # | Work item | Notes |
 |---|---|---|
-| B1 | `thelab/ide/agentic_round.py`: role configs (prompt + toolset per role), bounded loop, SSE stage events; built on `AgentHarness` against real MCP servers (context, eda, registry) | per-role tool allowlists: Analyst = context+eda reads; FE = sandbox `run_python` + eda; Selector = registry reads + proposal tools |
-| B2 | Sandbox FE path: generated transform → sandbox → transformed CSV artifact → deterministic post-validator (shape/schema, target-presence, at-decision-time leakage policy from P2.6.5, metric recompute outside sandbox) | rejections are traceable outcomes, never silent |
-| B3 | Model selection beyond the grid: agent configs → ProposalStore → ApprovalGate → `run_model` | provenance intact; optional sandbox training-script path for RQ5 |
-| B4 | Comparison artifact `agentic_vs_deterministic.json` (best metrics, Δ, validity rates, tokens, rejections) → runs/ + context store | single source for RQ5/6 tables |
-| B5 | UI: extend the Experiment stage pipeline with an "Agentic round" stage + per-agent events; code viewer for agent scripts (reuse notebook viewer) | no new panels |
-| B6 | Provider handling: mock for tests; configured provider for live runs; every round + handoff indexed into the context store | `AGENTIC_ROUND_PROVIDER` env |
+| B1 ✅ | `thelab/ide/agentic_round.py`: role configs (per-role system prompts), bounded stages, SSE events; Analyst runs through real stdio MCP servers (context + eda) via `AgentHarness` with role system-prompt support added to the harness | deterministic fallbacks at every stage (`llm_used` recorded); provider=None ⇒ fully deterministic round |
+| B2 ✅ | Sandbox FE path: generated transform → `run_in_sandbox` → validated artifact → deterministic post-check (row bounds, target presence/NaN/degenerate-target, duplicate-target); rejected artifacts are deleted and recorded, never silent | sandbox artifacts return inline (temp workspace is destroyed): **transforms are limited to ≤1 MB CSVs** (sandbox `MAX_ARTIFACT_BYTES`) — recorded limitation; metrics always recomputed by the factory, never trusted from the sandbox |
+| B3 ✅ | Selection beyond the grid: `ExperimentProposal` (registry-validated) → `ProposalStore` → `ensure_executable(..., allow_auto=not require_approval)`; fallback = deterministic recommendation | `require_approval=True` is a binding parameter; execution job calls the gate with `allow_auto=False` |
+| B4 ✅ | Comparison artifact `<exp_id>.agentic_round.json` (brief, transform, proposal, execution, `comparison`: deterministic vs agentic best + `metric_delta` + `validity_rate`) | best-of-record updated only when the agentic run strictly improves `test_accuracy`, tagged `best_source=agentic_round` |
+| B5 ✅ | UI: "Agentic round" stage in the pipeline (awaiting/running/done), plan-form checkbox, approval banner with Approve/Reject, analyst brief card, transform card with code viewer, comparison table with per-metric Δ; SSE stream rotates to the execution job via `plan["job_id"]` | new state `ExperimentState.AWAITING_APPROVAL` |
+| B6 ✅ | Provider handling: mock drives tests; live provider for recorded runs; round events appended to the context JSONL via validated+redacted `context_write_mcp` helpers | endpoints: `GET /experiment/{id}/agentic-round`, `POST .../agentic-round/approve`, `POST .../agentic-round/reject` |
 
-**Done when:** end-to-end agentic round on S&P + one Kaggle dataset with
-Ollama AND OpenRouter; all handoffs typed + indexed; suite green.
+Implementation note: the round and its execution job run **blocking in the job
+coroutine** (same pattern as `_run_proposal_experiment`). An earlier version
+hopped executors via `asyncio.to_thread`/`run_in_executor`, which hung
+non-deterministically under the test client's portal loop; the direct pattern
+is stable (3× clean repeat runs, full suite green).
+
+### Phase B.2 — B7 sandbox artifact channel + B8 provenance policy — implemented 2026-09-03
+
+| # | Work item | Notes |
+|---|---|---|
+| B7 ✅ | `run_in_sandbox(..., artifact_dir, input_dir)`: the trusted parent passes absolute dirs; the child copies whitelisted artifacts to `artifact_dir` after execution (`SandboxResult.spilled`) and reads large inputs from `input_dir` (no giant stdin JSON). Non-absolute dirs are rejected up front (`SandboxError`) — defense in depth for trusted-config values | chat `run_python` keeps the 1 MiB inline cap; the round's FE transform now handles upload-cap-scale datasets (verified with a >1 MB e2e) |
+| B8 ✅ | Full provenance: every stage records `source: "llm" \| "deterministic_fallback"`; rounds record `mode: "agentic" \| "degraded_deterministic"` (no LLM content ⇒ never presented as agentic); UI shows the round mode + per-stage source chips | **RQ5/RQ6 counting rule:** only `mode == "agentic"` rounds count toward agentic claims; `degraded_deterministic` rounds are reported separately and serve as the natural control arm for RQ6 |
+
+Updated limitation: the 1 MiB inline artifact cap still applies to chat
+`run_python`; the agentic round's transform path is no longer size-limited
+(input up to the 100 MB upload cap via `input_dir`, outputs via
+`artifact_dir`). Sandbox outputs remain untrusted: validation always happens
+in the parent from disk.
 
 ### Phase C — Evaluation & thesis
 

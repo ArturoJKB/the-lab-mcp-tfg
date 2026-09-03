@@ -9,6 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from thelab.agents.approval import ensure_executable
 from thelab.agents.mock import MockProvider
 from thelab.agents.provider import AgentMessage, LLMProvider
 from thelab.agents.worker import ProposalStore, WorkerAgent
@@ -22,6 +23,42 @@ from thelab.run.runner import try_all_models
 
 EventCallback = Callable[[str, str], None]
 ShouldContinue = Callable[[], bool]
+
+# Per-role system prompts: each sub-agent has a distinct identity and scope.
+# The role argument of _interpret selects the prompt; unknown roles fall back
+# to the generic analyst prompt.
+ROLE_SYSTEM_PROMPTS: dict[str, str] = {
+    "EDAAnalyst": (
+        "You are the EDAAnalyst sub-agent of The Lab's experiment orchestrator. "
+        "You interpret the deterministic EDA report: data quality, class balance, "
+        "correlations, outliers, and leakage suspects, plus the modeling risks "
+        "they imply. Ground every statement in the provided data; no speculation."
+    ),
+    "FeatureEngineer": (
+        "You are the FeatureEngineer sub-agent of The Lab's experiment orchestrator. "
+        "You interpret the cleaning decisions and the baseline model comparison: "
+        "what the transformations changed and what the baselines imply for feature "
+        "work. Ground every statement in the provided data; no speculation."
+    ),
+    "ModelSelector": (
+        "You are the ModelSelector sub-agent of The Lab's experiment orchestrator. "
+        "You recommend the best model configuration from deterministic comparison "
+        "results and justify the choice against the reported metrics. Ground every "
+        "statement in the provided data; no speculation."
+    ),
+}
+
+_DEFAULT_ROLE_PROMPT = (
+    "You are a concise ML analyst sub-agent for The Lab. "
+    "Ground every statement in the provided data; no speculation."
+)
+
+
+def _apply_feedback(instruction: str, feedback: str | None) -> str:
+    """Append prior user feedback to a stage instruction (real consumer)."""
+    if not feedback or not feedback.strip():
+        return instruction
+    return f"{instruction}\nPrior user feedback on earlier runs — address it: {feedback.strip()}"
 
 
 class OrchestrationCancelled(RuntimeError):
@@ -76,15 +113,10 @@ class ExperimentOrchestrator:
             return None
 
         def _complete() -> dict[str, Any]:
+            system_prompt = ROLE_SYSTEM_PROMPTS.get(role, _DEFAULT_ROLE_PROMPT)
             turn = provider.complete(  # type: ignore[union-attr]
                 [
-                    AgentMessage(
-                        role="system",
-                        content=(
-                            "You are a concise ML analyst sub-agent for The Lab. "
-                            "Ground every statement in the provided data; no speculation."
-                        ),
-                    ),
+                    AgentMessage(role="system", content=system_prompt),
                     AgentMessage(
                         role="user",
                         content=f"{instruction}\n\nData:\n{json.dumps(payload, default=str)[:6000]}",
@@ -299,7 +331,10 @@ class ExperimentOrchestrator:
         eda_interp = await self._interpret(
             provider,
             "EDAAnalyst",
-            "Summarize the key findings and modeling risks from this EDA report in 3-5 bullets.",
+            _apply_feedback(
+                "Summarize the key findings and modeling risks from this EDA report in 3-5 bullets.",
+                feedback,
+            ),
             eda_result["eda_result"],
         )
         if eda_interp:
@@ -320,7 +355,10 @@ class ExperimentOrchestrator:
         fe_interp = await self._interpret(
             provider,
             "FeatureEngineer",
-            "Justify the cleaning decisions and what the baseline comparison implies, in 3-5 bullets.",
+            _apply_feedback(
+                "Justify the cleaning decisions and what the baseline comparison implies, in 3-5 bullets.",
+                feedback,
+            ),
             {
                 "clean_metadata": fe_result.get("clean_metadata", {}),
                 "top_models": fe_result.get("top_models", []),
@@ -346,7 +384,10 @@ class ExperimentOrchestrator:
         ms_interp = await self._interpret(
             provider,
             "ModelSelector",
-            "Recommend the best model configuration from this comparison and explain why, in 3-5 bullets.",
+            _apply_feedback(
+                "Recommend the best model configuration from this comparison and explain why, in 3-5 bullets.",
+                feedback,
+            ),
             {
                 "task_type": task_type,
                 "top_models": ms_result.get("top_models", []),
@@ -365,17 +406,31 @@ class ExperimentOrchestrator:
             worker = self._create_worker(provider)
 
             # No silent fallback: a provider failure fails the experiment loudly
-            # so the UI can name the provider and the issue.
+            # so the UI can name the provider and the issue. Prior feedback is
+            # forwarded into the proposal goal so the agent addresses it.
+            propose_goal = f"Train best models for {goal}"
+            if feedback and feedback.strip():
+                propose_goal = f"{propose_goal}\nPrior user feedback to address: {feedback.strip()}"
             proposal = await worker.propose(
-                goal=f"Train best models for {goal}",
+                goal=propose_goal,
                 dataset=dataset_id_to_relative_path(fe_result["cleaned_dataset_id"]),
                 target=target,
                 model_grid=best_models,
                 seeds=seeds,
             )
 
-            # Approve and run
-            self.proposal_store.approve(proposal.proposal_id, principal="orchestrator")
+            # Approval gate (single chokepoint). The caller initiated this
+            # experiment explicitly, so the initiator's mandate allows
+            # auto-approval — recorded as principal "auto:experiment:<id>" so
+            # the audit trail shows who initiated and that no human saw the
+            # specific proposal.
+            approval_path = ensure_executable(
+                self.proposal_store,
+                proposal.proposal_id,
+                principal=f"experiment:{experiment_id}",
+                allow_auto=True,
+            )
+            emit("planning", f"Proposal {proposal.proposal_id} approved ({approval_path.name})")
             batch_path = self.proposal_store.write_batch_config(proposal.proposal_id)
 
             runner = BatchRunner(

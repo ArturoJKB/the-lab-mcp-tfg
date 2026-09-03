@@ -26,7 +26,12 @@ type ExperimentStatus = {
   target: string;
   state: string;
   feedback?: string | null;
-  plan: { job_id?: string; previous_job_ids?: string[]; recommendation?: Record<string, unknown> };
+  plan: {
+    job_id?: string;
+    previous_job_ids?: string[];
+    recommendation?: Record<string, unknown>;
+    agentic_round?: AgenticRoundInfo | null;
+  };
   sub_agent_results: Record<string, Interpretation>;
   best_run_id?: string | null;
   best_metrics?: Record<string, number> | null;
@@ -45,12 +50,63 @@ type ProviderInfo = {
 
 type UsageInfo = Record<string, unknown>;
 
-const STAGES = ["planning", "cleaning", "training", "evaluating"];
+const STAGES = ["planning", "cleaning", "training", "evaluating", "agentic_round"];
 const INTERPRETERS: [string, string][] = [
   ["EDAAnalyst", "EDAAnalyst — findings"],
   ["FeatureEngineer", "FeatureEngineer — cleaning rationale"],
   ["ModelSelector", "ModelSelector — recommendation"],
 ];
+
+type AgenticRoundInfo = {
+  round_id?: string;
+  status?: string;
+  proposal_id?: string;
+  approval_error?: string | null;
+  error?: string | null;
+};
+
+type AgenticRoundRecord = {
+  round_id?: string;
+  status?: string;
+  policy?: string;
+  mode?: "agentic" | "degraded_deterministic";
+  brief?: {
+    source?: "llm" | "deterministic_fallback";
+    findings?: string[];
+    opportunities?: string[];
+    risks?: string[];
+  };
+  transform?: {
+    status?: string;
+    source?: "llm" | "deterministic_fallback";
+    rationale?: string;
+    code?: string;
+    error?: string;
+    dataset_id?: string;
+    validation?: { ok?: boolean; errors?: string[] };
+  };
+  proposal?: { model_grid?: string[]; seeds?: number[]; rationale?: string };
+  selection?: {
+    source?: "llm" | "deterministic_fallback";
+    model_grid?: string[];
+    seeds?: number[];
+    rationale?: string;
+  };
+  execution?: {
+    status?: string;
+    comparison?: {
+      deterministic_best?: { run_id?: string; metrics?: Record<string, number> };
+      agentic_best?: { run_id?: string; model?: string; metrics?: Record<string, number> } | null;
+      validity_rate?: number | null;
+      metric_delta?: Record<string, number>;
+    };
+  };
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  llm: "LLM",
+  deterministic_fallback: "fallback",
+};
 
 type Tab = "plan" | "run" | "proposals" | "history";
 
@@ -79,6 +135,7 @@ export default function ExperimentsView({
   const [provider, setProvider] = useState("mock");
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providerModel, setProviderModel] = useState("");
+  const [agenticRound, setAgenticRound] = useState(false);
   const [startStatus, setStartStatus] = useState("");
   const [starting, setStarting] = useState(false);
 
@@ -86,6 +143,9 @@ export default function ExperimentsView({
   const [experimentId, setExperimentId] = useState<string | null>(null);
   const [status, setStatus] = useState<ExperimentStatus | null>(null);
   const [stageStatus, setStageStatus] = useState<Record<string, StageStatus>>({});
+  const [roundRecord, setRoundRecord] = useState<AgenticRoundRecord | null>(null);
+  const [roundAction, setRoundAction] = useState("");
+  const [agenticStage, setAgenticStage] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
   const [running, setRunning] = useState(false);
@@ -138,13 +198,27 @@ export default function ExperimentsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasetState]);
 
+  const loadRoundRecord = useCallback(async (id: string) => {
+    const res = await api<{ plan: AgenticRoundInfo; record: AgenticRoundRecord | null }>(
+      "GET",
+      `/experiment/${encodeURIComponent(id)}/agentic-round`,
+    );
+    if (res.ok && res.data) {
+      setRoundRecord(res.data.record);
+      return res.data.plan;
+    }
+    setRoundRecord(null);
+    return null;
+  }, []);
+
   const onDone = useCallback(() => {
     if (!experimentId) return;
     api<ExperimentStatus>("GET", `/experiment/${encodeURIComponent(experimentId)}/status`).then((r) => {
       if (r.ok && r.data) setStatus(r.data);
     });
+    loadRoundRecord(experimentId);
     loadHistory();
-  }, [experimentId, loadHistory]);
+  }, [experimentId, loadHistory, loadRoundRecord]);
 
   const { events, connected } = useExperimentStream(experimentId, onDone);
 
@@ -167,16 +241,22 @@ export default function ExperimentsView({
     async (id: string, connectIfRunning = true) => {
       setExperimentId(id);
       setTab("run");
-      const res = await api<ExperimentStatus>("GET", `/experiment/${encodeURIComponent(id)}/status`);
+      setRoundAction("");
+      const [res, round] = await Promise.all([
+        api<ExperimentStatus>("GET", `/experiment/${encodeURIComponent(id)}/status`),
+        loadRoundRecord(id),
+      ]);
       if (!res.ok || !res.data) return;
       const data = res.data;
       setStatus(data);
       setStageStatus({});
-      const live = ["pending", "running", "iterating"].includes(data.state);
-      setRunning(live && connectIfRunning);
+      const live = ["pending", "running", "iterating", "awaiting_approval"].includes(data.state);
+      setRunning(live && connectIfRunning && data.state !== "awaiting_approval");
+      const roundEnabled = Boolean(data.plan?.agentic_round || round);
+      setAgenticStage(roundEnabled);
       if (!live) onDone();
     },
-    [onDone],
+    [onDone, loadRoundRecord],
   );
 
   const start = async () => {
@@ -189,7 +269,14 @@ export default function ExperimentsView({
     const res = await api<{ experiment_id: string; job_id: string; state: string }>(
       "POST",
       "/experiment/run",
-      { goal, dataset_id: datasetId, target, provider, model: providerModel || null },
+      {
+        goal,
+        dataset_id: datasetId,
+        target,
+        provider,
+        model: providerModel || null,
+        agentic_round: agenticRound,
+      },
     );
     setStarting(false);
     if (!res.ok || !res.data) {
@@ -199,6 +286,9 @@ export default function ExperimentsView({
     setStartStatus(`Experiment ${res.data.experiment_id} started.`);
     setStatus(null);
     setStageStatus({});
+    setRoundRecord(null);
+    setRoundAction("");
+    setAgenticStage(agenticRound);
     setRunning(true);
     setExperimentId(res.data.experiment_id);
     setTab("run");
@@ -226,6 +316,38 @@ export default function ExperimentsView({
     const jobId = status?.plan?.job_id;
     if (!jobId) return;
     await api("POST", `/jobs/${encodeURIComponent(jobId)}/cancel`);
+  };
+
+  const approveRound = async () => {
+    if (!experimentId) return;
+    setRoundAction("Queueing approved round execution…");
+    const res = await api<{ job_id: string; state: string }>(
+      "POST",
+      `/experiment/${encodeURIComponent(experimentId)}/agentic-round/approve`,
+    );
+    if (!res.ok || !res.data) {
+      setRoundAction(res.detail || res.error || "Failed to approve round");
+      return;
+    }
+    setRoundAction("Round approved — executing through the deterministic factory…");
+    setStageStatus((prev) => ({ ...prev, agentic_round: "running" }));
+    setRunning(true);
+  };
+
+  const rejectRound = async () => {
+    if (!experimentId) return;
+    setRoundAction("Rejecting round…");
+    const res = await api<{ state: string }>(
+      "POST",
+      `/experiment/${encodeURIComponent(experimentId)}/agentic-round/reject`,
+      { reason: "rejected from UI" },
+    );
+    if (!res.ok || !res.data) {
+      setRoundAction(res.detail || res.error || "Failed to reject round");
+      return;
+    }
+    setRoundAction("Round rejected — the deterministic result stands.");
+    onDone();
   };
 
   const metricsEntries = Object.entries(status?.best_metrics ?? {}).filter(
@@ -407,6 +529,22 @@ export default function ExperimentsView({
               }
               return null;
             })()}
+            <label htmlFor="exp-agentic" style={{ alignSelf: "center" }}>
+              Agentic round
+            </label>
+            <div style={{ alignSelf: "center" }}>
+              <input
+                id="exp-agentic"
+                type="checkbox"
+                checked={agenticRound}
+                onChange={(e) => setAgenticRound(e.target.checked)}
+                style={{ marginRight: 6, verticalAlign: "middle" }}
+              />
+              <span className="muted" style={{ fontSize: "0.78rem" }}>
+                after the deterministic batch, role agents explore beyond it (sandboxed code,
+                human approval before training)
+              </span>
+            </div>
             <button className="primary" onClick={start} disabled={starting}>
               {starting ? "Starting…" : "Start experiment"}
             </button>
@@ -425,7 +563,159 @@ export default function ExperimentsView({
 
           {experimentId && (
             <>
-              <StagePipeline stageStatus={stageStatus} finalState={status?.state ?? null} />
+              <StagePipeline
+                stageStatus={stageStatus}
+                finalState={status?.state ?? null}
+                showAgentic={agenticStage}
+                agenticStatus={
+                  status?.state === "awaiting_approval"
+                    ? "awaiting"
+                    : stageStatus["agentic_round"] ?? "pending"
+                }
+              />
+
+              {status?.state === "awaiting_approval" && (
+                <div className="banner loading-banner" style={{ marginTop: "var(--space-2)" }}>
+                  <strong>Agentic round paused at the human gate.</strong> Review the proposal
+                  below — approving runs it through the deterministic factory; rejecting keeps the
+                  deterministic result.
+                  <div style={{ marginTop: "var(--space-2)", display: "flex", gap: "var(--space-2)" }}>
+                    <button className="primary" onClick={approveRound}>
+                      Approve &amp; execute round
+                    </button>
+                    <button className="secondary" onClick={rejectRound}>
+                      Reject round
+                    </button>
+                  </div>
+                </div>
+              )}
+              {roundAction && <div className="banner loading-banner">{roundAction}</div>}
+
+              {roundRecord && (
+                <div className="muted" style={{ fontSize: "0.75rem", margin: "var(--space-2) 0 var(--space-1)" }}>
+                  round provenance:{" "}
+                  <strong>
+                    {roundRecord.mode === "agentic"
+                      ? "agentic · LLM contributed"
+                      : roundRecord.mode
+                        ? "deterministic fallback — no LLM content (excluded from RQ5/6 agentic tallies)"
+                        : "unknown"}
+                  </strong>
+                </div>
+              )}
+
+              {roundRecord?.execution?.comparison && (() => {
+                const c = roundRecord.execution.comparison!;
+                const det = c.deterministic_best?.metrics ?? {};
+                const ag = c.agentic_best?.metrics ?? {};
+                return (
+                  <div className="interp-card" key="round-comparison">
+                    <h4>Agentic vs deterministic</h4>
+                    <div className="muted mono" style={{ fontSize: "0.75rem" }}>
+                      validity rate: {c.validity_rate != null ? `${Math.round(c.validity_rate * 100)}%` : "n/a"} ·
+                      {" "}agentic runs: {c.agentic_best ? "completed" : "none completed"}
+                    </div>
+                    <table style={{ width: "100%", fontSize: "0.78rem", marginTop: 6 }}>
+                      <thead>
+                        <tr className="muted">
+                          <th style={{ textAlign: "left" }}>metric</th>
+                          <th>deterministic</th>
+                          <th>agentic</th>
+                          <th>Δ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(c.metric_delta ?? {}).map(([k, delta]) => (
+                          <tr key={k}>
+                            <td className="mono">{k}</td>
+                            <td style={{ textAlign: "center" }} className="mono">
+                              {typeof det[k] === "number" ? (det[k] as number).toFixed(4) : "—"}
+                            </td>
+                            <td style={{ textAlign: "center" }} className="mono">
+                              {typeof ag[k] === "number" ? (ag[k] as number).toFixed(4) : "—"}
+                            </td>
+                            <td
+                              style={{ textAlign: "center" }}
+                              className={`mono ${delta > 0 ? "level-info" : delta < 0 ? "level-error" : ""}`}
+                            >
+                              {delta > 0 ? "+" : ""}
+                              {delta.toFixed(4)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="muted" style={{ fontSize: "0.72rem", marginTop: 4 }}>
+                      deterministic best: <code>{c.deterministic_best?.run_id ?? "—"}</code>
+                      {c.agentic_best?.run_id && (
+                        <> · agentic best: <code>{c.agentic_best.run_id}</code> ({c.agentic_best.model})</>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {roundRecord?.brief && (
+                <div className="interp-card" key="round-brief">
+                  <h4>
+                    Agentic round — analyst brief
+                    {roundRecord.brief.source && (
+                      <span className="count-chip" style={{ marginLeft: 8 }}>
+                        {SOURCE_LABEL[roundRecord.brief.source] ?? roundRecord.brief.source}
+                      </span>
+                    )}
+                  </h4>
+                  {(["findings", "opportunities", "risks"] as const).map((k) =>
+                    (roundRecord.brief?.[k] ?? []).length > 0 ? (
+                      <div key={k} style={{ marginBottom: 4 }}>
+                        <strong style={{ fontSize: "0.78rem" }}>{k}:</strong>
+                        <ul style={{ margin: "2px 0 6px 18px", fontSize: "0.8rem" }}>
+                          {roundRecord.brief![k]!.map((f, i) => (
+                            <li key={i}>{f}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null,
+                  )}
+                </div>
+              )}
+
+              {roundRecord?.transform && roundRecord.transform.status !== "skipped" && (() => {
+                const t = roundRecord.transform!;
+                return (
+                  <div className="interp-card" key="round-transform">
+                    <h4>
+                      FeatureEngineer — sandboxed transform
+                      {t.source && (
+                        <span className="count-chip" style={{ marginLeft: 8 }}>
+                          {SOURCE_LABEL[t.source] ?? t.source}
+                        </span>
+                      )}
+                    </h4>
+                    <div className="muted" style={{ fontSize: "0.78rem" }}>
+                      status: <strong>{t.status}</strong>
+                      {t.dataset_id && (<> · artifact: <code>{t.dataset_id}</code></>)}
+                      {t.validation && !t.validation.ok && (
+                        <> · rejected: {t.validation.errors?.join("; ")}</>
+                      )}
+                      {t.status !== "completed" && t.error && <> · {t.error}</>}
+                    </div>
+                    {t.rationale && (
+                      <div style={{ fontSize: "0.8rem", marginTop: 4 }}>{t.rationale}</div>
+                    )}
+                    {t.code && (
+                      <details style={{ marginTop: 6 }}>
+                        <summary className="muted" style={{ fontSize: "0.75rem", cursor: "pointer" }}>
+                          generated code (executed in sandbox)
+                        </summary>
+                        <pre className="mono" style={{ fontSize: "0.72rem", whiteSpace: "pre-wrap", marginTop: 6 }}>
+                          {t.code}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
                 {running && (

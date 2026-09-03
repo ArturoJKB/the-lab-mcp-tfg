@@ -63,6 +63,10 @@ class SandboxPolicy:
     })
 
     # AST node types that are rejected outright.
+    # NOTE: ast.Lambda is deliberately ALLOWED — groupby().transform(lambda ...),
+    # df.apply(lambda ...) and df.assign(lambda ...) are core pandas idioms that
+    # the FeatureEngineer sub-agent must use. Lambdas cannot import, access
+    # blocked builtins, or escape scope (no global/nonlocal — separately blocked).
     blocked_ast_nodes: frozenset[type[ast.AST]] = frozenset({
         ast.AsyncFor,
         ast.AsyncFunctionDef,
@@ -71,7 +75,6 @@ class SandboxPolicy:
         ast.ClassDef,
         ast.Delete,
         ast.Global,
-        ast.Lambda,
         ast.Match,
         ast.NamedExpr,
         ast.Nonlocal,

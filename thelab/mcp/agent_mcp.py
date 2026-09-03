@@ -22,6 +22,12 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
+from thelab.agents.approval import (
+    ApprovalDenied,
+    HumanApprovalRequired,
+    auto_approve_enabled,
+    ensure_executable,
+)
 from thelab.agents.mock import MockProvider
 from thelab.agents.provider import LLMProvider
 from thelab.agents.worker import ProposalStore, WorkerAgent
@@ -196,19 +202,23 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
 
 
 async def _orchestrate_experiment(arguments: dict[str, Any]) -> types.CallToolResult:
-    """Main orchestration entry point."""
+    """Main orchestration entry point.
+
+    MCP clients are agents, not humans: by default the proposal is created and
+    returned as ``awaiting_approval`` instead of being executed. Execution
+    happens only after explicit human approval (UI / CLI) or when
+    ``THELAB_AUTO_APPROVE=1`` is set by the local operator.
+    """
     goal = arguments.get("goal", "")
     dataset_id = arguments.get("dataset_id", "")
     target = arguments.get("target", "")
-    _ = arguments.get("feedback")
+    feedback = arguments.get("feedback")
     provider_name = arguments.get("provider", "mock")
     model = arguments.get("model")
 
     if not goal or not dataset_id or not target:
         return _error("goal, dataset_id, and target are required")
 
-    _ = _generate_experiment_id()
-    _ = _get_runs_root()
     proposals_dir = _get_proposals_dir()
 
     # Create provider
@@ -233,19 +243,44 @@ async def _orchestrate_experiment(arguments: dict[str, Any]) -> types.CallToolRe
         runs_root=runs_root_path,
     )
 
+    # User feedback is forwarded into the proposal goal (real consumer).
+    propose_goal = goal
+    if isinstance(feedback, str) and feedback.strip():
+        propose_goal = f"{goal}\nPrior user feedback to address: {feedback.strip()}"
+
     # Create proposal via worker
     try:
         proposal = await worker.propose(
-            goal=goal,
+            goal=propose_goal,
             dataset=dataset_id,
             target=target,
         )
     except Exception as exc:
         return _error(f"failed to create proposal: {exc}")
 
-    # Auto-approve and run batch
-    store = ProposalStore(_get_proposals_dir())
-    approve_path = store.approve(proposal.proposal_id, principal="agent_mcp")
+    # Approval gate: agents never self-approve unless the operator opts in.
+    try:
+        ensure_executable(
+            store,
+            proposal.proposal_id,
+            principal="agent_mcp",
+            allow_auto=auto_approve_enabled(),
+        )
+    except ApprovalDenied as exc:
+        return _error(str(exc))
+    except HumanApprovalRequired:
+        return _ok({
+            "status": "awaiting_approval",
+            "proposal_id": proposal.proposal_id,
+            "proposal": proposal.safe_dict(),
+            "approve": (
+                "POST /proposals/{id}/approve (UI), 'thelab proposals approve <id>', "
+                "or set THELAB_AUTO_APPROVE=1 for this local operator"
+            ),
+        })
+
+    # Approved (human or operator opt-in): translate and run the batch.
+    approve_path = store.approval_path(proposal.proposal_id)
     batch_path = store.write_batch_config(proposal.proposal_id)
 
     # Run batch
@@ -254,9 +289,11 @@ async def _orchestrate_experiment(arguments: dict[str, Any]) -> types.CallToolRe
     entries = runner.load_config(batch_path)
     results = runner.run(entries)
 
+    failed = sum(1 for r in results if r.status == "failed")
+
     return _ok({
         "experiment_id": _generate_experiment_id(),
-        "status": "completed",
+        "status": "completed" if failed == 0 else "partial",
         "proposal_id": proposal.proposal_id,
         "proposal": proposal.safe_dict(),
         "approval_path": str(approve_path),
@@ -289,11 +326,6 @@ async def _spawn_subagent(arguments: dict[str, Any]) -> types.CallToolResult:
 
     if agent_type not in ["EDAAnalyst", "FeatureEngineer", "ModelSelector"]:
         return _error(f"invalid agent_type: {agent_type}")
-
-    _ = _generate_subagent_id(agent_type)
-
-    # Use mock provider for sub-agents
-    _ = MockProvider([])
 
     # Create worker agent for sub-agent
     worker = WorkerAgent(
@@ -445,7 +477,7 @@ async def _log_agent_activity(arguments: dict[str, Any]) -> types.CallToolResult
         return _error("event_type, summary, and run_id are required")
 
     try:
-        from thelab.mcp.context_write_mcp import _append_event, _validate_event
+        from thelab.mcp.context_write_mcp import append_event, validate_event
 
         now = datetime.now(UTC)
         event = {
@@ -459,11 +491,11 @@ async def _log_agent_activity(arguments: dict[str, Any]) -> types.CallToolResult
             "privacy": {"level": "internal"},
         }
 
-        normalized, error = _validate_event(event)
+        normalized, error = validate_event(event)
         if error:
             return _error(error)
 
-        log_path = _append_event(normalized)
+        log_path = append_event(normalized)
         return _ok({"event_id": event["event_id"], "status": "logged", "log_path": str(log_path)})
 
     except Exception as exc:

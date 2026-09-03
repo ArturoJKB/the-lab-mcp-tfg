@@ -24,11 +24,16 @@ def _workspace_root() -> Path:
 
 
 def approve_proposal(proposal_id: str, principal: str = "ui") -> dict[str, Any]:
-    """Write an approval record for a proposal."""
+    """Write an approval record for a proposal through the approval gate."""
+    from thelab.agents.approval import ApprovalDenied, record_human_approval
+
     store = ProposalStore(_proposals_dir())
     if not store.exists(proposal_id):
         raise ValueError(f"proposal not found: {proposal_id}")
-    path = store.approve(proposal_id, principal=principal)
+    try:
+        path = record_human_approval(store, proposal_id, principal=principal)
+    except ApprovalDenied as exc:
+        raise ValueError(str(exc)) from exc
     return {"proposal_id": proposal_id, "status": "approved", "path": path.as_posix()}
 
 
@@ -47,11 +52,17 @@ def run_proposal(
     on_result: Callable[[Any], None] | None = None,
 ) -> dict[str, Any]:
     """Translate an approved proposal to a batch config and execute it."""
+    from thelab.agents.approval import ApprovalDenied, HumanApprovalRequired, ensure_executable
+
     store = ProposalStore(_proposals_dir())
     if not store.exists(proposal_id):
         raise ValueError(f"proposal not found: {proposal_id}")
-    if not store.is_approved(proposal_id):
-        raise ValueError(f"proposal must be approved before running: {proposal_id}")
+    try:
+        ensure_executable(
+            store, proposal_id, principal=f"proposal_run:{proposal_id}", allow_auto=False
+        )
+    except (ApprovalDenied, HumanApprovalRequired) as exc:
+        raise ValueError(str(exc)) from exc
 
     config_path = store.write_batch_config(proposal_id)
     runner = BatchRunner(workspace_root=_workspace_root())
@@ -85,13 +96,18 @@ def run_proposal(
 
 
 def approve_and_run_proposal(proposal_id: str, principal: str = "ui") -> dict[str, Any]:
-    """Approve a proposal and immediately run it as a batch job."""
+    """Approve a proposal through the gate and immediately run it as a batch job."""
+    from thelab.agents.approval import ApprovalDenied, record_human_approval
+
     store = ProposalStore(_proposals_dir())
     if not store.exists(proposal_id):
         raise ValueError(f"proposal not found: {proposal_id}")
 
-    # Approve first
-    approve_path = store.approve(proposal_id, principal=principal)
+    # Approve through the gate (a rejected proposal is never executed)
+    try:
+        approve_path = record_human_approval(store, proposal_id, principal=principal)
+    except ApprovalDenied as exc:
+        raise ValueError(str(exc)) from exc
 
     # Then run
     config_path = store.write_batch_config(proposal_id)

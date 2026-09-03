@@ -44,7 +44,7 @@ def _get_log_source_path() -> Path:
     return DEFAULT_LOG_SOURCE
 
 
-def _validate_event(event: Any) -> tuple[dict[str, Any], str | None]:
+def validate_event(event: Any) -> tuple[dict[str, Any], str | None]:
     """Validate a ``/log`` event and return (normalized_event, error_message).
 
     Required fields:
@@ -98,7 +98,7 @@ def _validate_event(event: Any) -> tuple[dict[str, Any], str | None]:
     return normalized, None
 
 
-def _append_event(event: dict[str, Any]) -> Path:
+def append_event(event: dict[str, Any]) -> Path:
     """Append a normalized event to the log source file.
 
     Returns the path written to.
@@ -161,7 +161,7 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
     if len(raw_bytes) > _MAX_EVENT_BYTES:
         return _error(f"event payload exceeds {_MAX_EVENT_BYTES} bytes")
 
-    normalized, error = _validate_event(event)
+    normalized, error = validate_event(event)
     if error:
         return _error(error)
 
@@ -169,7 +169,7 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
     if len(summary) > _MAX_SUMMARY_LEN:
         return _error(f"outcome.summary exceeds {_MAX_SUMMARY_LEN} characters")
 
-    log_path = _append_event(normalized)
+    log_path = append_event(normalized)
     return _ok({
         "event_id": normalized.get("event_id"),
         "log_path": str(log_path),

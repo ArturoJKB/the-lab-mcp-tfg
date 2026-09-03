@@ -18,7 +18,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from thelab.agents.harness import _METRIC_KEYS, _METRIC_TOLERANCE, _RUN_ID_RE
+from thelab.agents.grounding import extract_run_ids, metric_mismatches
 from thelab.agents.mock import MockProvider
 from thelab.agents.provider import AgentMessage, AgentTurn, LLMProvider, ToolSpec
 from thelab.context.reader import ContextReader
@@ -401,10 +401,12 @@ def _build_tools(dataset_id: str | None) -> tuple[list[ToolSpec], dict[str, Tool
         ToolSpec(
             name="run_python",
             description=(
-                "Execute pandas/Python code in a restricted sandbox against the "
+                "Execute pandas/Python code in a compute-isolated sandbox against the "
                 "selected dataset (available as 'dataset.csv'). Use for concrete "
-                "data questions (NaN counts, groupbys, distributions). No network, "
-                "no file writes outside the sandbox."
+                "data questions (NaN counts, groupbys, distributions). The sandbox "
+                "enforces an import allowlist, blocked builtins, and memory/time "
+                "limits; it is not OS-confined, so do not use it for downloads or "
+                "filesystem access outside the dataset copy."
             ),
             input_schema={
                 "type": "object",
@@ -492,31 +494,19 @@ def _build_tools(dataset_id: str | None) -> tuple[list[ToolSpec], dict[str, Tool
 
 def _check_grounding(answer: str) -> str | None:
     """Return an error message if cited run ids or metric claims are unsupported."""
-    import re
-
-    run_ids = _RUN_ID_RE.findall(answer)
+    run_ids = extract_run_ids(answer)
     for run_id in run_ids:
         brief = _run_brief(run_id)
         if brief is None:
             return f"cited run_id '{run_id}' does not exist in the workspace"
-    claims: dict[str, float] = {}
-    for key in _METRIC_KEYS:
-        match = re.search(rf"{key}[^0-9\n]{{0,30}}(-?\d+(?:\.\d+)?)", answer)
-        if match:
-            try:
-                claims[key] = float(match.group(1))
-            except ValueError:
-                continue
     for run_id in run_ids:
         brief = _run_brief(run_id)
         metrics = (brief or {}).get("metrics") or {}
-        for key, claimed in claims.items():
-            actual = metrics.get(key)
-            if isinstance(actual, (int, float)) and abs(claimed - float(actual)) > _METRIC_TOLERANCE:
-                return (
-                    f"metric claim {key}={claimed} for run {run_id} does not "
-                    f"match evidence ({actual})"
-                )
+        for key, (claimed, actual) in metric_mismatches(answer, metrics).items():
+            return (
+                f"metric claim {key}={claimed} for run {run_id} does not "
+                f"match evidence ({actual})"
+            )
     return None
 
 
@@ -581,7 +571,9 @@ def _system_prompt(dataset_id: str | None, style: str | None = None, role_hint: 
         "only when a tool returned them. Never claim to train models — you propose; "
         "the user approves; the deterministic pipeline executes. "
         "Reuse earlier tool results instead of repeating identical calls; the sandbox "
-        "has no network access, so never suggest downloading data there."
+        "is an import-restricted subprocess, not an OS-level jail — never suggest "
+        "using it for downloads or filesystem access; fetch data through the "
+        "provided tools instead."
         + style_line + role_line
     )
 

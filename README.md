@@ -12,7 +12,7 @@ The Lab is a local-first machine-learning factory that turns a tabular CSV into 
 Three properties define the system:
 
 1. **Context-aware.** Every run, decision, error, and artifact reference is stored in a local, searchable context (SQLite + FTS5). Agents ground their proposals in this context — prior runs, EDA findings, experiment history — instead of guessing.
-2. **Multi-agent orchestration.** A `WorkerAgent` proposes experiments; an `ExperimentOrchestrator` runs specialized sub-agents (EDAAnalyst, FeatureEngineer, ModelSelector) through a deterministic pipeline with explicit human approval boundaries.
+2. **Multi-agent orchestration.** A `WorkerAgent` proposes experiments; an `ExperimentOrchestrator` runs role-specialized sub-agents (EDAAnalyst, FeatureEngineer, ModelSelector — each with its own prompt contract) over a deterministic pipeline. Every proposal passes a single approval gate: agent-initiated proposals require explicit human approval, user-initiated runs record the initiating principal, and a rejected proposal can never be executed.
 3. **MCP-native.** Datasets, models, artifacts, context, EDA, and orchestration are all exposed as typed MCP tools. An independent MCP client can discover a trained model and request predictions without knowing anything about the training pipeline.
 
 ## Concept → evidence map

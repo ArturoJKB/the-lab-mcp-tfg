@@ -157,6 +157,12 @@ def main() -> None:
     memory_limit = request.get("memory_limit_bytes")
     max_output_bytes = request.get("max_output_bytes", 64 * 1024)
     files = request.get("files") or {}
+    # Trusted parent-provided directories (never agent input):
+    # - input_dir: pre-placed input files copied into the workspace.
+    # - artifact_dir: outputs are copied here after execution so callers can
+    #   read large artifacts from disk (inline artifacts stay capped at 1 MiB).
+    input_dir = request.get("input_dir")
+    artifact_dir = request.get("artifact_dir")
 
     if memory_limit:
         _set_memory_limit(memory_limit)
@@ -170,15 +176,52 @@ def main() -> None:
             if not safe_name or safe_name.startswith("."):
                 continue
             (workspace / safe_name).write_text(str(content), encoding="utf-8", errors="replace")
+        if input_dir:
+            _copy_inputs(Path(input_dir), workspace)
         result = _run_code(code, workspace, max_output_bytes)
         if result["status"] in {"completed", "failed"}:
-            result["artifacts"] = _collect_artifacts(workspace)
+            collected = list_artifacts(workspace)
+            result["artifacts"] = [read_artifact(path) for path in collected]
+            if artifact_dir:
+                result["spilled"] = _spill_artifacts(collected, Path(artifact_dir))
         json.dump(result, sys.stdout)
 
 
-def _collect_artifacts(workspace: Path) -> list[dict[str, Any]]:
-    """Return allowed artifacts found in the workspace."""
-    return [read_artifact(path) for path in list_artifacts(workspace)]
+def _copy_inputs(input_dir: Path, workspace: Path) -> None:
+    """Copy caller-provided input files into the workspace (trusted code)."""
+    import shutil
+
+    if not input_dir.is_dir():
+        return
+    for path in sorted(input_dir.iterdir()):
+        if not path.is_file():
+            continue
+        safe_name = path.name
+        if not safe_name or safe_name.startswith("."):
+            continue
+        shutil.copyfile(path, workspace / safe_name)
+
+
+def _spill_artifacts(collected: list[Path], artifact_dir: Path) -> list[dict[str, Any]]:
+    """Copy collected artifacts into *artifact_dir* (trusted code).
+
+    Returns JSON-safe records with the on-disk destination paths.
+    """
+    import shutil
+
+    if not artifact_dir.is_absolute():
+        return []
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    spilled: list[dict[str, Any]] = []
+    for path in collected:
+        dest = artifact_dir / path.name
+        counter = 1
+        while dest.exists():
+            dest = artifact_dir / f"{path.stem}_{counter}{path.suffix}"
+            counter += 1
+        shutil.copyfile(path, dest)
+        spilled.append({"name": path.name, "path": str(dest), "size": dest.stat().st_size})
+    return spilled
 
 
 if __name__ == "__main__":
