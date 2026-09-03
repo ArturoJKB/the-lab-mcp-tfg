@@ -15,5 +15,9 @@ def test_evaluate_thesis_script_exits_zero():
     )
     assert proc.returncode == 0, f"evaluator failed:\n{proc.stdout}\n{proc.stderr}"
     assert "Overall: PASS" in proc.stdout
-    for rq in ("RQ1", "RQ2", "RQ3", "RQ4", "RQ5", "RQ6"):
-        assert f"{rq}: PASS" in proc.stdout
+    # Dataset matrix: every RQ passes on both arms (iris + housing);
+    # RQ3 is dataset-independent.
+    for rq in ("RQ1", "RQ2", "RQ4", "RQ5", "RQ6"):
+        for dataset in ("iris", "housing"):
+            assert f"{rq}[{dataset}]: PASS" in proc.stdout
+    assert "RQ3: PASS" in proc.stdout

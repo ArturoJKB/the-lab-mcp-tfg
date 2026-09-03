@@ -91,3 +91,64 @@ def test_auto_approve_env_flag(monkeypatch: pytest.MonkeyPatch):
     assert auto_approve_enabled() is True
     monkeypatch.setenv("THELAB_AUTO_APPROVE", "0")
     assert auto_approve_enabled() is False
+
+
+# ---------------------------------------------------------------------------
+# Workspace config opt-in (per-workspace dev loops, fail-closed)
+# ---------------------------------------------------------------------------
+
+
+def test_config_auto_approve_enables_gate(tmp_path, monkeypatch):
+    import json
+
+    from thelab.agents.approval import AUTO_APPROVE_CONFIG
+
+    monkeypatch.delenv("THELAB_AUTO_APPROVE", raising=False)
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
+    (tmp_path / ".thelab").mkdir(exist_ok=True)
+    (tmp_path / AUTO_APPROVE_CONFIG).write_text(
+        json.dumps({"auto_approve": True, "reason": "opencode dev loop"})
+    )
+    assert auto_approve_enabled() is True
+    # Gate honors it: agent-initiated flow proceeds with an auto principal.
+    import json as _json
+
+    from thelab.agents.worker import ProposalStore
+
+    local_store = ProposalStore(tmp_path / "proposals")
+    local_pid = _generate_proposal_id()
+    local_store.save(_make_proposal(local_pid))
+    path = ensure_executable(
+        local_store, local_pid, principal="agent_mcp", allow_auto=auto_approve_enabled()
+    )
+    record = _json.loads(path.read_text(encoding="utf-8"))
+    assert record["principal"] == "auto:agent_mcp"
+
+
+def test_config_auto_approve_fail_closed_on_missing_reason(tmp_path, monkeypatch):
+    import json
+
+    from thelab.agents.approval import AUTO_APPROVE_CONFIG
+
+    monkeypatch.delenv("THELAB_AUTO_APPROVE", raising=False)
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
+    (tmp_path / ".thelab").mkdir(exist_ok=True)
+    (tmp_path / AUTO_APPROVE_CONFIG).write_text(json.dumps({"auto_approve": True}))
+    assert auto_approve_enabled() is False
+
+
+def test_config_auto_approve_fail_closed_on_malformed_file(tmp_path, monkeypatch):
+    from thelab.agents.approval import AUTO_APPROVE_CONFIG
+
+    monkeypatch.delenv("THELAB_AUTO_APPROVE", raising=False)
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
+    (tmp_path / ".thelab").mkdir(exist_ok=True)
+    (tmp_path / AUTO_APPROVE_CONFIG).write_text("{not json")
+    assert auto_approve_enabled() is False
+
+
+def test_config_auto_approve_absent_by_default(tmp_path, monkeypatch):
+    monkeypatch.delenv("THELAB_AUTO_APPROVE", raising=False)
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
+    (tmp_path / ".thelab").mkdir(exist_ok=True)
+    assert auto_approve_enabled() is False

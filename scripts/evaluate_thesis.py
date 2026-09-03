@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Thesis evaluation script for The Lab P0.
+"""Thesis evaluation script for The Lab.
 
-Runs automated checks for the three PRD research questions and prints a
+Runs automated checks for the six research questions over a small dataset
+matrix (iris classification + deterministic synthetic regression) and prints a
 structured pass/fail report. Exit code 0 means all required checks passed.
 
 Usage:
-    python scripts/evaluate_thesis.py
+    python scripts/evaluate_thesis.py                 # suite mode (mock)
+    python scripts/evaluate_thesis.py --live openrouter --model <id>
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import os
 import shutil
 import sys
 import tempfile
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +31,56 @@ from thelab.context.repository import ContextRepository
 from thelab.run.runner import run_model
 
 _TOLERANCE = 1e-12
+
+
+@dataclass(frozen=True)
+class DatasetSpec:
+    """One arm of the evaluator's dataset matrix."""
+
+    name: str
+    target: str
+    task: str  # classification | regression
+    model: str
+    metric_keys: list[str]  # RQ1 comparison keys
+    predict_row: dict[str, float]
+    recommendation_grid: list[str] = field(default_factory=list)
+
+    def label(self, rq: str) -> str:
+        return f"{rq}[{self.name}]"
+
+
+def _iris_spec() -> DatasetSpec:
+    return DatasetSpec(
+        name="iris",
+        target="species",
+        task="classification",
+        model="logistic_regression",
+        metric_keys=["test_accuracy", "test_f1_macro"],
+        predict_row={
+            "sepal_length": 5.1,
+            "sepal_width": 3.5,
+            "petal_length": 1.4,
+            "petal_width": 0.2,
+        },
+        recommendation_grid=["logistic_regression"],
+    )
+
+
+def _housing_spec() -> DatasetSpec:
+    return DatasetSpec(
+        name="housing",
+        target="median_house_value",
+        task="regression",
+        model="ridge",
+        metric_keys=["test_rmse", "test_r2"],
+        predict_row={
+            "median_income": 5.0,
+            "avg_rooms": 4.5,
+            "housing_age": 20.0,
+            "avg_occupancy": 3.0,
+        },
+        recommendation_grid=["ridge"],
+    )
 
 
 def _iris_csv(path: Path) -> Path:
@@ -49,8 +102,45 @@ def _iris_csv(path: Path) -> Path:
     return csv
 
 
-def _metrics_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
-    for key in ("test_accuracy", "test_f1_macro"):
+def _housing_csv(path: Path) -> Path:
+    """Deterministic synthetic regression dataset (housing-shaped).
+
+    Seeded generator: price is a linear function of the features plus noise,
+    so RQ1's determinism check is meaningful and ridge reaches a solid R2.
+    """
+    import numpy as np
+
+    rng = np.random.RandomState(42)
+    n = 4000
+    income = rng.uniform(0.5, 15.0, n)
+    rooms = rng.uniform(1.0, 9.0, n)
+    age = rng.uniform(1.0, 52.0, n)
+    occupancy = rng.uniform(0.5, 6.0, n)
+    price = (
+        45_000.0
+        + 32_000.0 * income
+        + 8_500.0 * rooms
+        - 900.0 * age
+        + 1_200.0 * occupancy
+        + rng.normal(0.0, 12_000.0, n)
+    )
+    lines = ["median_income,avg_rooms,housing_age,avg_occupancy,median_house_value"]
+    for i in range(n):
+        lines.append(
+            f"{income[i]:.4f},{rooms[i]:.3f},{age[i]:.1f},{occupancy[i]:.3f},{price[i]:.2f}"
+        )
+    csv = path / "housing.csv"
+    csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return csv
+
+
+def _dataset_csv(workspace: Path, spec: DatasetSpec) -> Path:
+    builders = {"iris": _iris_csv, "housing": _housing_csv}
+    return builders[spec.name](workspace / "uploads")
+
+
+def _metrics_equal(a: dict[str, Any], b: dict[str, Any], keys: list[str]) -> bool:
+    for key in keys:
         if a.get(key) is None or b.get(key) is None:
             return False
         if abs(float(a[key]) - float(b[key])) > _TOLERANCE:
@@ -58,23 +148,23 @@ def _metrics_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     return True
 
 
-def _check_rq1_reproducibility(workspace: Path) -> dict[str, Any]:
+def _check_rq1_reproducibility(workspace: Path, spec: DatasetSpec) -> dict[str, Any]:
     """RQ1: same dataset + config + seed -> comparable metrics."""
-    csv = _iris_csv(workspace)
+    csv = _dataset_csv(workspace, spec)
     runs_dir = workspace / "runs"
 
     result1 = run_model(
         dataset=csv,
-        target="species",
-        model="logistic_regression",
+        target=spec.target,
+        model=spec.model,
         seed=42,
         output="runs",
         workspace_root=workspace,
     )
     result2 = run_model(
         dataset=csv,
-        target="species",
-        model="logistic_regression",
+        target=spec.target,
+        model=spec.model,
         seed=42,
         output="runs",
         workspace_root=workspace,
@@ -82,16 +172,16 @@ def _check_rq1_reproducibility(workspace: Path) -> dict[str, Any]:
 
     if result1["status"] != "completed" or result2["status"] != "completed":
         return {
-            "rq": "RQ1",
+            "rq": spec.label("RQ1"),
             "status": "FAIL",
             "reason": f"run statuses: {result1['status']}, {result2['status']}",
         }
 
     metrics1 = result1.get("metrics", {})
     metrics2 = result2.get("metrics", {})
-    if not _metrics_equal(metrics1, metrics2):
+    if not _metrics_equal(metrics1, metrics2, spec.metric_keys):
         return {
-            "rq": "RQ1",
+            "rq": spec.label("RQ1"),
             "status": "FAIL",
             "reason": f"metrics differ: {metrics1} vs {metrics2}",
         }
@@ -99,24 +189,25 @@ def _check_rq1_reproducibility(workspace: Path) -> dict[str, Any]:
     manifest_path = runs_dir / result1["run_id"] / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("random_seed") != 42:
-        return {"rq": "RQ1", "status": "FAIL", "reason": "manifest missing seed"}
+        return {
+            "rq": spec.label("RQ1"),
+            "status": "FAIL",
+            "reason": "manifest missing seed",
+        }
 
     dep_versions = manifest.get("dependency_versions")
     if not isinstance(dep_versions, dict) or not dep_versions:
         return {
-            "rq": "RQ1",
+            "rq": spec.label("RQ1"),
             "status": "FAIL",
             "reason": "manifest missing non-empty dependency_versions",
         }
 
     return {
-        "rq": "RQ1",
+        "rq": spec.label("RQ1"),
         "status": "PASS",
         "run_ids": [result1["run_id"], result2["run_id"]],
-        "metrics": {
-            "test_accuracy": metrics1.get("test_accuracy"),
-            "test_f1_macro": metrics1.get("test_f1_macro"),
-        },
+        "metrics": {key: metrics1.get(key) for key in spec.metric_keys},
     }
 
 
@@ -143,7 +234,9 @@ async def _with_model_registry(runs_root: Path, coro):
             return await coro(session)
 
 
-async def _check_rq2_mcp_interop(run_id: str, runs_root: Path) -> dict[str, Any]:
+async def _check_rq2_mcp_interop(
+    run_id: str, runs_root: Path, spec: DatasetSpec
+) -> dict[str, Any]:
     """RQ2: independent MCP client discovers and predicts."""
 
     async def exercise(session: ClientSession) -> dict[str, Any]:
@@ -151,7 +244,7 @@ async def _check_rq2_mcp_interop(run_id: str, runs_root: Path) -> dict[str, Any]
         tool_names = {t.name for t in tools.tools}
         if "list_models" not in tool_names or "predict" not in tool_names:
             return {
-                "rq": "RQ2",
+                "rq": spec.label("RQ2"),
                 "status": "FAIL",
                 "reason": f"missing tools: {tool_names}",
             }
@@ -160,30 +253,41 @@ async def _check_rq2_mcp_interop(run_id: str, runs_root: Path) -> dict[str, Any]
         text = "".join(c.text for c in result.content if hasattr(c, "text"))
         payload = json.loads(text)
         if not payload.get("ok"):
-            return {"rq": "RQ2", "status": "FAIL", "reason": "list_models returned ok=false"}
+            return {
+                "rq": spec.label("RQ2"),
+                "status": "FAIL",
+                "reason": "list_models returned ok=false",
+            }
         models = payload.get("data", [])
         matching = [m for m in models if m.get("run_id") == run_id]
         if not matching:
-            return {"rq": "RQ2", "status": "FAIL", "reason": "run_id not in list_models"}
+            return {
+                "rq": spec.label("RQ2"),
+                "status": "FAIL",
+                "reason": "run_id not in list_models",
+            }
 
         result = await session.call_tool(
             "predict",
-            {
-                "run_id": run_id,
-                "features": [
-                    {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}
-                ],
-            },
+            {"run_id": run_id, "features": [spec.predict_row]},
         )
         text = "".join(c.text for c in result.content if hasattr(c, "text"))
         payload = json.loads(text)
         if not payload.get("ok"):
-            return {"rq": "RQ2", "status": "FAIL", "reason": f"predict returned ok=false: {payload.get('error')}"}
+            return {
+                "rq": spec.label("RQ2"),
+                "status": "FAIL",
+                "reason": f"predict returned ok=false: {payload.get('error')}",
+            }
         predictions = payload.get("data", {}).get("predictions")
         if not predictions or not isinstance(predictions, list):
-            return {"rq": "RQ2", "status": "FAIL", "reason": "predict returned no predictions"}
+            return {
+                "rq": spec.label("RQ2"),
+                "status": "FAIL",
+                "reason": "predict returned no predictions",
+            }
 
-        return {"rq": "RQ2", "status": "PASS", "predictions": predictions}
+        return {"rq": spec.label("RQ2"), "status": "PASS", "predictions": predictions}
 
     return await _with_model_registry(runs_root, exercise)
 
@@ -260,7 +364,7 @@ def _print_report(report: dict[str, Any]) -> None:
 # RQ4-RQ6: agentic claims (P5.C)
 # ---------------------------------------------------------------------------
 
-def _agentic_env(workspace: Path) -> dict[str, str]:
+def _agentic_env(workspace: Path, specs: list[DatasetSpec]) -> dict[str, str]:
     """Point the agentic-round modules at the evaluator's workspace."""
     env = {
         "THELAB_UPLOADS_DIR": str(workspace / "uploads"),
@@ -275,33 +379,41 @@ def _agentic_env(workspace: Path) -> dict[str, str]:
     (workspace / "uploads").mkdir(exist_ok=True)
     (workspace / "proposals").mkdir(exist_ok=True)
     (workspace / "experiments").mkdir(exist_ok=True)
-    _iris_csv(workspace / "uploads")
+    for spec in specs:
+        _dataset_csv(workspace, spec)
     return env
 
 
-def _build_deterministic_result(run_id: str, metrics: dict[str, Any]) -> dict[str, Any]:
+def _build_deterministic_result(
+    spec: DatasetSpec, run_id: str, metrics: dict[str, Any]
+) -> dict[str, Any]:
     """Deterministic-baseline evidence derived from the real RQ1 run."""
+    eda_context = (
+        "Features: 4 numeric, 0 categorical; Classes: 3, imbalance ratio: 1.0"
+        if spec.task == "classification"
+        else "Features: 4 numeric, 0 categorical; regression target with linear signal"
+    )
     return {
         "status": "completed",
-        "eda": {"eda_context": "Features: 4 numeric, 0 categorical; Classes: 3, imbalance ratio: 1.0"},
+        "eda": {"eda_context": eda_context},
         "feature_engineering": {
-            "cleaned_dataset_id": "uploads/iris.csv",
+            "cleaned_dataset_id": f"uploads/{spec.name}.csv",
             "clean_metadata": {"skipped": True, "reason": "fixture already clean"},
             "top_models": [
-                {"model": "logistic_regression", "metrics": dict(metrics)},
+                {"model": spec.model, "metrics": dict(metrics)},
             ],
         },
         "model_selection": {
             "recommendation": {
-                "best_model": "logistic_regression",
-                "model_grid": ["logistic_regression"],
+                "best_model": spec.model,
+                "model_grid": list(spec.recommendation_grid),
                 "seeds": [42],
             }
         },
         "training_results": [
             {
-                "dataset": "uploads/iris.csv",
-                "model": "logistic_regression",
+                "dataset": f"uploads/{spec.name}.csv",
+                "model": spec.model,
                 "seed": 42,
                 "status": "completed",
                 "run_id": run_id,
@@ -311,13 +423,13 @@ def _build_deterministic_result(run_id: str, metrics: dict[str, Any]) -> dict[st
     }
 
 
-def _stripped_deterministic_result() -> dict[str, Any]:
+def _stripped_deterministic_result(spec: DatasetSpec) -> dict[str, Any]:
     """Ungrounded arm for RQ4: all context evidence removed."""
     return {
         "status": "completed",
         "eda": {"eda_context": ""},
         "feature_engineering": {
-            "cleaned_dataset_id": "uploads/iris.csv",
+            "cleaned_dataset_id": f"uploads/{spec.name}.csv",
             "clean_metadata": {},
             "top_models": [],
         },
@@ -377,7 +489,7 @@ def _load_round_record(experiment_id: str) -> dict[str, Any]:
 
 
 async def _check_rq4_grounding(
-    run_id: str, metrics: dict[str, Any], provider: Any
+    spec: DatasetSpec, run_id: str, metrics: dict[str, Any], provider: Any
 ) -> dict[str, Any]:
     """RQ4: grounded vs stripped-context round; claims verified against evidence.
 
@@ -387,24 +499,24 @@ async def _check_rq4_grounding(
     """
     from thelab.ide.agentic_round import run_agentic_round
 
-    grounded_experiment = _new_experiment(Path.cwd(), "rq4-grounded")
+    grounded_experiment = _new_experiment(Path.cwd(), f"rq4-grounded-{spec.name}")
     grounded = await run_agentic_round(
         grounded_experiment,
-        _build_deterministic_result(run_id, metrics),
+        _build_deterministic_result(spec, run_id, metrics),
         provider=provider,
         require_approval=True,
     )
-    ungrounded_experiment = _new_experiment(Path.cwd(), "rq4-ungrounded")
+    ungrounded_experiment = _new_experiment(Path.cwd(), f"rq4-ungrounded-{spec.name}")
     ungrounded = await run_agentic_round(
         ungrounded_experiment,
-        _stripped_deterministic_result(),
+        _stripped_deterministic_result(spec),
         provider=provider,
         require_approval=True,
     )
 
     for arm in (grounded, ungrounded):
         if arm.get("status") != "awaiting_approval":
-            return {"rq": "RQ4", "status": "FAIL", "reason": f"arm status: {arm.get('status')}"}
+            return {"rq": spec.label("RQ4"), "status": "FAIL", "reason": f"arm status: {arm.get('status')}"}
 
     g_verified, g_total = _verified_claim_stats(
         _extract_record_claims(grounded), metrics
@@ -417,12 +529,12 @@ async def _check_rq4_grounding(
         # Suite bar: the grounded arm's evidence-derived claims verify exactly.
         if g_total > 0 and g_verified < g_total:
             return {
-                "rq": "RQ4",
+                "rq": spec.label("RQ4"),
                 "status": "FAIL",
                 "reason": f"grounded arm has unverified claims: {g_verified}/{g_total}",
             }
         return {
-            "rq": "RQ4",
+            "rq": spec.label("RQ4"),
             "status": "PASS",
             "grounded_claims": f"{g_verified}/{g_total} verified",
             "ungrounded_claims": f"{u_verified}/{u_total} verified",
@@ -433,12 +545,12 @@ async def _check_rq4_grounding(
     u_rate = u_verified / u_total if u_total else 1.0
     if g_rate < u_rate:
         return {
-            "rq": "RQ4",
+            "rq": spec.label("RQ4"),
             "status": "FAIL",
             "reason": f"grounded verified-rate {g_rate:.2f} < ungrounded {u_rate:.2f}",
         }
     return {
-        "rq": "RQ4",
+        "rq": spec.label("RQ4"),
         "status": "PASS",
         "grounded_verified_rate": round(g_rate, 3),
         "ungrounded_verified_rate": round(u_rate, 3),
@@ -448,7 +560,7 @@ async def _check_rq4_grounding(
 
 
 async def _check_rq5_agentic_capability(
-    workspace: Path, run_id: str, metrics: dict[str, Any], provider: Any
+    workspace: Path, spec: DatasetSpec, run_id: str, metrics: dict[str, Any], provider: Any
 ) -> dict[str, Any]:
     """RQ5: the round protocol end-to-end — gate blocks, approval enables.
 
@@ -463,8 +575,8 @@ async def _check_rq5_agentic_capability(
     from thelab.agents.worker import ProposalStore
     from thelab.ide.agentic_round import execute_approved_round, run_agentic_round
 
-    experiment = _new_experiment(workspace, "rq5")
-    deterministic_result = _build_deterministic_result(run_id, metrics)
+    experiment = _new_experiment(workspace, f"rq5-{spec.name}")
+    deterministic_result = _build_deterministic_result(spec, run_id, metrics)
     record = await run_agentic_round(
         experiment,
         deterministic_result,
@@ -472,7 +584,7 @@ async def _check_rq5_agentic_capability(
         require_approval=True,
     )
     if record.get("status") != "awaiting_approval":
-        return {"rq": "RQ5", "status": "FAIL", "reason": f"round status: {record.get('status')}"}
+        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": f"round status: {record.get('status')}"}
     proposal_id = record["proposal_id"]
 
     # Gate: unapproved execution must be refused.
@@ -482,27 +594,27 @@ async def _check_rq5_agentic_capability(
     except HumanApprovalRequired:
         blocked = True
     if not blocked:
-        return {"rq": "RQ5", "status": "FAIL", "reason": "execution was not blocked by the gate"}
+        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": "execution was not blocked by the gate"}
 
     record_human_approval(ProposalStore(os.environ["THELAB_PROPOSALS_DIR"]), proposal_id, principal="evaluator")
     result = execute_approved_round(experiment, proposal_id)
     comparison = result.get("comparison", {})
     if result.get("status") not in {"completed", "failed"}:
-        return {"rq": "RQ5", "status": "FAIL", "reason": f"execution status: {result.get('status')}"}
+        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": f"execution status: {result.get('status')}"}
     if "metric_delta" not in comparison or "validity_rate" not in comparison:
-        return {"rq": "RQ5", "status": "FAIL", "reason": "comparison artifact incomplete"}
+        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": "comparison artifact incomplete"}
 
     validity = comparison.get("validity_rate")
     if provider is not None and result["status"] == "completed":
         if validity is None or float(validity) < 0.8:
             return {
-                "rq": "RQ5",
+                "rq": spec.label("RQ5"),
                 "status": "FAIL",
                 "reason": f"validity_rate {validity} below 0.8 bar",
             }
 
     return {
-        "rq": "RQ5",
+        "rq": spec.label("RQ5"),
         "status": "PASS",
         "gate_blocked_unapproved": True,
         "validity_rate": validity,
@@ -513,7 +625,7 @@ async def _check_rq5_agentic_capability(
 
 
 async def _check_rq6_orchestration(
-    run_id: str, metrics: dict[str, Any], provider: Any
+    spec: DatasetSpec, run_id: str, metrics: dict[str, Any], provider: Any
 ) -> dict[str, Any]:
     """RQ6: role-specialized (multi) vs shared-prompt (single) orchestration.
 
@@ -528,33 +640,33 @@ async def _check_rq6_orchestration(
         ("multi", RoundConfig(role_mode="multi")),
         ("single", RoundConfig(role_mode="single")),
     ):
-        experiment = _new_experiment(Path.cwd(), f"rq6-{label}")
+        experiment = _new_experiment(Path.cwd(), f"rq6-{label}-{spec.name}")
         record = await run_agentic_round(
             experiment,
-            _build_deterministic_result(run_id, metrics),
+            _build_deterministic_result(spec, run_id, metrics),
             provider=provider,
             require_approval=True,
             config=config,
         )
         if record.get("status") != "awaiting_approval":
             return {
-                "rq": "RQ6",
+                "rq": spec.label("RQ6"),
                 "status": "FAIL",
                 "reason": f"{label} arm status: {record.get('status')}",
             }
         if record.get("role_mode") != label:
             return {
-                "rq": "RQ6",
+                "rq": spec.label("RQ6"),
                 "status": "FAIL",
                 "reason": f"{label} arm recorded role_mode={record.get('role_mode')}",
             }
         proposal = record.get("proposal") or {}
         if not proposal.get("model_grid"):
-            return {"rq": "RQ6", "status": "FAIL", "reason": f"{label} arm produced no grid"}
+            return {"rq": spec.label("RQ6"), "status": "FAIL", "reason": f"{label} arm produced no grid"}
         arms[label] = record
 
     return {
-        "rq": "RQ6",
+        "rq": spec.label("RQ6"),
         "status": "PASS",
         "multi_mode": arms["multi"].get("mode"),
         "single_mode": arms["single"].get("mode"),
@@ -583,44 +695,57 @@ async def main() -> int:
         provider = create_provider(args.live, args.model)
         mode = f"live ({args.live}" + (f":{args.model}" if args.model else "") + ")"
 
+    specs = [_iris_spec(), _housing_spec()]
     workspace = Path(tempfile.mkdtemp(prefix="thelab-eval-"))
     previous_env = {}
+    report: dict[str, Any] = {"mode": mode, "results": []}
     try:
-        rq1 = _check_rq1_reproducibility(workspace)
-        runs_root = workspace / "runs"
-
-        # Use the first completed run from RQ1 for the MCP interoperability check.
-        run_id = rq1.get("run_ids", [None])[0]
-        if run_id is None:
-            rq2 = {"rq": "RQ2", "status": "FAIL", "reason": "no run available from RQ1"}
-        else:
-            rq2 = await _check_rq2_mcp_interop(run_id, runs_root)
-
+        # RQ3 is dataset-independent; run once.
         rq3 = _check_rq3_context_retrieval(workspace)
+        report["results"].append(rq3)
 
-        metrics = rq1.get("metrics", {})
-        agentic_results: list[dict[str, Any]]
-        if run_id is None or rq1["status"] != "PASS":
-            agentic_results = [
-                {"rq": f"RQ{n}", "status": "FAIL", "reason": "no verified baseline run from RQ1"}
-                for n in (4, 5, 6)
-            ]
-        else:
-            env = _agentic_env(workspace)
-            previous_env = {k: os.environ.get(k) for k in env}
-            try:
-                rq4 = await _check_rq4_grounding(run_id, metrics, provider)
-                rq5 = await _check_rq5_agentic_capability(workspace, run_id, metrics, provider)
-                rq6 = await _check_rq6_orchestration(run_id, metrics, provider)
-            finally:
-                for key, value in previous_env.items():
-                    if value is None:
-                        os.environ.pop(key, None)
-                    else:
-                        os.environ[key] = value
-            agentic_results = [rq4, rq5, rq6]
+        env = _agentic_env(workspace, specs)
+        previous_env = {k: os.environ.get(k) for k in env}
+        try:
+            for spec in specs:
+                rq1 = _check_rq1_reproducibility(workspace, spec)
+                report["results"].append(rq1)
 
-        report = {"mode": mode, "results": [rq1, rq2, rq3, *agentic_results]}
+                run_id = rq1.get("run_ids", [None])[0]
+                if rq1["status"] != "PASS" or run_id is None:
+                    report["results"].append(
+                        {"rq": spec.label("RQ2"), "status": "FAIL", "reason": "no verified run from RQ1"}
+                    )
+                    for n in (4, 5, 6):
+                        report["results"].append(
+                            {
+                                "rq": spec.label(f"RQ{n}"),
+                                "status": "FAIL",
+                                "reason": "no verified baseline run from RQ1",
+                            }
+                        )
+                    continue
+
+                rq2 = await _check_rq2_mcp_interop(run_id, workspace / "runs", spec)
+                report["results"].append(rq2)
+
+                metrics = rq1.get("metrics", {})
+                report["results"].append(
+                    await _check_rq4_grounding(spec, run_id, metrics, provider)
+                )
+                report["results"].append(
+                    await _check_rq5_agentic_capability(workspace, spec, run_id, metrics, provider)
+                )
+                report["results"].append(
+                    await _check_rq6_orchestration(spec, run_id, metrics, provider)
+                )
+        finally:
+            for key, value in previous_env.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
         _print_report(report)
         return 0 if all(r["status"] == "PASS" for r in report["results"]) else 1
     finally:

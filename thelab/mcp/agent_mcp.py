@@ -275,7 +275,8 @@ async def _orchestrate_experiment(arguments: dict[str, Any]) -> types.CallToolRe
             "proposal": proposal.safe_dict(),
             "approve": (
                 "POST /proposals/{id}/approve (UI), 'thelab proposals approve <id>', "
-                "or set THELAB_AUTO_APPROVE=1 for this local operator"
+                "or enable an operator auto-approve opt-in (THELAB_AUTO_APPROVE=1 "
+                "or .thelab/auto-approve.json with auto_approve=true + reason)"
             ),
         })
 

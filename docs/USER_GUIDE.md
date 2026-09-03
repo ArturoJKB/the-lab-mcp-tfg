@@ -143,9 +143,11 @@ Note: HTTP paths reference datasets by id (`uploads/<file>` or
 - Agent-initiated experiments (via `agent_mcp` from an external MCP client
   such as opencode or Claude Code) stop at the approval gate: the tool returns
   the proposal as `awaiting_approval` and a human approves it in the UI or
-  with `thelab proposals approve`. For trusted dev loops,
-  `THELAB_AUTO_APPROVE=1` (env) opts the local operator in — recorded as
-  `auto:<principal>` in the audit trail.
+  with `thelab proposals approve`. For trusted dev loops there are two
+  operator opt-ins, both recorded as `auto:<principal>` in the audit trail:
+  the `THELAB_AUTO_APPROVE=1` env var, or a per-workspace
+  `.thelab/auto-approve.json` file with `{"auto_approve": true, "reason":
+  "<why>"}` (fail-closed: the reason is mandatory).
 
 ---
 
