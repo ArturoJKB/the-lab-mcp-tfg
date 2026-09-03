@@ -9,7 +9,6 @@ context-managed client (persistent portal).
 
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
 
@@ -63,7 +62,7 @@ def test_service_stays_responsive_during_experiment(throughput_env, monkeypatch)
         "(work order X1 deferred — see docs/P5_PLAN.md); unskip when X1 lands"
     )
     from thelab.ide.orchestrator import ExperimentOrchestrator
-    from thelab.run.batch import BatchResult, BatchRunner
+    from thelab.run.batch import BatchResult
 
     def _slow_try_all(*args, **kwargs):
         time.sleep(2)
@@ -115,7 +114,7 @@ def test_service_stays_responsive_during_experiment(throughput_env, monkeypatch)
         # The experiment runs ~7s of deterministic stalls: several fast polls
         # must have been served concurrently with the running job.
         assert len(poll_latencies) >= 2, f"expected concurrent polls, got {len(poll_latencies)}"
-        slow = [l for l in poll_latencies if l > 1.5]
+        slow = [lat for lat in poll_latencies if lat > 1.5]
         assert not slow, (
             "service loop froze during the experiment: "
             f"poll latencies {poll_latencies}"
