@@ -277,9 +277,11 @@ def _single_turn_json(
     provider: LLMProvider,
     system_prompt: str,
     instruction: str,
-) -> dict[str, Any] | None:
-    """One provider turn with a role prompt; returns parsed JSON or None.
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """One provider turn with a role prompt.
 
+    Returns ``(parsed_json_or_None, usage_or_None)`` — usage carries the
+    provider's token counts when reported (thesis token-efficiency metric).
     Runs synchronously — callers invoke it from a worker thread.
     """
     try:
@@ -291,8 +293,8 @@ def _single_turn_json(
             [],
         )
     except Exception:  # noqa: BLE001 - degrade to deterministic, never block
-        return None
-    return _parse_json_answer(turn.text)
+        return None, None
+    return _parse_json_answer(turn.text), turn.usage
 
 
 # ---------------------------------------------------------------------------
@@ -450,10 +452,14 @@ def _generate_transform(
                 "Rewrite the transform so it fixes exactly these violations "
                 "while satisfying the contract."
             )
-        parsed = _single_turn_json(provider, config.prompt_for(FEATURE_ENGINEER_SYSTEM_PROMPT), instruction)
+        parsed, fe_usage = _single_turn_json(
+            provider, config.prompt_for(FEATURE_ENGINEER_SYSTEM_PROMPT), instruction
+        )
         code = (parsed or {}).get("code")
         if attempt == 1:
             record["rationale"] = (parsed or {}).get("rationale", "")
+        if fe_usage:
+            record.setdefault("llm_usage", []).append({"stage": "feature_engineering", **fe_usage})
         if not isinstance(code, str) or not code.strip():
             attempts.append({"attempt": attempt, "status": "no_code"})
             if attempt == 1:
@@ -567,10 +573,11 @@ def _generate_selection(
     brief: dict[str, Any],
     transform_record: dict[str, Any],
     config: RoundConfig,
-) -> tuple[dict[str, Any], bool]:
-    """Selector stage: returns (selection_dict, llm_used)."""
+) -> tuple[dict[str, Any], bool, dict[str, Any] | None]:
+    """Selector stage: returns (selection_dict, llm_used, usage_or_None)."""
     task_type = str(pack.get("task_type") or "auto")
     registry_models = _registry_for_task(task_type)
+    sel_usage: dict[str, Any] | None = None
     if provider is not None:
         instruction = (
             f"Task type: {task_type} — only models from the list below are valid.\n"
@@ -581,7 +588,9 @@ def _generate_selection(
             f"Transform outcome: {json.dumps({k: transform_record.get(k) for k in ('status', 'rationale', 'validation')}, default=str)}\n"
             "Propose a small training grid (1-3 models, 1-3 seeds)."
         )
-        parsed = _single_turn_json(provider, config.prompt_for(MODEL_SELECTOR_SYSTEM_PROMPT), instruction)
+        parsed, sel_usage = _single_turn_json(
+            provider, config.prompt_for(MODEL_SELECTOR_SYSTEM_PROMPT), instruction
+        )
         if parsed and isinstance(parsed.get("model_grid"), list) and parsed["model_grid"]:
             # Deterministic post-filter: drop models that do not match the
             # task type (a wrong-task model is a guaranteed training
@@ -592,7 +601,7 @@ def _generate_selection(
                     str(m) for m in parsed["model_grid"] if str(m) in allowed
                 ]
                 if not parsed["model_grid"]:
-                    return _selection_fallback(pack), False
+                    return _selection_fallback(pack), False, sel_usage
             # Grid-explosion cap (audit F3): bound the Cartesian product the
             # LLM can spawn (≤3 models × ≤3 seeds × ≤4 hp combos); the
             # truncation is deterministic and recorded via "grid_capped".
@@ -615,8 +624,8 @@ def _generate_selection(
             parsed["seeds"] = (seeds or [42])[:3]
             parsed["hyperparameter_grid"] = {k: v[:per_list] for k, v in hp_items}
             parsed["grid_capped"] = capped
-            return parsed, True
-    return _selection_fallback(pack), False
+            return parsed, True, sel_usage
+    return _selection_fallback(pack), False, sel_usage
 
 
 # ---------------------------------------------------------------------------
@@ -748,7 +757,7 @@ async def run_agentic_round(
         record["status"] = "cancelled"
         return record
     emit("ModelSelector proposing training configuration beyond the baseline grid")
-    selection, selector_llm_used = _generate_selection(
+    selection, selector_llm_used, sel_usage = _generate_selection(
         config.provider_for("ModelSelector", provider), pack, brief, transform_record, config
     )
     selection["source"] = "llm" if selector_llm_used else "deterministic_fallback"
@@ -768,6 +777,12 @@ async def run_agentic_round(
     record["mode"] = "agentic" if llm_contributed else "degraded_deterministic"
     if config.stage_models:
         record["stage_models"] = dict(config.stage_models)
+    stage_usage: dict[str, Any] = {}
+    for stage, usage in (("feature_engineering", transform_record.get("llm_usage")), ("model_selector", sel_usage)):
+        if usage:
+            stage_usage[stage] = usage
+    if stage_usage:
+        record["llm_usage"] = stage_usage
 
     dataset_id = transform_record.get("dataset_id") or pack.get("cleaned_dataset_id")
     if not dataset_id:

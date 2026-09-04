@@ -535,7 +535,7 @@ def test_selector_post_filters_wrong_task_models(round_env, experiment, determin
         "hyperparameter_grid": {},
         "rationale": "llm pick",
     }
-    selection, llm_used = _generate_selection(
+    selection, llm_used, _sel_usage = _generate_selection(
         MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"}, RoundConfig()
     )
     assert llm_used is True
@@ -554,7 +554,7 @@ def test_selector_falls_back_when_all_wrong_task(round_env, experiment, determin
         "hyperparameter_grid": {},
         "rationale": "llm pick",
     }
-    selection, llm_used = _generate_selection(
+    selection, llm_used, _sel_usage = _generate_selection(
         MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"}, RoundConfig()
     )
     assert llm_used is False  # fell back to the deterministic recommendation
@@ -580,7 +580,7 @@ def test_selector_caps_llm_grid(round_env, experiment, deterministic_result):
         "hyperparameter_grid": {"C": [0.1, 1.0, 10.0, 100.0, 1000.0], "max_iter": [100, 200]},
         "rationale": "llm explosion",
     }
-    selection, llm_used = _generate_selection(
+    selection, llm_used, _sel_usage = _generate_selection(
         MockProvider([json.dumps(scripted)]), pack, {"findings": []}, {"status": "skipped"},
         RoundConfig(),
     )
@@ -766,7 +766,7 @@ def test_stage_providers_route_per_stage(round_env, experiment):
         config.provider_for("FeatureEngineer", None), pack, {"findings": []}, config
     )
     assert fe_record["status"] == "completed", fe_record
-    selection, selector_llm_used = _generate_selection(
+    selection, selector_llm_used, _sel_usage = _generate_selection(
         config.provider_for("ModelSelector", None), pack, {"findings": []}, fe_record, config
     )
     assert selector_llm_used is True
