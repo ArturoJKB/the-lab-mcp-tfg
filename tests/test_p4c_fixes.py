@@ -10,7 +10,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from thelab.agents.chat import provider_status
-from thelab.ide.experiment import ExperimentState
 from thelab.ide.orchestrator import ExperimentOrchestrator
 from thelab.model_service.app import app
 
@@ -136,8 +135,10 @@ def test_orchestrator_fails_loudly_when_provider_dies(tmp_path: Path, monkeypatc
 
 
 def test_failed_experiment_marks_state(tmp_path: Path, monkeypatch):
-    """An experiment whose orchestrate raises ends FAILED, not stuck pending."""
-    from thelab.ide.experiment import ExperimentStore
+    """Wrong target is now caught at experiment entry (P6.B.1 target validation)
+    — the experiment never starts, so there's no mid-orchestration failure to
+    mark. The mid-orchestration FAILED path is covered by
+    test_audit_remediation.py::test_all_failed_batch_fails_the_experiment."""
     from thelab.ide.experiment_api import start_experiment
 
     for d in ("uploads", "fixtures", "runs", "proposals", "jobs", "experiments"):
@@ -154,23 +155,5 @@ def test_failed_experiment_marks_state(tmp_path: Path, monkeypatch):
     }.items():
         monkeypatch.setenv(key, str(val))
 
-    import time
-
-    started = asyncio.run(start_experiment("g", "uploads/iris.csv", "column_that_does_not_exist"))
-    deadline = time.time() + 60
-    from thelab.ide.jobs import get_job_manager
-
-    async def wait():
-        while True:
-            job = await get_job_manager().get(started["job_id"])
-            if job is not None and job.status in {"completed", "failed"}:
-                return job
-            await asyncio.sleep(0.2)
-            if time.time() > deadline:
-                raise AssertionError("job never finished")
-
-    job = asyncio.run(wait())
-    assert job.status == "failed"
-    store = ExperimentStore()
-    experiment = store.load(started["experiment_id"])
-    assert experiment is not None and experiment.state == ExperimentState.FAILED
+    with pytest.raises(ValueError, match="not found"):
+        asyncio.run(start_experiment("g", "uploads/iris.csv", "column_that_does_not_exist"))
