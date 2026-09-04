@@ -23,6 +23,11 @@ from thelab.sandbox.artifacts import list_artifacts, read_artifact
 from thelab.sandbox.ast_check import check_code
 from thelab.sandbox.policy import DEFAULT_POLICY
 
+# The real __import__, captured before any builtins filtering: _safe_import
+# delegates to it after whitelist validation so the full import semantics
+# (fromlist, submodule-as-binding) are preserved inside the sandbox.
+_REAL_IMPORT = __import__
+
 
 def _set_memory_limit(max_bytes: int) -> None:
     """Set a hard memory limit for this process when resource limits exist."""
@@ -33,12 +38,20 @@ def _set_memory_limit(max_bytes: int) -> None:
 
 
 def _safe_import(name: str, globals_: dict[str, Any] | None = None, locals_: dict[str, Any] | None = None, fromlist: tuple[str, ...] = (), level: int = 0) -> ModuleType:  # noqa: ARG001
-    """Import hook that enforces the sandbox whitelist."""
+    """Import hook that enforces the sandbox whitelist.
+
+    Validates *name* against the whitelist, then delegates to the real
+    ``__import__`` (captured before builtins filtering). Delegating preserves
+    the full import semantics — submodule binding, fromlist handling,
+    ``import a.b as t`` — which ``importlib.import_module`` does not
+    replicate (matplotlib 3.11's ``import matplotlib.pyplot as plt`` fails
+    under an ``import_module`` hook).
+    """
     if level != 0:
         raise ImportError("relative imports are not allowed in the sandbox")
     if not DEFAULT_POLICY.is_import_allowed(name):
         raise ImportError(f"import not allowed: {name}")
-    return importlib.import_module(name)
+    return _REAL_IMPORT(name, globals_, locals_, fromlist, level)
 
 
 def _scrub_sandbox_module_refs() -> None:
