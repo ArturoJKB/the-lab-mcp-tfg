@@ -195,8 +195,16 @@ class ExperimentOrchestrator:
         """Run EDA analysis using deterministic skills."""
         _ = resolve_dataset_path(dataset_id)
 
-        # Run EDA
-        eda_result = run_eda(dataset_id, target=target)
+        try:
+            eda_result = run_eda(dataset_id, target=target)
+        except TypeError as exc:
+            # Audit P6-BLK-005: array-valued columns crash EDA's hash-based
+            # correlation/missing-value scans with "unhashable type".
+            raise OrchestrationFailed(
+                f"EDA stage failed: non-scalar column values in {dataset_id} "
+                f"are not supported by the EDA engine ({exc}). "
+                "Clean the dataset to remove or flatten array-valued columns."
+            ) from exc
 
         # Build EDA context string for downstream agents
         eda_context = self._build_eda_context(eda_result)

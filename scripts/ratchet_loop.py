@@ -20,6 +20,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -410,7 +411,12 @@ def _prepare_dataset(spec: DatasetCfg, ingest: bool) -> str | None:
             categorical_impute_strategy="mode",
         )
     except ValueError as exc:
-        # Already-cleaned naming convention or clean-policy rejection: use raw.
+        # Idempotent re-clean: return the existing cleaned dataset id when the
+        # cleaning API's "already cleaned" naming convention tells us where it is.
+        match = re.search(r"'(uploads/[^']+)' is already cleaned", str(exc))
+        if match:
+            print(f"  clean skipped: already cleaned -> {match.group(1)}", flush=True)
+            return match.group(1)
         print(f"  clean skipped ({exc}); using raw file directly", flush=True)
         return raw_id
     cleaned_id = metadata.get("dataset_id") or ""

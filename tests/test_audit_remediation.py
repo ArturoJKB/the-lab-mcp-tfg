@@ -351,3 +351,69 @@ def test_grid_caps_reject_explosions():
             hyperparameter_grid={"C": [0.1, 1.0, 10.0, 100.0, 1000.0]},
             **base,
         )
+
+
+# ---------------------------------------------------------------------------
+# P6.B.1 — B1a: target-column validation at experiment entry
+# ---------------------------------------------------------------------------
+
+
+def test_wrong_target_rejected_at_entry(client, audit_env):
+    """A wrong target name fails fast at POST /experiment/run with a clear
+    message listing available columns — not mid-orchestration as a provider
+    failure (audit P6-BLK-004)."""
+    response = client.post(
+        "/experiment/run",
+        json={
+            "goal": "test",
+            "dataset_id": "uploads/iris.csv",
+            "target": "IsActiveMemeber",
+            "provider": "mock",
+        },
+    )
+    assert response.status_code == 400
+    detail = response.json()["detail"]
+    assert "IsActiveMemeber" in detail
+    assert "not found" in detail
+    assert "sepal_length" in detail  # available columns listed
+
+
+def test_correct_target_passes_entry_validation(client, audit_env):
+    response = client.post(
+        "/experiment/run",
+        json={
+            "goal": "test",
+            "dataset_id": "uploads/iris.csv",
+            "target": "species",
+            "provider": "mock",
+        },
+    )
+    assert response.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# P6.B.1 — B1b: EDA array guard (OrchestrationFailed, not silent crash)
+# ---------------------------------------------------------------------------
+
+
+def test_eda_array_guard_raises_orchestration_failed(tmp_path):
+    """The EDA stage's TypeError for non-scalar columns is wrapped as
+    OrchestrationFailed, not a raw TypeError."""
+    from unittest.mock import patch
+
+    from thelab.ide.orchestrator import ExperimentOrchestrator, OrchestrationFailed
+
+    orchestrator = ExperimentOrchestrator()
+    # Skip the resolve_dataset_path check by patching it too
+    with patch(
+        "thelab.ide.orchestrator.resolve_dataset_path",
+        return_value=tmp_path / "fake.csv",
+    ):
+        with patch(
+            "thelab.ide.orchestrator.run_eda",
+            side_effect=TypeError("unhashable type: 'numpy.ndarray'"),
+        ):
+            with pytest.raises(OrchestrationFailed, match="unhashable type"):
+                asyncio.run(
+                    orchestrator.run_eda_analysis("uploads/any.csv", "any_target")
+                )

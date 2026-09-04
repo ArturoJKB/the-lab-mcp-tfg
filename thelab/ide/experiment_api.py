@@ -28,6 +28,7 @@ async def start_experiment(
 ) -> dict[str, Any]:
     """Create an experiment and queue its orchestration as a background job."""
     resolve_dataset_path(dataset_id)
+    _validate_target_column(dataset_id, target)
     from thelab.agents.chat import create_provider
 
     try:
@@ -70,6 +71,21 @@ async def start_experiment(
         "dataset_id": dataset_id,
         "target": target,
     }
+
+
+def _validate_target_column(dataset_id: str, target: str) -> None:
+    """Fail fast when *target* is not a real column in the dataset (audit P6-BLK-004)."""
+    import pandas as pd
+
+    from thelab.ide.datasets import resolve_dataset_path
+
+    path = resolve_dataset_path(dataset_id)
+    columns = pd.read_csv(path, nrows=0).columns.tolist()
+    if target not in columns:
+        raise ValueError(
+            f"target column '{target}' not found in {dataset_id}; "
+            f"available columns: {columns[:12]}"
+        )
 
 
 def _load_or_raise(experiment_id: str) -> tuple[Experiment, ExperimentStore]:
