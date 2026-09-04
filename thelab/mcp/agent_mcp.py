@@ -55,6 +55,47 @@ TOOLS = [
         },
     ),
     types.Tool(
+        name="run_full_journey",
+        description="Start a full agentic journey: deterministic baseline -> agentic round -> "
+        "awaiting human approval at the gate. Returns experiment_id and job_id for polling. "
+        "After the gate, use continue_journey to execute after human approval.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "goal": {"type": "string", "description": "Natural language goal for the experiment"},
+                "dataset_id": {"type": "string", "description": "Dataset identifier (e.g., uploads/data.csv)"},
+                "target": {"type": "string", "description": "Target column name"},
+                "provider": {"type": "string", "enum": ["mock", "ollama", "openrouter"], "default": "mock"},
+                "model": {"type": "string", "description": "Model name for LLM provider"},
+            },
+            "required": ["goal", "dataset_id", "target"],
+        },
+    ),
+    types.Tool(
+        name="continue_journey",
+        description="After human approval of the agentic-round proposal, execute it through the "
+        "deterministic factory. Requires the proposal to be approved via the UI or CLI.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "experiment_id": {"type": "string", "description": "Experiment ID from run_full_journey"},
+            },
+            "required": ["experiment_id"],
+        },
+    ),
+    types.Tool(
+        name="get_journey_status",
+        description="Return the agentic-round record for a journey: brief, transform, proposal, "
+        "execution comparison. Poll this to track progress.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "experiment_id": {"type": "string", "description": "Experiment ID"},
+            },
+            "required": ["experiment_id"],
+        },
+    ),
+    types.Tool(
         name="spawn_subagent",
         description="Spawn a typed sub-agent (EDAAnalyst, FeatureEngineer, ModelSelector) with a specific goal and context.",
         input_schema={
@@ -177,6 +218,15 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
     arguments = params.arguments or {}
 
     try:
+        if name == "run_full_journey":
+            return await _run_full_journey(arguments)
+
+        if name == "continue_journey":
+            return await _continue_journey(arguments)
+
+        if name == "get_journey_status":
+            return await _get_journey_status(arguments)
+
         if name == "orchestrate_experiment":
             return await _orchestrate_experiment(arguments)
 
@@ -199,6 +249,89 @@ async def on_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.C
 
     except Exception as exc:
         return _error(f"tool execution failed: {exc}")
+
+
+async def _run_full_journey(arguments: dict[str, Any]) -> types.CallToolResult:
+    """Start a full agentic journey (deterministic baseline -> agentic round -> gate).
+
+    Thin MCP wrapper around start_experiment(agentic_round=True). The caller
+    polls get_journey_status until state == awaiting_approval, then the human
+    approves and continue_journey executes.
+    """
+    goal = arguments.get("goal", "")
+    dataset_id = arguments.get("dataset_id", "")
+    target = arguments.get("target", "")
+    provider_name = arguments.get("provider", "mock")
+    model = arguments.get("model")
+
+    if not goal or not dataset_id or not target:
+        return _error("goal, dataset_id, and target are required")
+
+    try:
+        from thelab.ide.experiment_api import start_experiment
+
+        data = await start_experiment(
+            goal=goal,
+            dataset_id=dataset_id,
+            target=target,
+            provider_name=provider_name,
+            model=model,
+            agentic_round=True,
+        )
+        return _ok({
+            "experiment_id": data["experiment_id"],
+            "job_id": data["job_id"],
+            "state": data["state"],
+            "poll_hint": "poll get_journey_status until state == awaiting_approval",
+        })
+    except Exception as exc:
+        return _error(f"journey failed to start: {exc}")
+
+
+async def _continue_journey(arguments: dict[str, Any]) -> types.CallToolResult:
+    """Execute an approved agentic-round proposal through the factory."""
+    experiment_id = arguments.get("experiment_id", "")
+    if not experiment_id:
+        return _error("experiment_id is required")
+
+    try:
+        from thelab.ide.experiment_api import approve_agentic_round
+
+        data = await approve_agentic_round(experiment_id, principal="agent_mcp")
+        return _ok({
+            "experiment_id": data["experiment_id"],
+            "proposal_id": data["proposal_id"],
+            "job_id": data["job_id"],
+            "state": data["state"],
+            "poll_hint": "poll get_journey_status until state == completed",
+        })
+    except ValueError as exc:
+        return _error(str(exc))
+    except Exception as exc:
+        return _error(f"continue_journey failed: {exc}")
+
+
+async def _get_journey_status(arguments: dict[str, Any]) -> types.CallToolResult:
+    """Return the agentic-round record for a journey."""
+    experiment_id = arguments.get("experiment_id", "")
+    if not experiment_id:
+        return _error("experiment_id is required")
+
+    try:
+        from thelab.ide.experiment_api import get_agentic_round, get_experiment_status
+
+        status = await get_experiment_status(experiment_id)
+        round_data = await get_agentic_round(experiment_id)
+        return _ok({
+            "experiment_id": experiment_id,
+            "state": status.get("state"),
+            "best_run_id": status.get("best_run_id"),
+            "round": round_data,
+        })
+    except ValueError as exc:
+        return _error(str(exc))
+    except Exception as exc:
+        return _error(f"get_journey_status failed: {exc}")
 
 
 async def _orchestrate_experiment(arguments: dict[str, Any]) -> types.CallToolResult:

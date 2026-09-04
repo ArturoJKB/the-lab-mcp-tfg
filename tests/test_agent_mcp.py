@@ -19,6 +19,9 @@ EXPECTED_TOOLS = {
     "run_training_job",
     "get_job_status",
     "log_agent_activity",
+    "run_full_journey",
+    "continue_journey",
+    "get_journey_status",
 }
 
 IRIS_ROWS = [
