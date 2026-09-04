@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2",
     "pandas>=2",
     "scikit-learn>=1.4",
+    "matplotlib>=3.9",
     "mcp>=1.6",
     "fastapi>=0.110",
     "uvicorn>=0.29",

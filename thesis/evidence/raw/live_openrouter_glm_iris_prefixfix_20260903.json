@@ -1,0 +1,54 @@
+{
+  "mode": "live (openrouter:z-ai/glm-5.3-flash)",
+  "results": [
+    {
+      "event_id": "evt-repro",
+      "hits": 1,
+      "rq": "RQ3",
+      "status": "PASS"
+    },
+    {
+      "metrics": {
+        "test_accuracy": 1.0,
+        "test_f1_macro": 1.0
+      },
+      "rq": "RQ1[iris]",
+      "run_ids": [
+        "run-20260903-183714-13f53162",
+        "run-20260903-183715-4773d856"
+      ],
+      "status": "PASS"
+    },
+    {
+      "predictions": [
+        "setosa"
+      ],
+      "rq": "RQ2[iris]",
+      "status": "PASS"
+    },
+    {
+      "grounded_claims": 2,
+      "grounded_verified_rate": 1.0,
+      "rq": "RQ4[iris]",
+      "status": "PASS",
+      "ungrounded_claims": 0,
+      "ungrounded_verified_rate": 1.0
+    },
+    {
+      "agentic_completed": 0,
+      "agentic_total": 108,
+      "gate_blocked_unapproved": true,
+      "metric_delta": {},
+      "rq": "RQ5[iris]",
+      "status": "PASS",
+      "validity_rate": 0.0
+    },
+    {
+      "multi_mode": "agentic",
+      "note": "mock structural run; live quality comparison pending (--live)",
+      "rq": "RQ6[iris]",
+      "single_mode": "degraded_deterministic",
+      "status": "PASS"
+    }
+  ]
+}

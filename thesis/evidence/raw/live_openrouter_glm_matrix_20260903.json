@@ -1,0 +1,97 @@
+{
+  "mode": "live (openrouter:z-ai/glm-5.3-flash)",
+  "results": [
+    {
+      "event_id": "evt-repro",
+      "hits": 1,
+      "rq": "RQ3",
+      "status": "PASS"
+    },
+    {
+      "metrics": {
+        "test_accuracy": 1.0,
+        "test_f1_macro": 1.0
+      },
+      "rq": "RQ1[iris]",
+      "run_ids": [
+        "run-20260903-200605-c6daa144",
+        "run-20260903-200605-127d6d49"
+      ],
+      "status": "PASS"
+    },
+    {
+      "predictions": [
+        "setosa"
+      ],
+      "rq": "RQ2[iris]",
+      "status": "PASS"
+    },
+    {
+      "grounded_claims": 2,
+      "grounded_verified_rate": 1.0,
+      "rq": "RQ4[iris]",
+      "status": "PASS",
+      "ungrounded_claims": 0,
+      "ungrounded_verified_rate": 1.0
+    },
+    {
+      "agentic_completed": 15,
+      "agentic_total": 15,
+      "gate_blocked_unapproved": true,
+      "metric_delta": {},
+      "rq": "RQ5[iris]",
+      "status": "PASS",
+      "validity_rate": 1.0
+    },
+    {
+      "multi_mode": "agentic",
+      "note": "mock structural run; live quality comparison pending (--live)",
+      "rq": "RQ6[iris]",
+      "single_mode": "degraded_deterministic",
+      "status": "PASS"
+    },
+    {
+      "metrics": {
+        "test_r2": 0.9922550528997377,
+        "test_rmse": 12310.539861502295
+      },
+      "rq": "RQ1[housing]",
+      "run_ids": [
+        "run-20260903-202554-f52d5a92",
+        "run-20260903-202554-9e521a84"
+      ],
+      "status": "PASS"
+    },
+    {
+      "predictions": [
+        229308.87645420185
+      ],
+      "rq": "RQ2[housing]",
+      "status": "PASS"
+    },
+    {
+      "grounded_claims": 2,
+      "grounded_verified_rate": 1.0,
+      "rq": "RQ4[housing]",
+      "status": "PASS",
+      "ungrounded_claims": 0,
+      "ungrounded_verified_rate": 1.0
+    },
+    {
+      "agentic_completed": 0,
+      "agentic_total": 9,
+      "gate_blocked_unapproved": true,
+      "metric_delta": {},
+      "rq": "RQ5[housing]",
+      "status": "PASS",
+      "validity_rate": 0.0
+    },
+    {
+      "multi_mode": "agentic",
+      "note": "mock structural run; live quality comparison pending (--live)",
+      "rq": "RQ6[housing]",
+      "single_mode": "degraded_deterministic",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{RQ1--RQ6 evaluation matrix (live (openrouter:z-ai/glm-5.3-flash)). Agentic checks RQ4--RQ6 run per dataset arm; RQ3 is dataset-independent.}
+\label{tab:rq-matrix-live-openrouter-glm-iris-prefixfix-20260903}
+\begin{tabular}{llll}
+\toprule
+RQ & Dataset & Verdict & Key result \\
+\midrule
+RQ3 & — & PASS & hits: 1 \\
+RQ1 & iris & PASS & test\_accuracy=1.0000, test\_f1\_macro=1.0000 \\
+RQ2 & iris & PASS & predictions: ['setosa'] \\
+RQ4 & iris & PASS & grounded 1.0 vs ungrounded 1.0 \\
+RQ5 & iris & PASS & validity 0.0 (0/108) \\
+RQ6 & iris & PASS & multi: agentic / single: degraded\_deterministic \\
+\bottomrule
+\end{tabular}
+\end{table}

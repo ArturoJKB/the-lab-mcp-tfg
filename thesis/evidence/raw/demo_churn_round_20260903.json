@@ -1,0 +1,245 @@
+{
+  "analyst_llm_used": false,
+  "approval_error": "proposal 'prop-round-7d3b299c679d' is not approved; approve via the UI (POST /proposals/prop-round-7d3b299c679d/approve), 'thelab proposals approve <id>', or enable an operator auto-approve opt-in (THELAB_AUTO_APPROVE=1 or .thelab/auto-approve.json)",
+  "brief": {
+    "findings": [
+      "EDA: Features: 11 numeric, 2 categorical; Classes: 2, imbalance ratio: 3.91; Top correlation: Balance vs NumOfProducts (-0.304); Outliers detected in numeric columns",
+      "Best dry-run baseline: hist_gradient_boosting (test_accuracy=0.8575)"
+    ],
+    "opportunities": [
+      "Evaluate whether feature transformations improve on the best dry-run baseline."
+    ],
+    "risks": [
+      "Agent-proposed transforms must be validated for target leakage."
+    ],
+    "source": "deterministic_fallback"
+  },
+  "created_at": "2026-09-03T23:17:59.954979+00:00",
+  "execution": {
+    "comparison": {
+      "agentic_best": {
+        "metrics": {
+          "test_accuracy": 0.8715,
+          "test_f1_macro": 0.7511039315409911,
+          "test_samples": 2000,
+          "train_accuracy": 0.864875,
+          "train_f1_macro": 0.7329369881067094,
+          "train_samples": 8000
+        },
+        "model": "svc",
+        "run_id": "run-20260903-231810-413483cf",
+        "seed": 43
+      },
+      "agentic_completed": 9,
+      "agentic_total": 9,
+      "deterministic_best": {
+        "metrics": {
+          "test_accuracy": 0.859,
+          "test_f1_macro": 0.7507596527604694,
+          "test_samples": 2000,
+          "train_accuracy": 0.92575,
+          "train_f1_macro": 0.8723600529512386,
+          "train_samples": 8000
+        },
+        "run_id": "run-20260903-231740-405c597d"
+      },
+      "metric_delta": {
+        "test_accuracy": 0.0125,
+        "test_f1_macro": 0.000344
+      },
+      "validity_rate": 1.0
+    },
+    "executed_at": "2026-09-03T23:18:16.317867+00:00",
+    "proposal_id": "prop-round-7d3b299c679d",
+    "status": "completed",
+    "training_results": [
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.859,
+          "test_f1_macro": 0.7507596527604694,
+          "test_samples": 2000,
+          "train_accuracy": 0.92575,
+          "train_f1_macro": 0.8723600529512386,
+          "train_samples": 8000
+        },
+        "model": "hist_gradient_boosting",
+        "run_id": "run-20260903-231759-7783f941",
+        "seed": 42,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.865,
+          "test_f1_macro": 0.7672798984995587,
+          "test_samples": 2000,
+          "train_accuracy": 0.922875,
+          "train_f1_macro": 0.8676016770704587,
+          "train_samples": 8000
+        },
+        "model": "hist_gradient_boosting",
+        "run_id": "run-20260903-231800-4b11d7ad",
+        "seed": 43,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.858,
+          "test_f1_macro": 0.7441953050831275,
+          "test_samples": 2000,
+          "train_accuracy": 0.92275,
+          "train_f1_macro": 0.8670550180330833,
+          "train_samples": 8000
+        },
+        "model": "hist_gradient_boosting",
+        "run_id": "run-20260903-231801-8c0e7d7a",
+        "seed": 44,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.8615,
+          "test_f1_macro": 0.7420471122546712,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "train_f1_macro": 1.0,
+          "train_samples": 8000
+        },
+        "model": "random_forest",
+        "run_id": "run-20260903-231801-f8d33cb9",
+        "seed": 42,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.8635,
+          "test_f1_macro": 0.7507958785472222,
+          "test_samples": 2000,
+          "train_accuracy": 0.999875,
+          "train_f1_macro": 0.9998073353176351,
+          "train_samples": 8000
+        },
+        "model": "random_forest",
+        "run_id": "run-20260903-231803-04e940b9",
+        "seed": 43,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.858,
+          "test_f1_macro": 0.7317738437941534,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "train_f1_macro": 1.0,
+          "train_samples": 8000
+        },
+        "model": "random_forest",
+        "run_id": "run-20260903-231805-3cf1b217",
+        "seed": 44,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.8565,
+          "test_f1_macro": 0.713491505322619,
+          "test_samples": 2000,
+          "train_accuracy": 0.86875,
+          "train_f1_macro": 0.743701275781821,
+          "train_samples": 8000
+        },
+        "model": "svc",
+        "run_id": "run-20260903-231807-edf21e70",
+        "seed": 42,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.8715,
+          "test_f1_macro": 0.7511039315409911,
+          "test_samples": 2000,
+          "train_accuracy": 0.864875,
+          "train_f1_macro": 0.7329369881067094,
+          "train_samples": 8000
+        },
+        "model": "svc",
+        "run_id": "run-20260903-231810-413483cf",
+        "seed": 43,
+        "status": "completed"
+      },
+      {
+        "error": null,
+        "metrics": {
+          "test_accuracy": 0.852,
+          "test_f1_macro": 0.7098039215686275,
+          "test_samples": 2000,
+          "train_accuracy": 0.871125,
+          "train_f1_macro": 0.7492785907900432,
+          "train_samples": 8000
+        },
+        "model": "svc",
+        "run_id": "run-20260903-231813-3ce06ca8",
+        "seed": 44,
+        "status": "completed"
+      }
+    ]
+  },
+  "experiment_id": "exp-20260903-231739-59822a9c",
+  "mode": "degraded_deterministic",
+  "policy": "human_required",
+  "proposal": {
+    "created_at": "2026-09-03T23:17:59.955430+00:00",
+    "dataset": "data/uploads/audit_churn_cleaned_Exited_2.csv",
+    "goal": "Agentic round for experiment exp-20260903-231739-59822a9c: Agentic round over the deterministic baseline (defense demo)",
+    "hyperparameter_grid": {},
+    "model_grid": [
+      "hist_gradient_boosting",
+      "random_forest",
+      "svc"
+    ],
+    "prior_runs": [],
+    "proposal_id": "prop-round-7d3b299c679d",
+    "rationale": "deterministic baseline recommendation (no LLM selection available)",
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "target": "Exited",
+    "task_type": "auto"
+  },
+  "proposal_id": "prop-round-7d3b299c679d",
+  "require_approval": true,
+  "role_mode": "multi",
+  "round_id": "round-20260903-231759-1b3f35",
+  "selection": {
+    "hyperparameter_grid": {},
+    "model_grid": [
+      "hist_gradient_boosting",
+      "random_forest",
+      "svc"
+    ],
+    "rationale": "deterministic baseline recommendation (no LLM selection available)",
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "source": "deterministic_fallback"
+  },
+  "selector_llm_used": false,
+  "status": "awaiting_approval",
+  "transform": {
+    "llm_used": false,
+    "reason": "no LLM provider configured; deterministic baseline stands",
+    "source": "deterministic_fallback",
+    "stage": "feature_engineering",
+    "status": "skipped"
+  }
+}
