@@ -171,6 +171,39 @@ model-keyed grid rejection (F2-pre), shared-grid per-model param filtering
 (F2), grid-explosion caps (F3), target-quantization transform rejection (F4),
 task-aware model selection.
 
+### Live RQ5 variance recordings (P6 W4, churn ×3, 2026-09-04)
+
+Command: `evaluate_thesis.py --live openrouter --model z-ai/glm-5.3-flash
+--datasets churn --rounds 3` · Overall **PASS (RQ1–RQ6[churn])** · log:
+`scratch/app_audit/results/w_live_churn3.log`, analysis:
+`scratch/app_audit/W_LIVE_VARIANCE.md`.
+
+Deterministic baseline (RQ1-verified): **test_accuracy 0.808** (logistic_regression).
+
+| Round | Mode | Validity | Entries | Agentic best | Best acc | Δ vs baseline |
+|---|---|---|---|---|---|---|
+| 0 | agentic | 1.0 | 15/15 | svc (seed 42) | **0.8630** | **+5.5 pts** |
+| 1 | agentic | 1.0 | 9/9 | hist_gradient_boosting (42) | **0.8645** | **+5.65 pts** |
+| 2 | agentic | 1.0 | 6/6 | hist_gradient_boosting (137) | **0.8625** | **+5.45 pts** |
+
+- **Validity 3/3 rounds at 1.0** (30/30 agentic entries trained): the F2/F3
+  failure class is eliminated; the grid cap visibly bounded the batches
+  (15 → 9 → 6 entries).
+- **Agentic beats the deterministic baseline in all 3 rounds by
+  +5.45…+5.65 pts** — variance evidence, not a one-shot result. Against the
+  defense demo's fair deterministic try-all baseline (0.859) the agentic arm
+  still wins every round (+0.35…+0.55).
+- RQ4: PASS (grounded claims verified); RQ6: PASS with honest provenance arms
+  (multi = `agentic`, single = `degraded_deterministic`).
+
+**GLM latency finding (quantified):** GLM-5.3-flash is a reasoning model —
+same trivial prompt: **386 completion tokens vs 32** for llama-3.3-70b /
+mistral-small, **3.7 s vs ~1 s**, and it caused a >15-min runaway turn during
+an earlier recording. Round latency is dominated by reasoning-token burn, not
+infrastructure. **Decision:** use `meta-llama/llama-3.3-70b-instruct` for P6
+Arm A recordings (5–10× faster through the same route); this quantifies the
+X4 call-diet case (fewer calls × non-reasoning model = rounds in minutes).
+
 ## Baseline record (P0 closeout, 2026-08-10)
 
 Kept as evidence of the original RQ protocol execution in the locked
