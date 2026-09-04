@@ -39,6 +39,10 @@ def is_evaluator_report(data: dict[str, Any]) -> bool:
     return isinstance(data.get("mode"), str) and isinstance(data.get("results"), list)
 
 
+def is_latency_probe(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("probe"), str) and isinstance(data.get("probes"), list)
+
+
 def is_round_record(data: dict[str, Any]) -> bool:
     return "round_id" in data and "experiment_id" in data
 
@@ -215,8 +219,40 @@ def build_agentic_comparison(rounds: list[dict[str, Any]]) -> str:
     )
 
 
+def build_latency_table(snapshot: dict[str, Any], source_stem: str) -> str:
+    rows: list[list[str]] = []
+    for probe in snapshot["probes"]:
+        rows.append(
+            [
+                probe.get("model", ""),
+                probe.get("tier", ""),
+                str(probe.get("ok", 0)) + "/" + str(probe.get("calls", 0)),
+                _fmt_s(probe.get("p50_s")),
+                _fmt_s(probe.get("p90_s")),
+                _fmt_s(probe.get("mean_s")),
+                str(probe.get("completion_tokens_avg") or "--"),
+            ]
+        )
+    caption = (
+        f"Model latency probe ({_tex_escape(snapshot.get('mode', 'trivial'))} "
+        "generation, " + _tex_escape(source_stem) + "). p50/p90 completion "
+        "latency in seconds; round-stage calls are generation-length-bound, so "
+        "trivial-ping latency alone underestimates round cost."
+    )
+    return _booktabs_table(
+        caption,
+        f"tab:latency-{_label_safe(source_stem)}",
+        ["Model", "Tier", "OK", "p50 (s)", "p90 (s)", "mean (s)", "avg out tokens"],
+        rows,
+    )
+
+
+def _fmt_s(value: Any) -> str:
+    return f"{float(value):.2f}" if isinstance(value, (int, float)) else "--"
+
+
 # ---------------------------------------------------------------------------
-# Figure: validity story (pre/post fix + journeys)
+# Table 1: RQ x dataset evaluation matrix
 # ---------------------------------------------------------------------------
 
 def collect_validity_points(
@@ -315,6 +351,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"snapshot: {raw_dir / (name + '.json')}")
 
     reports: list[tuple[str, dict[str, Any]]] = []
+    probes: list[tuple[str, dict[str, Any]]] = []
     rounds: list[tuple[str, dict[str, Any]]] = []
     for path in sorted(raw_dir.glob("*.json")):
         try:
@@ -324,6 +361,8 @@ def main(argv: list[str] | None = None) -> int:
             continue
         if is_evaluator_report(data):
             reports.append((path.stem, data))
+        elif is_latency_probe(data):
+            probes.append((path.stem, data))
         elif is_round_record(data):
             rounds.append((path.stem, data))
 
@@ -343,6 +382,15 @@ def main(argv: list[str] | None = None) -> int:
         manifest += [
             f"- `rq_matrix_{stem}.tex` — table `tab:rq-matrix-{stem}` from `raw/{stem}.json`"
             f" (evaluator mode: `{report.get('mode', '')}`).",
+        ]
+
+    for stem, probe in probes:
+        tex = build_latency_table(probe, stem)
+        out_file = args.out / f"model_latency_{stem}.tex"
+        out_file.write_text(tex, encoding="utf-8")
+        manifest += [
+            f"- `model_latency_{stem}.tex` — table `tab:latency-{_label_safe(stem)}`"
+            f" from `raw/{stem}.json` (probe mode: `{probe.get('mode', '')}`).",
         ]
 
     comparison_tex = build_agentic_comparison([data for _, data in rounds])

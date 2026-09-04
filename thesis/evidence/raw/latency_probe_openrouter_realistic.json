@@ -1,0 +1,108 @@
+{
+  "base_url": "https://openrouter.ai/api/v1",
+  "calls_per_model": 4,
+  "mode": "realistic",
+  "probe": "openrouter_latency_realistic",
+  "probes": [
+    {
+      "calls": 4,
+      "completion_tokens_avg": 360.0,
+      "errors": [],
+      "label": "GLM 5.3 Flash (baseline)",
+      "latencies_s": [
+        3.311,
+        5.345,
+        8.318,
+        4.529
+      ],
+      "mean_s": 5.38,
+      "mode": "realistic",
+      "model": "z-ai/glm-5.3-flash",
+      "ok": 4,
+      "p50_s": 5.345,
+      "p90_s": 8.318,
+      "tier": "paid"
+    },
+    {
+      "calls": 4,
+      "completion_tokens_avg": 200.8,
+      "errors": [],
+      "label": "DeepSeek V4 Flash (paid)",
+      "latencies_s": [
+        17.567,
+        11.562,
+        6.278,
+        2.825
+      ],
+      "mean_s": 9.56,
+      "mode": "realistic",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ok": 4,
+      "p50_s": 11.562,
+      "p90_s": 17.567,
+      "tier": "paid"
+    },
+    {
+      "calls": 4,
+      "completion_tokens_avg": 120.8,
+      "errors": [],
+      "label": "Gemini 2.5 Flash Lite (paid)",
+      "latencies_s": [
+        1.106,
+        0.945,
+        0.843,
+        1.15
+      ],
+      "mean_s": 1.01,
+      "mode": "realistic",
+      "model": "google/gemini-2.5-flash-lite",
+      "ok": 4,
+      "p50_s": 1.106,
+      "p90_s": 1.15,
+      "tier": "paid"
+    },
+    {
+      "calls": 4,
+      "completion_tokens_avg": 372.5,
+      "errors": [],
+      "label": "MiniMax M2.7 (free)",
+      "latencies_s": [
+        8.421,
+        8.626,
+        9.445,
+        9.038
+      ],
+      "mean_s": 8.88,
+      "mode": "realistic",
+      "model": "minimax/minimax-m2.7:free",
+      "ok": 4,
+      "p50_s": 9.038,
+      "p90_s": 9.445,
+      "tier": "free"
+    },
+    {
+      "calls": 4,
+      "completion_tokens_avg": null,
+      "errors": [
+        "call 1: HTTP 429",
+        "call 2: HTTP 429",
+        "call 3: HTTP 429",
+        "call 4: HTTP 429"
+      ],
+      "label": "Gemma 4 31B (free)",
+      "latencies_s": [
+        0.13,
+        0.111,
+        0.17,
+        0.136
+      ],
+      "mean_s": 0.14,
+      "mode": "realistic",
+      "model": "google/gemma-4-31b-it:free",
+      "ok": 0,
+      "p50_s": 0.136,
+      "p90_s": 0.17,
+      "tier": "free"
+    }
+  ]
+}

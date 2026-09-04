@@ -1,0 +1,102 @@
+{
+  "base_url": "https://openrouter.ai/api/v1",
+  "calls_per_model": 3,
+  "mode": "trivial",
+  "probe": "openrouter_latency",
+  "probes": [
+    {
+      "calls": 3,
+      "completion_tokens_avg": 16.0,
+      "errors": [],
+      "label": "GLM 5.3 Flash (baseline)",
+      "latencies_s": [
+        1.94,
+        1.429,
+        1.688
+      ],
+      "mean_s": 1.69,
+      "mode": "trivial",
+      "model": "z-ai/glm-5.3-flash",
+      "ok": 3,
+      "p50_s": 1.688,
+      "p90_s": 1.94,
+      "tier": "paid"
+    },
+    {
+      "calls": 3,
+      "completion_tokens_avg": 15.3,
+      "errors": [],
+      "label": "DeepSeek V4 Flash (paid)",
+      "latencies_s": [
+        1.653,
+        2.144,
+        1.802
+      ],
+      "mean_s": 1.87,
+      "mode": "trivial",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ok": 3,
+      "p50_s": 1.802,
+      "p90_s": 2.144,
+      "tier": "paid"
+    },
+    {
+      "calls": 3,
+      "completion_tokens_avg": 1.0,
+      "errors": [],
+      "label": "Gemini 2.5 Flash Lite (paid)",
+      "latencies_s": [
+        0.648,
+        0.53,
+        0.854
+      ],
+      "mean_s": 0.68,
+      "mode": "trivial",
+      "model": "google/gemini-2.5-flash-lite",
+      "ok": 3,
+      "p50_s": 0.648,
+      "p90_s": 0.854,
+      "tier": "paid"
+    },
+    {
+      "calls": 3,
+      "completion_tokens_avg": 16.0,
+      "errors": [],
+      "label": "MiniMax M2.7 (free)",
+      "latencies_s": [
+        1.751,
+        2.376,
+        2.589
+      ],
+      "mean_s": 2.24,
+      "mode": "trivial",
+      "model": "minimax/minimax-m2.7:free",
+      "ok": 3,
+      "p50_s": 2.376,
+      "p90_s": 2.589,
+      "tier": "free"
+    },
+    {
+      "calls": 3,
+      "completion_tokens_avg": null,
+      "errors": [
+        "call 1: HTTP 429",
+        "call 2: HTTP 429",
+        "call 3: HTTP 429"
+      ],
+      "label": "Gemma 4 31B (free)",
+      "latencies_s": [
+        0.433,
+        0.131,
+        0.138
+      ],
+      "mean_s": 0.23,
+      "mode": "trivial",
+      "model": "google/gemma-4-31b-it:free",
+      "ok": 0,
+      "p50_s": 0.138,
+      "p90_s": 0.433,
+      "tier": "free"
+    }
+  ]
+}

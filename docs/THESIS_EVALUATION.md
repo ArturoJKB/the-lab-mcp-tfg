@@ -141,6 +141,31 @@ within 170 s on the development laptop (CPU); local recordings move to a more
 powerful machine (plumbing verified separately: dead provider fails fast with
 a readable error).
 
+### Model standardization for P6 live runs (latency probe, 2026-09-04)
+
+`scripts/probe_model_latency.py` measured OpenRouter completion latency per
+candidate model (trivial ping + realistic ~300-token structured generation,
+mirroring agentic-round calls; results in
+`thesis/evidence/raw/latency_probe_*.json`, table `tab:latency-*`):
+
+| Model (route) | Trivial p50 | Realistic p50 | Verdict |
+|---|---|---|---|
+| **gemini-2.5-flash-lite** (paid, cheapest) | 0.65 s | **1.11 s** | fastest reliable — standard for P6 iterative testing |
+| **GLM 5.3 Flash** (baseline, ultra-cheap) | 1.69 s | **5.35 s** | recorded-run baseline |
+| deepseek-v4-flash (paid) | 1.80 s | 11.56 s | generation-heavy → slow |
+| minimax-m2.7 (free) | 2.38 s | 9.04 s | free tier = queued |
+| gemma-4-31b (free) | — | — | 404 on this account (not entitled) |
+
+Findings: (1) the OpenRouter route is fast for short calls — the 20–40 s
+evaluator calls are **generation-length-bound**, not route-bound, so trivial
+pings underestimate round cost; (2) free tiers on this account are broken or
+queued — free ≠ faster; (3) decision: **standardize P6 iterative testing on
+`google/gemini-2.5-flash-lite`**, keep GLM for recorded headline runs unless
+re-probing shows a consistent winner, and move final recorded runs to local
+Ollama on a stronger machine. Probe results are thesis evidence
+(`tab:latency-*`); stale model ids in the first probe returned HTTP 404 —
+the probe validates against the live catalog.
+
 Live-path fixes that came out of these recordings (each with repro tests):
 model-keyed grid rejection (F2-pre), shared-grid per-model param filtering
 (F2), grid-explosion caps (F3), target-quantization transform rejection (F4),

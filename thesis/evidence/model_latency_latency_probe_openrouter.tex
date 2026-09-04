@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Model latency probe (trivial generation, latency\textbackslash{}\_probe\textbackslash{}\_openrouter). p50/p90 completion latency in seconds; round-stage calls are generation-length-bound, so trivial-ping latency alone underestimates round cost.}
+\label{tab:latency-latency-probe-openrouter}
+\begin{tabular}{lllllll}
+\toprule
+Model & Tier & OK & p50 (s) & p90 (s) & mean (s) & avg out tokens \\
+\midrule
+z-ai/glm-5.3-flash & paid & 3/3 & 1.69 & 1.94 & 1.69 & 16.0 \\
+deepseek/deepseek-v4-flash-0731 & paid & 3/3 & 1.80 & 2.14 & 1.87 & 15.3 \\
+google/gemini-2.5-flash-lite & paid & 3/3 & 0.65 & 0.85 & 0.68 & 1.0 \\
+minimax/minimax-m2.7:free & free & 3/3 & 2.38 & 2.59 & 2.24 & 16.0 \\
+google/gemma-4-31b-it:free & free & 0/3 & 0.14 & 0.43 & 0.23 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
