@@ -88,3 +88,9 @@ texput.log
 *.fls
 *.out
 *.synctex.gz
+
+# Thesis binaries and throwaway artifacts (source stays local/Overleaf)
+thesis.zip
+thesis_overleaf.zip
+.vscode/
+docs/demo_artifacts/

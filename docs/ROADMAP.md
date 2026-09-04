@@ -44,6 +44,7 @@ they are context for the thesis document, not binding for new code.
 | P5.A | P5 | done (2026-09-02) | Honesty fixes: real role prompts, single approval gate (agents can no longer self-execute training), feedback wiring, sandbox description accuracy — `docs/P5_PLAN.md` |
 | P5.B | P5 | done (2026-09-03) | Agentic round: role agents over MCP, sandboxed generated code with deterministic validation, human approval gate, comparison artifact + UI approval flow; B7 sandbox artifact channel (large-dataset transforms) + B8 provenance policy (`mode: agentic\|degraded_deterministic`) — `docs/P5_PLAN.md` |
 | P5.C | P5 | in_progress (C1 done, C4 done; C2-C3 pending live runs) | RQ4–RQ6 evaluator: grounding ablation, agentic capability, multi-vs-single — RQ1–RQ6 PASS in suite mode — `docs/P5_PLAN.md` |
+| P6 | P6 | planned | Continuous working loop: multi-domain dataset loop (= Experiment 4 execution), hole harvest into fix tickets (`docs/P6_FINDINGS.md`), feature harvest (max one build) — `docs/P6_PLAN.md` |
 
 ## Phase summaries
 

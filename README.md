@@ -81,6 +81,7 @@ thelab-mcp-demo context
 | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | How to use the app: UI, CLI, HTTP API, MCP |
 | [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) | CLI reference |
 | [`docs/PYTHON_API.md`](docs/PYTHON_API.md) | Python/notebook API |
+| [`docs/WORKSPACES.md`](docs/WORKSPACES.md) | Running The Lab from anywhere: workspace resolution, env vars, hermetic labs |
 
 Historical slice/phase records live in [`docs/legacy/`](docs/legacy/) — source
 material for the thesis document, not binding for new code.

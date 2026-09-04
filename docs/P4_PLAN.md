@@ -101,7 +101,11 @@ Driven by first-review findings; keeps the app honest and connected:
 Deferred: deeper Admin panel work, job eviction/heartbeat, per-session chat
 memory across page reloads.
 
-## Out of scope
+## P4.H — Benchmark doc + demo (2026-09-02)
+
+- `docs/BENCHMARK_LOCAL_VS_CLOUD.md`: Ollama vs OpenRouter side-by-side (agent quality, token usage, multi-dataset results)
+- `examples/notebooks/03_benchmark_comparison.ipynb`: companion notebook
+- `scripts/demo_defense.sh`: full defense demo (RQ1→RQ3→multi-agent→notebook)
 
 ## Out of scope
 

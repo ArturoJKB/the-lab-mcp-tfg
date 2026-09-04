@@ -2,7 +2,9 @@
 
 All command-line entry points. For the UI and HTTP API see
 [`docs/USER_GUIDE.md`](USER_GUIDE.md); for Python usage see
-[`docs/PYTHON_API.md`](PYTHON_API.md).
+[`docs/PYTHON_API.md`](PYTHON_API.md). The `thelab` CLI resolves its workspace
+from the current directory by design — for running from other folders and
+disposable ("hermetic") labs see [`docs/WORKSPACES.md`](WORKSPACES.md).
 
 ## Install
 
