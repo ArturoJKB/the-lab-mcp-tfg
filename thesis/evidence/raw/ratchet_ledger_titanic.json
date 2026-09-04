@@ -659,6 +659,161 @@
         "agentic_value": 0.8491620111731844,
         "delta": 0.04469273743016755
       }
+    },
+    {
+      "started_at": "2026-09-04T16:44:14",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.7143,
+              "agentic_completed": 15,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "logistic_regression",
+                "seed": 84,
+                "run_id": "run-20260904-145056-180a50ef",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.7963483146067416,
+                  "test_accuracy": 0.8435754189944135,
+                  "train_f1_macro": 0.7838824541608489,
+                  "test_f1_macro": 0.8330223880597014
+                }
+              },
+              "metric_delta": {},
+              "seconds": 400.6,
+              "metrics": {
+                "train_samples": 712,
+                "test_samples": 179,
+                "train_accuracy": 0.7963483146067416,
+                "test_accuracy": 0.8435754189944135,
+                "train_f1_macro": 0.7838824541608489,
+                "test_f1_macro": 0.8330223880597014
+              },
+              "config": {
+                "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+                "target": "Survived",
+                "model": "logistic_regression",
+                "seed": 84,
+                "hyperparameters": {
+                  "C": 1.0,
+                  "penalty": "l2"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-144415-cd9c6e74"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+          "target": "Survived",
+          "model": "logistic_regression",
+          "seed": 84,
+          "hyperparameters": {
+            "C": 1.0,
+            "penalty": "l2"
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8044692737430168,
+        "agentic_value": 0.8435754189944135,
+        "delta": 0.03910614525139666
+      }
+    },
+    {
+      "started_at": "2026-09-04T16:59:09",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "z-ai/glm-5.3-flash",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "z-ai/glm-5.3-flash",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 12,
+              "agentic_total": 12,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 0,
+                "run_id": "run-20260904-150542-b520c603",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.9424157303370787,
+                  "test_accuracy": 0.7374301675977654,
+                  "train_f1_macro": 0.9389777646780926,
+                  "test_f1_macro": 0.7111416309012876
+                }
+              },
+              "metric_delta": {},
+              "seconds": 392.4,
+              "metrics": {
+                "train_samples": 712,
+                "test_samples": 179,
+                "train_accuracy": 0.9424157303370787,
+                "test_accuracy": 0.7374301675977654,
+                "train_f1_macro": 0.9389777646780926,
+                "test_f1_macro": 0.7111416309012876
+              },
+              "config": {
+                "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+                "target": "Survived",
+                "model": "hist_gradient_boosting",
+                "seed": 0,
+                "hyperparameters": {
+                  "max_iter": 300
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-145914-370d6f3b"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.737430 does not beat baseline 0.804469 (test_accuracy)"
+      }
     }
   ]
 }

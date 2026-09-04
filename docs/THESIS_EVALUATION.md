@@ -243,8 +243,7 @@ significance-tested conclusions. **Framing: model quality is a property of
 the (task, context) pair, not of the model alone** — GLM uniform was the
 worst configuration measured (0/15); GLM as FeatureEngineer inside the mixed
 team was among the best (3/3 absorbed rounds). A GLM-uniform ablation with
-the constant-feature validator + rewrite loop now active is queued to
-separate the two candidate mechanisms (repair loop vs brief context).
+**GLM-uniform ablation (post-fix, 2026-09-04):** with the constant-feature validator + bounded rewrite loop active, a GLM uniform round completed fully agentic at **validity 1.0 (12/12 trained, 392 s)** — no absorption (best 0.7374 < baseline 0.8045; GLM's selection choice was poor, recorded honestly). Mechanism verdict: **the deterministic validator + repair loop, not the mixed context, made the reasoning model factory-safe**; per-stage assignment then converts that safety into performance (mixed 3/3 absorbed, best 0.8492). Validators expand the set of contexts a model is usable in.
 
 ## Baseline record (P0 closeout, 2026-08-10)
 
