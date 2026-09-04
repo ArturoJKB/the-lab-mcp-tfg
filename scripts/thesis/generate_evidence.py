@@ -43,6 +43,10 @@ def is_latency_probe(data: dict[str, Any]) -> bool:
     return isinstance(data.get("probe"), str) and isinstance(data.get("probes"), list)
 
 
+def is_generation_ledger(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("slug"), str) and isinstance(data.get("generations"), list)
+
+
 def is_round_record(data: dict[str, Any]) -> bool:
     return "round_id" in data and "experiment_id" in data
 
@@ -252,11 +256,117 @@ def _fmt_s(value: Any) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Ratchet ledger: generation + per-round capability tables
+# ---------------------------------------------------------------------------
+
+def _fmt_v(value: Any) -> str:
+    return f"{float(value):.4f}" if isinstance(value, (int, float)) else "--"
+
+
+def _round_rows(ledger: dict[str, Any]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for gen_index, generation in enumerate(ledger.get("generations") or []):
+        for cell in generation.get("cells") or []:
+            for r in cell.get("rounds") or []:
+                best = r.get("agentic_best") or {}
+                metrics = best.get("metrics") or {}
+                best_metric = metrics.get("test_accuracy", metrics.get("test_r2"))
+                rows.append(
+                    [
+                        f"g{gen_index} r{r.get('round', '-')}",
+                        str(r.get("provider", "")),
+                        str(r.get("model", ""))[:34],
+                        str(r.get("mode", "")),
+                        _fmt_v(r.get("validity_rate")),
+                        f"{r.get('agentic_completed', '-')}/{r.get('agentic_total', '-')}",
+                        (
+                            f"{best.get('model')} {_fmt_v(best_metric)}"
+                            if best.get("model")
+                            else "--"
+                        ),
+                    ]
+                )
+    return rows
+
+
+def build_ratchet_generation_table(ledger: dict[str, Any], source_stem: str) -> str:
+    rows: list[list[str]] = []
+    for gen_index, generation in enumerate(ledger.get("generations") or []):
+        base = generation.get("baseline") or {}
+        base_metrics = base.get("metrics") or {}
+        base_value = base_metrics.get("test_accuracy", base_metrics.get("test_r2"))
+        absorption = generation.get("absorption") or {}
+        champion = absorption.get("champion") or {}
+        validities = []
+        best_model, best_value = None, None
+        for cell in generation.get("cells") or []:
+            for r in cell.get("rounds") or []:
+                if r.get("validity_rate") is not None:
+                    validities.append(f"{float(r['validity_rate']):.2f}")
+                best = r.get("agentic_best") or {}
+                metrics = best.get("metrics") or {}
+                value = metrics.get("test_accuracy", metrics.get("test_r2"))
+                if value is not None and (
+                    best_value is None or float(value) > float(best_value)
+                ):
+                    best_value, best_model = float(value), best.get("model")
+        hp = champion.get("hyperparameters") or {}
+        champion_cfg = (
+            f"{champion.get('model')} s{champion.get('seed')}"
+            + (" " + " ".join(f"{k}={v}" for k, v in list(hp.items())[:2]) if hp else "")
+            if champion
+            else "--"
+        )
+        rows.append(
+            [
+                f"g{gen_index}",
+                f"{base.get('model')} {_fmt_v(base_value)}",
+                f"{best_model} {_fmt_v(best_value)}" if best_model else "--",
+                (
+                    f"{float(absorption['delta']):+.4f}"
+                    if isinstance(absorption.get("delta"), (int, float))
+                    else "--"
+                ),
+                "/".join(validities) or "--",
+                str(absorption.get("absorbed", False)),
+                champion_cfg,
+            ]
+        )
+    caption = (
+        "Ratchet loop per generation: deterministic try-all baseline vs best "
+        "agentic round; absorption requires the champion config to replay "
+        "exactly through the deterministic factory (same seed)."
+    )
+    return _booktabs_table(
+        caption,
+        f"tab:ratchet-generations-{_label_safe(source_stem)}",
+        ["Gen", "Baseline", "Agentic best", "Delta", "Validity", "Absorbed", "Champion"],
+        rows,
+    )
+
+
+def build_ratchet_rounds_table(ledger: dict[str, Any], source_stem: str) -> str:
+    caption = (
+        "Per-round capability matrix for the ratchet loop: which provider/model "
+        "produced valid, factory-safe agentic rounds (per-stage capability "
+        "discovery)."
+    )
+    return _booktabs_table(
+        caption,
+        f"tab:ratchet-rounds-{_label_safe(source_stem)}",
+        ["Gen/round", "Provider", "Model", "Mode", "Validity", "Entries", "Best"],
+        _round_rows(ledger),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Table 1: RQ x dataset evaluation matrix
 # ---------------------------------------------------------------------------
 
 def collect_validity_points(
-    reports: list[dict[str, Any]], rounds: list[dict[str, Any]]
+    reports: list[dict[str, Any]],
+    rounds: list[dict[str, Any]],
+    ledgers: list[dict[str, Any]] | None = None,
 ) -> list[tuple[str, float]]:
     """(label, validity_rate) points across all recorded sources."""
     points: list[tuple[str, float]] = []
@@ -272,6 +382,17 @@ def collect_validity_points(
                 (f"journey {data.get('experiment_id', '')[-8:]}",
                  float(comparison["validity_rate"]))
             )
+    for ledger in ledgers or []:
+        for gen_index, generation in enumerate(ledger.get("generations") or []):
+            for cell in generation.get("cells") or []:
+                for r in cell.get("rounds") or []:
+                    if r.get("validity_rate") is not None:
+                        points.append(
+                            (
+                                f"ratchet {ledger['slug']} g{gen_index}r{r.get('round', '-')}",
+                                float(r["validity_rate"]),
+                            )
+                        )
     return points
 
 
@@ -352,6 +473,7 @@ def main(argv: list[str] | None = None) -> int:
 
     reports: list[tuple[str, dict[str, Any]]] = []
     probes: list[tuple[str, dict[str, Any]]] = []
+    ledgers: list[tuple[str, dict[str, Any]]] = []
     rounds: list[tuple[str, dict[str, Any]]] = []
     for path in sorted(raw_dir.glob("*.json")):
         try:
@@ -363,6 +485,8 @@ def main(argv: list[str] | None = None) -> int:
             reports.append((path.stem, data))
         elif is_latency_probe(data):
             probes.append((path.stem, data))
+        elif is_generation_ledger(data):
+            ledgers.append((path.stem, data))
         elif is_round_record(data):
             rounds.append((path.stem, data))
 
@@ -393,6 +517,17 @@ def main(argv: list[str] | None = None) -> int:
             f" from `raw/{stem}.json` (probe mode: `{probe.get('mode', '')}`).",
         ]
 
+    for stem, ledger in ledgers:
+        gen_tex = build_ratchet_generation_table(ledger, stem)
+        (args.out / f"ratchet_generations_{stem}.tex").write_text(gen_tex, encoding="utf-8")
+        rounds_tex = build_ratchet_rounds_table(ledger, stem)
+        (args.out / f"ratchet_rounds_{stem}.tex").write_text(rounds_tex, encoding="utf-8")
+        manifest += [
+            f"- `ratchet_generations_{stem}.tex` — table `tab:ratchet-generations-{_label_safe(stem)}`"
+            f" + `ratchet_rounds_{stem}.tex` (`tab:ratchet-rounds-{_label_safe(stem)}`)"
+            f" from `raw/{stem}.json` (ratchet loop ledger).",
+        ]
+
     comparison_tex = build_agentic_comparison([data for _, data in rounds])
     if rounds:
         (args.out / "agentic_comparison.tex").write_text(comparison_tex, encoding="utf-8")
@@ -402,7 +537,11 @@ def main(argv: list[str] | None = None) -> int:
             + ".",
         ]
 
-    points = collect_validity_points([data for _, data in reports], [data for _, data in rounds])
+    points = collect_validity_points(
+        [data for _, data in reports],
+        [data for _, data in rounds],
+        [data for _, data in ledgers],
+    )
     if points:
         fig_path = args.out / "validity_rates.pdf"
         build_validity_figure(points, fig_path)

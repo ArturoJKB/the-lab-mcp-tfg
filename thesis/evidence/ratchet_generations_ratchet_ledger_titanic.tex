@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}
+\label{tab:ratchet-generations-ratchet-ledger-titanic}
+\begin{tabular}{lllllll}
+\toprule
+Gen & Baseline & Agentic best & Delta & Validity & Absorbed & Champion \\
+\midrule
+g0 & logistic\_regression 0.8045 & random\_forest 0.8212 & +0.0168 & 0.83/1.00/1.00 & True & random\_forest s87 n\_estimators=10 max\_depth=10 \\
+g1 & logistic\_regression 0.8045 & logistic\_regression 0.8045 & -- & 1.00/1.00 & False & -- \\
+g2 & logistic\_regression 0.8045 & random\_forest 0.8547 & +0.0503 & 1.00/1.00 & True & random\_forest s456 \\
+g3 & logistic\_regression 0.8045 & -- & -- & 0.00 & False & -- \\
+\bottomrule
+\end{tabular}
+\end{table}

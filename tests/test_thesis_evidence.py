@@ -58,6 +58,47 @@ def raw_dir(tmp_path: Path) -> Path:
     }
     (raw / "suite_matrix.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 
+    ledger = {
+        "slug": "titanic",
+        "generations": [
+            {
+                "baseline": {"model": "logistic_regression",
+                             "metrics": {"test_accuracy": 0.8045}},
+                "cells": [
+                    {
+                        "provider": "openrouter",
+                        "model": "meta-llama/llama-3.3-70b-instruct",
+                        "rounds": [
+                            {
+                                "round": 0,
+                                "provider": "openrouter",
+                                "model": "meta-llama/llama-3.3-70b-instruct",
+                                "mode": "agentic",
+                                "validity_rate": 0.8333,
+                                "agentic_completed": 15,
+                                "agentic_total": 18,
+                                "agentic_best": {
+                                    "model": "random_forest",
+                                    "metrics": {"test_accuracy": 0.8212},
+                                },
+                            }
+                        ],
+                    }
+                ],
+                "absorption": {
+                    "absorbed": True,
+                    "delta": 0.0167,
+                    "champion": {
+                        "model": "random_forest",
+                        "seed": 87,
+                        "hyperparameters": {"n_estimators": 10, "max_depth": 10},
+                    },
+                },
+            }
+        ],
+    }
+    (raw / "ratchet_ledger_titanic.json").write_text(json.dumps(ledger, indent=2), encoding="utf-8")
+
     round_record = {
         "round_id": "round-20260903-231759-1b3f35",
         "experiment_id": "exp-demo",
@@ -99,6 +140,16 @@ def test_generates_tables_figure_and_manifest(raw_dir: Path, tmp_path: Path):
 
     comparison = (out / "agentic_comparison.tex").read_text(encoding="utf-8")
     assert "0.8590 & 0.8715 & +0.0125 & 1.0 & agentic" in comparison
+
+    ratchet_gen = (out / "ratchet_generations_ratchet_ledger_titanic.tex").read_text(
+        encoding="utf-8"
+    )
+    assert r"\label{tab:ratchet-generations-ratchet-ledger-titanic}" in ratchet_gen
+    assert "random\\_forest" in ratchet_gen
+    rounds_tex = (out / "ratchet_rounds_ratchet_ledger_titanic.tex").read_text(
+        encoding="utf-8"
+    )
+    assert "meta-llama/llama-3.3-70b-instruct" in rounds_tex
 
     manifest = (out / "MANIFEST.md").read_text(encoding="utf-8")
     assert "scripts/thesis/generate_evidence.py" in manifest

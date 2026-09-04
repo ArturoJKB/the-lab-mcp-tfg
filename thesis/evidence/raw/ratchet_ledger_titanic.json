@@ -1,0 +1,360 @@
+{
+  "slug": "titanic",
+  "generations": [
+    {
+      "started_at": "2026-09-04T06:06:23",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.8333,
+              "agentic_completed": 15,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 87,
+                "run_id": "run-20260904-040702-75711389",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.949438202247191,
+                  "test_accuracy": 0.8212290502793296,
+                  "train_f1_macro": 0.9459035076611371,
+                  "test_f1_macro": 0.8067476383265857
+                }
+              },
+              "metric_delta": {},
+              "seconds": 38.3,
+              "metrics": {
+                "train_samples": 712,
+                "test_samples": 179,
+                "train_accuracy": 0.949438202247191,
+                "test_accuracy": 0.8212290502793296,
+                "train_f1_macro": 0.9459035076611371,
+                "test_f1_macro": 0.8067476383265857
+              },
+              "config": {
+                "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+                "target": "Survived",
+                "model": "random_forest",
+                "seed": 87
+              }
+            },
+            {
+              "round": 1,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 15,
+              "agentic_total": 15,
+              "agentic_best": {
+                "model": "logistic_regression",
+                "seed": 42,
+                "run_id": "run-20260904-040729-e34e1c61",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.7991573033707865,
+                  "test_accuracy": 0.8044692737430168,
+                  "train_f1_macro": 0.7865559783235327,
+                  "test_f1_macro": 0.7893197027272422
+                }
+              },
+              "metric_delta": {},
+              "seconds": 31.1
+            },
+            {
+              "round": 2,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 15,
+              "agentic_total": 15,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 87,
+                "run_id": "run-20260904-040810-de7b0149",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.9620786516853933,
+                  "test_accuracy": 0.8156424581005587,
+                  "train_f1_macro": 0.9592040286658334,
+                  "test_f1_macro": 0.8026065162907268
+                }
+              },
+              "metric_delta": {},
+              "seconds": 36.2
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-040624-3b861221"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+          "target": "Survived",
+          "model": "random_forest",
+          "seed": 87,
+          "hyperparameters": {
+            "n_estimators": 10,
+            "max_depth": 10
+          },
+          "run_id": "run-20260904-040702-75711389"
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8044692737430168,
+        "agentic_value": 0.8212290502793296,
+        "delta": 0.016759776536312776
+      }
+    },
+    {
+      "started_at": "2026-09-04T16:07:31",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "degraded_deterministic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "logistic_regression",
+                "seed": 42,
+                "run_id": "run-20260904-140751-d0487e6e",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.7991573033707865,
+                  "test_accuracy": 0.8044692737430168,
+                  "train_f1_macro": 0.7865559783235327,
+                  "test_f1_macro": 0.7893197027272422
+                }
+              },
+              "metric_delta": {},
+              "seconds": 17.0
+            },
+            {
+              "round": 1,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "degraded_deterministic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "logistic_regression",
+                "seed": 42,
+                "run_id": "run-20260904-140807-bc7859a5",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.7991573033707865,
+                  "test_accuracy": 0.8044692737430168,
+                  "train_f1_macro": 0.7865559783235327,
+                  "test_f1_macro": 0.7893197027272422
+                }
+              },
+              "metric_delta": {},
+              "seconds": 15.9
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-140731-ccfc0dea"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "no agentic round (all degraded or rejected)"
+      }
+    },
+    {
+      "started_at": "2026-09-04T16:12:57",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "degraded_deterministic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "logistic_regression",
+                "seed": 42,
+                "run_id": "run-20260904-141327-1ecdb7e8",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 0.7991573033707865,
+                  "test_accuracy": 0.8044692737430168,
+                  "train_f1_macro": 0.7865559783235327,
+                  "test_f1_macro": 0.7893197027272422
+                }
+              },
+              "metric_delta": {},
+              "seconds": 27.1
+            },
+            {
+              "round": 1,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 9,
+              "agentic_total": 9,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 456,
+                "run_id": "run-20260904-141355-fd60e276",
+                "metrics": {
+                  "train_samples": 712,
+                  "test_samples": 179,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.8547486033519553,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.8439930276213462
+                }
+              },
+              "metric_delta": {},
+              "seconds": 28.6,
+              "metrics": {
+                "train_samples": 712,
+                "test_samples": 179,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.8547486033519553,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.8439930276213462
+              },
+              "config": {
+                "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+                "target": "Survived",
+                "model": "random_forest",
+                "seed": 456,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-141258-603b3419"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+          "target": "Survived",
+          "model": "random_forest",
+          "seed": 456,
+          "hyperparameters": null
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8044692737430168,
+        "agentic_value": 0.8547486033519553,
+        "delta": 0.05027932960893855
+      }
+    },
+    {
+      "started_at": "2026-09-04T16:15:21",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "z-ai/glm-5.3-flash",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "z-ai/glm-5.3-flash",
+              "status": "failed",
+              "mode": "agentic",
+              "validity_rate": 0.0,
+              "agentic_completed": 0,
+              "agentic_total": 15,
+              "agentic_best": null,
+              "metric_delta": {},
+              "seconds": 168.5
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "logistic_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 712,
+          "test_samples": 179,
+          "train_accuracy": 0.7991573033707865,
+          "test_accuracy": 0.8044692737430168,
+          "train_f1_macro": 0.7865559783235327,
+          "test_f1_macro": 0.7893197027272422
+        },
+        "run_id": "run-20260904-141521-4ea0ea24"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "no agentic round (all degraded or rejected)"
+      }
+    }
+  ]
+}

@@ -9,5 +9,6 @@ byte-stable. Chapters consume tables via `\input{evidence/<file>}`.
 - `rq_matrix_live_openrouter_glm_matrix_20260903.tex` — table `tab:rq-matrix-live_openrouter_glm_matrix_20260903` from `raw/live_openrouter_glm_matrix_20260903.json` (evaluator mode: `live (openrouter:z-ai/glm-5.3-flash)`).
 - `model_latency_latency_probe_openrouter.tex` — table `tab:latency-latency-probe-openrouter` from `raw/latency_probe_openrouter.json` (probe mode: `trivial`).
 - `model_latency_latency_probe_openrouter_realistic.tex` — table `tab:latency-latency-probe-openrouter-realistic` from `raw/latency_probe_openrouter_realistic.json` (probe mode: `realistic`).
+- `ratchet_generations_ratchet_ledger_titanic.tex` — table `tab:ratchet-generations-ratchet-ledger-titanic` + `ratchet_rounds_ratchet_ledger_titanic.tex` (`tab:ratchet-rounds-ratchet-ledger-titanic`) from `raw/ratchet_ledger_titanic.json` (ratchet loop ledger).
 - `agentic_comparison.tex` — table `tab:agentic-comparison` from `raw/demo_churn_round_20260903.json`.
 - `validity_rates.pdf` — figure from the validity rates of all recorded RQ5 results and journeys (orange = below 0.5).
