@@ -204,6 +204,48 @@ infrastructure. **Decision:** use `meta-llama/llama-3.3-70b-instruct` for P6
 Arm A recordings (5–10× faster through the same route); this quantifies the
 X4 call-diet case (fewer calls × non-reasoning model = rounds in minutes).
 
+### Local-first proof (P6, ollama llama3.2:3b on laptop CPU, 2026-09-04)
+
+Command: `evaluate_thesis.py --live ollama --model llama3.2:3b --datasets iris
+--rounds 1` · Overall **PASS — RQ1–RQ6[iris]**, fully offline (no cloud calls).
+
+- **RQ5 validity 1.0** (1/1 agentic entry trained); gate blocked unapproved
+  execution, approval enabled it.
+- **RQ6 multi arm `mode: agentic`** — the 3B local model produced valid
+  structured JSON for all three agent stages (analyst brief, transform,
+  selection); single arm honest as `degraded_deterministic`.
+- Round latency ~20–60 s per call on CPU (2.6 tok/s) — the local-first claim
+  is **demonstrated, not asserted**: the full pipeline runs offline, behind
+  the gate, with all artifacts recorded.
+
+### Per-stage model assignment — mixed-team ratchet (P6, titanic, 2026-09-04)
+
+The ratchet loop (`.thelab/generations/titanic.json`, 8 generations) records
+the **per-stage model assignment** experiment — the architecture permits a
+different model per agent role, with `stage_models` provenance per round
+(`tab:ratchet-generations-*`, `tab:ratchet-rounds-*`):
+
+| Generation | Team | Round outcome | Absorbed |
+|---|---|---|---|
+| g0 | llama-3.3 uniform ×3 | validity 0.83/1.0/1.0; best RF 0.8212 | yes (+1.68 pts) |
+| g1–g2 | mistral uniform ×2 | mostly `degraded_deterministic`; one agentic 9/9 → RF 0.8547 | yes (+5.03 pts, g2) |
+| g3 | GLM uniform | validity 0.0 (constant-feature transform) | no |
+| g4–g7 | **mixed** (Analyst=llama, FE=GLM, Selector=llama/mistral) | 3/4 agentic at validity 1.0; best RF s13 **0.8492** | **yes ×3** (best +4.47 pts) |
+
+Findings: (1) **the mixed team outperformed every uniform team** — 15/15 or
+21/21 valid entries with zero rejected batches, and the best absorbed
+champion (0.8492, +4.47 pts over the 0.8045 baseline); (2) GLM's uniform
+failure (constant-feature transform) was repaired when GLM was confined to
+the FE role inside the mixed team — role confinement is a mitigation, not
+just a filter; (3) the absorption gate refused every unverifiable replay.
+Observed on one dataset with 1–3 rounds per cell — capability evidence, not
+significance-tested conclusions. **Framing: model quality is a property of
+the (task, context) pair, not of the model alone** — GLM uniform was the
+worst configuration measured (0/15); GLM as FeatureEngineer inside the mixed
+team was among the best (3/3 absorbed rounds). A GLM-uniform ablation with
+the constant-feature validator + rewrite loop now active is queued to
+separate the two candidate mechanisms (repair loop vs brief context).
+
 ## Baseline record (P0 closeout, 2026-08-10)
 
 Kept as evidence of the original RQ protocol execution in the locked
