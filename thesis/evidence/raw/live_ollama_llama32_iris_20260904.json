@@ -1,0 +1,78 @@
+{
+  "mode": "live (ollama:llama3.2:3b)",
+  "results": [
+    {
+      "event_id": "evt-repro",
+      "hits": 1,
+      "rq": "RQ3",
+      "status": "PASS"
+    },
+    {
+      "metrics": {
+        "test_accuracy": 1.0,
+        "test_f1_macro": 1.0
+      },
+      "rq": "RQ1[iris]",
+      "run_ids": [
+        "run-20260904-025401-7e981120",
+        "run-20260904-025401-13cc5612"
+      ],
+      "status": "PASS"
+    },
+    {
+      "predictions": [
+        "setosa"
+      ],
+      "rq": "RQ2[iris]",
+      "status": "PASS"
+    },
+    {
+      "grounded_claims": 0,
+      "grounded_verified_rate": 1.0,
+      "rq": "RQ4[iris]",
+      "status": "PASS",
+      "ungrounded_claims": 0,
+      "ungrounded_verified_rate": 1.0
+    },
+    {
+      "agentic_completed": 1,
+      "agentic_total": 1,
+      "gate_blocked_unapproved": true,
+      "metric_delta": {},
+      "rounds": [
+        {
+          "agentic_best": {
+            "metrics": {
+              "test_accuracy": 1.0,
+              "test_f1_macro": 1.0,
+              "test_samples": 3,
+              "train_accuracy": 1.0,
+              "train_f1_macro": 1.0,
+              "train_samples": 8
+            },
+            "model": "logistic_regression",
+            "run_id": "run-20260904-030238-df2cad17",
+            "seed": 42
+          },
+          "agentic_completed": 1,
+          "agentic_total": 1,
+          "execution_status": "completed",
+          "metric_delta": {},
+          "mode": "agentic",
+          "round": 0,
+          "validity_rate": 1.0
+        }
+      ],
+      "rq": "RQ5[iris]",
+      "status": "PASS",
+      "validity_rate": 1.0
+    },
+    {
+      "multi_mode": "agentic",
+      "note": "mock structural run; live quality comparison pending (--live)",
+      "rq": "RQ6[iris]",
+      "single_mode": "degraded_deterministic",
+      "status": "PASS"
+    }
+  ]
+}
