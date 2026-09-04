@@ -96,6 +96,13 @@ class RoundConfig:
     # claim). "single": all stages share one generic analyst prompt — the
     # pre-P5.A behavior, used as the RQ6 ablation control arm.
     role_mode: str = "multi"
+    # Per-stage model assignment (role-specialized LLMs): optional role ->
+    # provider mapping. Roles: "Analyst", "FeatureEngineer", "ModelSelector".
+    # When absent (or missing a role) the round-level provider is used.
+    stage_providers: dict[str, Any] | None = None
+    # Human-readable per-stage model labels for provenance (mirrors
+    # stage_providers; recorded in the round record as "stage_models").
+    stage_models: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         if self.role_mode not in {"multi", "single"}:
@@ -106,6 +113,12 @@ class RoundConfig:
         if self.role_mode == "single":
             return _GENERIC_ANALYST_PROMPT
         return role_prompt
+
+    def provider_for(self, role: str, default: Any) -> Any:
+        """Return the provider assigned to a stage role (default fallback)."""
+        if self.stage_providers and role in self.stage_providers:
+            return self.stage_providers[role]
+        return default
 
 
 _GENERIC_ANALYST_PROMPT = (
@@ -336,6 +349,22 @@ def _validate_transform(artifact: Path, source: Path, target: str) -> list[str]:
     for column in ("target", "label", "y"):
         if column != target and column in out.columns and out[column].equals(out[target]):
             errors.append(f"column '{column}' duplicates the target column")
+    # Constant feature columns (live GLM round 2026-09-04: an AgeMissing
+    # indicator was constant on this dataset and the factory rejected all 15
+    # batch entries). The factory's validation refuses constant features, so
+    # catch them here — with actionable wording the rewrite loop can repair.
+    constant_features = [
+        c
+        for c in out.columns
+        if c != target and str(c) not in {"target", "label", "y"} and out[c].nunique(dropna=False) <= 1
+    ]
+    if constant_features:
+        shown = ", ".join(map(str, constant_features[:4]))
+        extra = "" if len(constant_features) <= 4 else f" (+{len(constant_features) - 4} more)"
+        errors.append(
+            f"constant feature columns found: [{shown}]{extra} — "
+            "drop them or vary their values"
+        )
     return errors
 
 
@@ -645,6 +674,8 @@ async def run_agentic_round(
         transform_timeout_s=config.transform_timeout_s,
         analyst_max_steps=config.analyst_max_steps,
         role_mode=config.role_mode,
+        stage_providers=config.stage_providers,
+        stage_models=config.stage_models,
     )
 
     def emit(message: str) -> None:
@@ -670,8 +701,9 @@ async def run_agentic_round(
         record["status"] = "cancelled"
         return record
     emit("Analyst building findings brief from EDA and context evidence")
+    analyst_provider = config.provider_for("Analyst", provider)
     brief: dict[str, Any]
-    if provider is not None:
+    if analyst_provider is not None:
         instruction = (
             f"Goal: {pack['goal']}\nTarget: {pack['target']}\n"
             f"EDA context: {pack.get('eda_context', '')}\n"
@@ -680,7 +712,10 @@ async def run_agentic_round(
         )
         try:
             parsed = await _analyst_via_mcp(
-                provider, ["context", "eda"], instruction, config
+                analyst_provider,
+                ["context", "eda"],
+                instruction,
+                config,
             )
         except Exception:  # noqa: BLE001 - MCP/server failures degrade to fallback
             parsed = None
@@ -703,7 +738,9 @@ async def run_agentic_round(
         record["status"] = "cancelled"
         return record
     emit("FeatureEngineer proposing sandboxed transform")
-    transform_record = _generate_transform(provider, pack, brief, config)
+    transform_record = _generate_transform(
+        config.provider_for("FeatureEngineer", provider), pack, brief, config
+    )
     record["transform"] = transform_record
 
     # Stage 3: ModelSelector -> proposal -> approval gate
@@ -711,7 +748,9 @@ async def run_agentic_round(
         record["status"] = "cancelled"
         return record
     emit("ModelSelector proposing training configuration beyond the baseline grid")
-    selection, selector_llm_used = _generate_selection(provider, pack, brief, transform_record, config)
+    selection, selector_llm_used = _generate_selection(
+        config.provider_for("ModelSelector", provider), pack, brief, transform_record, config
+    )
     selection["source"] = "llm" if selector_llm_used else "deterministic_fallback"
     record["selector_llm_used"] = selector_llm_used
 
@@ -727,6 +766,8 @@ async def run_agentic_round(
         )
     )
     record["mode"] = "agentic" if llm_contributed else "degraded_deterministic"
+    if config.stage_models:
+        record["stage_models"] = dict(config.stage_models)
 
     dataset_id = transform_record.get("dataset_id") or pack.get("cleaned_dataset_id")
     if not dataset_id:

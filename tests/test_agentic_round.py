@@ -731,3 +731,104 @@ def test_transform_retry_exhaustion_records_all_attempts(round_env, experiment):
 
     assert not glob.glob(str(uploads / "house_cleaned_agentic*.csv"))
     assert "FAILED deterministic validation" in provider.prompts[1]
+
+
+def test_stage_providers_route_per_stage(round_env, experiment):
+    """Role-specialized LLMs: the FE stage uses the FeatureEngineer provider
+    and the selector stage uses the ModelSelector provider (W: per-stage
+    model assignment)."""
+    uploads, _, _, _ = round_env
+    rows = ["median_income,housing_age,median_house_value"]
+    for i in range(200):
+        rows.append(f"{1.0 + (i % 40) * 0.3:.2f},{5 + (i % 30)},{450000 + (i % 50) * 1731.17:.2f}")
+    (uploads / "house_cleaned.csv").write_text("\n".join(rows), encoding="utf-8")
+
+    pack = {
+        "target": "median_house_value",
+        "eda_context": "regression",
+        "cleaned_dataset_id": "uploads/house_cleaned.csv",
+        "baseline_top_models": [],
+    }
+    fe_provider = _transform_code(_good_transform_code())
+    from thelab.ide.agentic_round import _generate_selection
+
+    selector_script = json.dumps({
+        "model_grid": ["ridge"], "seeds": [42],
+        "hyperparameter_grid": {}, "rationale": "selector provider",
+    })
+    selector_provider = MockProvider([selector_script])
+
+    config = RoundConfig(
+        stage_providers={"FeatureEngineer": fe_provider, "ModelSelector": selector_provider},
+        stage_models={"FeatureEngineer": "glm-5.3-flash", "ModelSelector": "mistral-small"},
+    )
+    fe_record = _generate_transform(
+        config.provider_for("FeatureEngineer", None), pack, {"findings": []}, config
+    )
+    assert fe_record["status"] == "completed", fe_record
+    selection, selector_llm_used = _generate_selection(
+        config.provider_for("ModelSelector", None), pack, {"findings": []}, fe_record, config
+    )
+    assert selector_llm_used is True
+    assert selection["model_grid"] == ["ridge"]
+    assert config.stage_models == {"FeatureEngineer": "glm-5.3-flash", "ModelSelector": "mistral-small"}
+
+
+def test_provider_for_falls_back_to_round_provider():
+    config = RoundConfig(stage_providers={"FeatureEngineer": object()})
+    sentinel = object()
+    assert config.provider_for("FeatureEngineer", sentinel) is not sentinel
+    assert config.provider_for("Analyst", sentinel) is sentinel
+    assert RoundConfig().provider_for("Analyst", sentinel) is sentinel
+
+
+def test_validate_transform_flags_constant_feature(tmp_path: Path):
+    """GLM round (2026-09-04): an AgeMissing indicator was constant on the
+    dataset and the factory rejected every batch entry. The transform
+    validator must catch it so the rewrite loop repairs the code."""
+    src = tmp_path / "src.csv"
+    out = tmp_path / "out.csv"
+    src.write_text("age,fare,species\n1,10,x\n2,20,y\n3,30,x\n", encoding="utf-8")
+    out.write_text(
+        "age,fare,species,AgeMissing\n1,10,x,0\n2,20,y,0\n3,30,x,0\n",
+        encoding="utf-8",
+    )
+    errors = _validate_transform(out, src, "species")
+    assert any("constant feature columns found" in e and "AgeMissing" in e for e in errors)
+
+
+def test_transform_retry_repairs_constant_feature(round_env, experiment):
+    """GLM failure mode end-to-end: attempt 1 adds a constant indicator
+    column; the feedback loop drives attempt 2 to a valid transform."""
+    uploads, _, _, _ = round_env
+    rows = ["age,fare,species"]
+    for i in range(80):
+        rows.append(f"{18 + (i % 50)},{10 + (i % 90) * 2}.0,{'x' if i % 2 else 'y'}")
+    (uploads / "tiny_cleaned.csv").write_text("\n".join(rows), encoding="utf-8")
+    pack = {
+        "target": "species",
+        "eda_context": "classification",
+        "cleaned_dataset_id": "uploads/tiny_cleaned.csv",
+        "baseline_top_models": [],
+    }
+    bad = (
+        "import pandas as pd\n"
+        "df = pd.read_csv('dataset.csv')\n"
+        "df['AgeMissing'] = 0\n"
+        "df.to_csv('transformed.csv', index=False)\n"
+    )
+    good = (
+        "import pandas as pd\n"
+        "df = pd.read_csv('dataset.csv')\n"
+        "df['fare_per_age'] = df['fare'] / (df['age'] + 1)\n"
+        "df.to_csv('transformed.csv', index=False)\n"
+    )
+    provider = _RecordingProvider([
+        json.dumps({"code": bad, "rationale": "add indicator"}),
+        json.dumps({"code": good, "rationale": "fixed"}),
+    ])
+    record = _generate_transform(provider, pack, {"findings": []}, RoundConfig())
+    assert record["status"] == "completed", record
+    assert record["attempt_count"] == 2
+    assert "constant feature columns found" in provider.prompts[1]
+    assert "drop them or vary their values" in provider.prompts[1]

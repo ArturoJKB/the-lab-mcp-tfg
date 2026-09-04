@@ -92,6 +92,28 @@ def _quote_unquoted_keys(text: str) -> str:
     return re.sub(r"([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)", r'\1"\2"\3', text)
 
 
+_TRIPLE_DOUBLE = re.compile(r'("""\s*[\s\S]*?\s*""")')
+_TRIPLE_SINGLE = re.compile(r"('''\s*[\s\S]*?\s*''')")
+
+
+def _convert_triple_quoted_strings(text: str) -> str:
+    """Convert Python triple-quoted strings into JSON-compatible strings.
+
+    LLMs frequently emit Python-flavored JSON where a multiline value (e.g.
+    generated source code) is delimited with ``\"\"\"...\"\"\"`` instead of a
+    JSON string with escaped newlines. Each triple-quoted segment is replaced
+    by its JSON-encoded equivalent, preserving the content exactly.
+    """
+
+    def _encode(match: re.Match[str]) -> str:
+        inner = match.group(0)[3:-3]
+        return json.dumps(inner.strip("\n"))
+
+    text = _TRIPLE_DOUBLE.sub(_encode, text)
+    text = _TRIPLE_SINGLE.sub(_encode, text)
+    return text
+
+
 def repair_json(text: str) -> dict[str, Any] | list[Any] | None:
     """Try to repair and parse a JSON object/array from LLM output.
 
@@ -105,8 +127,10 @@ def repair_json(text: str) -> dict[str, Any] | list[Any] | None:
     # Try increasingly aggressive repairs.
     attempts = [
         candidate,
+        _convert_triple_quoted_strings(candidate),
         _remove_trailing_commas(candidate),
         _fix_single_quotes(_remove_trailing_commas(candidate)),
+        _convert_triple_quoted_strings(_remove_trailing_commas(candidate)),
         _quote_unquoted_keys(_fix_single_quotes(_remove_trailing_commas(candidate))),
     ]
 
