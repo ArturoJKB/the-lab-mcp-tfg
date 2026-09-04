@@ -63,7 +63,13 @@ FEATURE_ENGINEER_SYSTEM_PROMPT = (
     "You are the FeatureEngineer agent of The Lab's agentic round. You write one "
     "pandas transform that improves on the deterministic cleaning without leaking "
     "the target. The dataset is available as 'dataset.csv'; write the result to "
-    "'transformed.csv' (same target column, no target mutation, no row explosion). "
+    "'transformed.csv'. Transform contract (violations are deterministically "
+    "rejected and fed back to you for one rewrite):\n"
+    "- NEVER modify the target column: it must pass through value-identical — "
+    "same dtype, same values. No binning, no quantizing, no encoding, no "
+    "rescaling, no imputing of the target.\n"
+    "- Work on feature columns only: drop noisy ones, add derived ones.\n"
+    "- Preserve the row count: exactly one output row per input row.\n"
     "Do not import anything outside numpy/pandas/sklearn. Your final answer must "
     "be a single JSON object with keys 'code' (string, Python source) and "
     "'rationale' (string), and no other text."
@@ -372,77 +378,141 @@ def _generate_transform(
         record["reason"] = "dataset exceeds the transform input cap"
         return record
 
-    instruction = (
+    target_name = str(pack.get("target"))
+    contract = (
+        "Transform contract (violations are deterministically rejected):\n"
+        f"- The target column '{target_name}' must pass through value-identical: "
+        "same dtype, same values. Never bin, quantize, encode, rescale, or "
+        "impute it.\n"
+        "- Transform feature columns only (drop noisy ones, add derived ones).\n"
+        "- Preserve the row count: exactly one output row per input row."
+    )
+    base_instruction = (
         f"Dataset context: {pack.get('eda_context', '')}\n"
-        f"Target column: {pack.get('target')}\n"
+        f"Target column: {target_name}\n"
         f"Analyst brief: {json.dumps(brief, default=str)[:2500]}\n"
         "Write one pandas transform improving on the deterministic cleaning and "
-        "save it to 'transformed.csv'."
+        "save it to 'transformed.csv'.\n"
+        f"{contract}"
     )
-    parsed = _single_turn_json(provider, config.prompt_for(FEATURE_ENGINEER_SYSTEM_PROMPT), instruction)
-    code = (parsed or {}).get("code")
-    record["rationale"] = (parsed or {}).get("rationale", "")
-    if not isinstance(code, str) or not code.strip():
-        record["status"] = "skipped"
-        record["reason"] = "feature engineer produced no usable code"
-        return record
-    record["code"] = code
+
+    # Bounded retry with validation feedback (live housing recording
+    # 2026-09-03: the first transform quantized the float target and the
+    # round fell back to degraded_deterministic with zero valid attempts).
+    # Each attempt is recorded individually; a round stays agentic if any
+    # LLM-authored attempt passes validation.
+    max_attempts = 2
+    attempts: list[dict[str, Any]] = []
+    last_errors: list[str] = []
+    dest: Path | None = None
 
     import shutil
     import tempfile
 
     from thelab.sandbox import run_in_sandbox
 
-    with tempfile.TemporaryDirectory(prefix="thelab-round-") as tmp:
-        input_dir = Path(tmp) / "in"
-        artifact_dir = Path(tmp) / "out"
-        input_dir.mkdir()
-        artifact_dir.mkdir()
-        shutil.copyfile(source_path, input_dir / "dataset.csv")
+    for attempt in range(1, max_attempts + 1):
+        instruction = base_instruction
+        if attempt > 1 and last_errors:
+            instruction = (
+                f"{base_instruction}\n\n"
+                "Your previous attempt FAILED deterministic validation:\n"
+                f"- {'; '.join(last_errors)}\n"
+                "Rewrite the transform so it fixes exactly these violations "
+                "while satisfying the contract."
+            )
+        parsed = _single_turn_json(provider, config.prompt_for(FEATURE_ENGINEER_SYSTEM_PROMPT), instruction)
+        code = (parsed or {}).get("code")
+        if attempt == 1:
+            record["rationale"] = (parsed or {}).get("rationale", "")
+        if not isinstance(code, str) or not code.strip():
+            attempts.append({"attempt": attempt, "status": "no_code"})
+            if attempt == 1:
+                record["status"] = "skipped"
+                record["reason"] = "feature engineer produced no usable code"
+            else:
+                record["status"] = "rejected"
+                record["error"] = "; ".join(last_errors) or "no usable code on retry"
+            record["attempts"] = attempts
+            return record
+        record["code"] = code
 
-        result = run_in_sandbox(
-            code,
-            timeout=config.transform_timeout_s,
-            artifact_dir=artifact_dir,
-            input_dir=input_dir,
-        )
-        record["sandbox"] = {"status": result.status, "error": result.error}
-        if result.status != "completed":
-            record["status"] = "rejected"
-            record["error"] = result.error or f"sandbox status: {result.status}"
+
+        with tempfile.TemporaryDirectory(prefix="thelab-round-") as tmp:
+            input_dir = Path(tmp) / "in"
+            artifact_dir = Path(tmp) / "out"
+            input_dir.mkdir()
+            artifact_dir.mkdir()
+            shutil.copyfile(source_path, input_dir / "dataset.csv")
+
+            result = run_in_sandbox(
+                code,
+                timeout=config.transform_timeout_s,
+                artifact_dir=artifact_dir,
+                input_dir=input_dir,
+            )
+            attempt_record: dict[str, Any] = {
+                "attempt": attempt,
+                "sandbox": {"status": result.status, "error": result.error},
+            }
+            if result.status != "completed":
+                last_errors = [result.error or f"sandbox status: {result.status}"]
+                attempt_record["status"] = "rejected"
+                attempt_record["errors"] = last_errors
+                attempts.append(attempt_record)
+                record["sandbox"] = attempt_record["sandbox"]
+                continue
+
+            spilled = next(
+                (s for s in (result.spilled or []) if s.get("name") == "transformed.csv"),
+                None,
+            )
+            if spilled is None or not Path(str(spilled.get("path"))).is_file():
+                last_errors = ["transform did not produce transformed.csv"]
+                attempt_record["status"] = "rejected"
+                attempt_record["errors"] = last_errors
+                attempts.append(attempt_record)
+                record["sandbox"] = attempt_record["sandbox"]
+                continue
+            spilled_path = Path(str(spilled["path"]))
+
+            # Persist, then validate from disk (pandas in the parent, never the sandbox).
+            dest_dir = get_uploads_root()
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest = dest_dir / f"{Path(str(cleaned_dataset_id)).stem}_agentic.csv"
+            counter = 1
+            while dest.exists():
+                dest = dest_dir / f"{Path(str(cleaned_dataset_id)).stem}_agentic_{counter}.csv"
+                counter += 1
+            shutil.copyfile(spilled_path, dest)
+
+            errors = _validate_transform(dest, source_path, target_name)
+            attempt_record["validation"] = {"ok": not errors, "errors": errors}
+            if errors:
+                dest.unlink(missing_ok=True)
+                dest = None
+                last_errors = errors
+                attempt_record["status"] = "rejected"
+                attempts.append(attempt_record)
+                record["sandbox"] = attempt_record["sandbox"]
+                record["validation"] = attempt_record["validation"]
+                continue
+
+            attempt_record["status"] = "completed"
+            attempts.append(attempt_record)
+            record["sandbox"] = attempt_record["sandbox"]
+            record["validation"] = {"ok": True, "errors": []}
+            record["status"] = "completed"
+            record["dataset_id"] = f"uploads/{dest.name}"
+            record["source_dataset_id"] = cleaned_dataset_id
+            record["attempts"] = attempts
+            record["attempt_count"] = attempt
             return record
 
-        spilled = next(
-            (s for s in (result.spilled or []) if s.get("name") == "transformed.csv"),
-            None,
-        )
-        if spilled is None or not Path(str(spilled.get("path"))).is_file():
-            record["status"] = "rejected"
-            record["error"] = "transform did not produce transformed.csv"
-            return record
-        spilled_path = Path(str(spilled["path"]))
-
-        # Persist, then validate from disk (pandas in the parent, never the sandbox).
-        dest_dir = get_uploads_root()
-        dest_dir.mkdir(parents=True, exist_ok=True)
-        dest = dest_dir / f"{Path(str(cleaned_dataset_id)).stem}_agentic.csv"
-        counter = 1
-        while dest.exists():
-            dest = dest_dir / f"{Path(str(cleaned_dataset_id)).stem}_agentic_{counter}.csv"
-            counter += 1
-        shutil.copyfile(spilled_path, dest)
-
-        errors = _validate_transform(dest, source_path, str(pack.get("target")))
-        record["validation"] = {"ok": not errors, "errors": errors}
-        if errors:
-            record["status"] = "rejected"
-            record["error"] = "; ".join(errors)
-            dest.unlink(missing_ok=True)
-            return record
-
-    record["status"] = "completed"
-    record["dataset_id"] = f"uploads/{dest.name}"
-    record["source_dataset_id"] = cleaned_dataset_id
+    record["attempts"] = attempts
+    record["attempt_count"] = max_attempts
+    record["status"] = "rejected"
+    record["error"] = "; ".join(last_errors) or "transform rejected after all attempts"
     return record
 
 

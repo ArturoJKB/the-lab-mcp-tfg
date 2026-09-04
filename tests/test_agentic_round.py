@@ -624,3 +624,110 @@ def test_transform_rejected_on_target_quantization(round_env, experiment):
     assert "dtype kind changed" in record["error"] or "cardinality" in record["error"]
     import glob
     assert not glob.glob(str(uploads / "house_cleaned_agentic*.csv"))
+
+
+class _RecordingProvider:
+    """Scripted provider that records the instructions it receives."""
+
+    def __init__(self, responses: list[str]):
+        self.responses = responses
+        self.prompts: list[str] = []
+
+    def complete(self, messages, tools):  # noqa: ANN001, ANN202
+        self.prompts.append(messages[-1].content if messages else "")
+        from thelab.agents.provider import AgentTurn
+
+        return AgentTurn(text=self.responses.pop(0))
+
+
+def _good_transform_code() -> str:
+    return (
+        "import pandas as pd\n"
+        "df = pd.read_csv('dataset.csv')\n"
+        "df['income_per_age'] = df['median_income'] / (df['housing_age'] + 1)\n"
+        "df.to_csv('transformed.csv', index=False)\n"
+    )
+
+
+def _quantizing_transform_code() -> str:
+    return (
+        "import pandas as pd\n"
+        "df = pd.read_csv('dataset.csv')\n"
+        "df['median_house_value'] = (df['median_house_value'] // 50000) * 50000\n"
+        "df.to_csv('transformed.csv', index=False)\n"
+    )
+
+
+def test_transform_retry_recovers_after_validation_failure(round_env, experiment):
+    """W2: a validation-failed first attempt is retried once with the exact
+    rejection reasons fed back; a valid second attempt completes the round."""
+    uploads, _, _, _ = round_env
+    rows = ["median_income,housing_age,median_house_value"]
+    for i in range(200):
+        rows.append(f"{1.0 + (i % 40) * 0.3:.2f},{5 + (i % 30)},{450000 + (i % 50) * 1731.17:.2f}")
+    (uploads / "house_cleaned.csv").write_text("\n".join(rows), encoding="utf-8")
+
+    pack = {
+        "target": "median_house_value",
+        "eda_context": "regression",
+        "cleaned_dataset_id": "uploads/house_cleaned.csv",
+        "baseline_top_models": [],
+    }
+    provider = _RecordingProvider(
+        [
+            json.dumps({"code": _quantizing_transform_code(), "rationale": "bad attempt"}),
+            json.dumps({"code": _good_transform_code(), "rationale": "fixed attempt"}),
+        ]
+    )
+    record = _generate_transform(provider, pack, {"findings": []}, RoundConfig())
+
+    assert record["status"] == "completed", json.dumps(
+        {k: v for k, v in record.items() if k != "code"}, default=str
+    )[:1500]
+    assert record["attempt_count"] == 2
+    assert [a["status"] for a in record["attempts"]] == ["rejected", "completed"]
+    assert record["validation"]["ok"] is True
+    assert record["dataset_id"].startswith("uploads/")
+    # The remediation feedback reached attempt 2: the exact failure text and
+    # the contract reminder must be in the second prompt.
+    assert "FAILED deterministic validation" in provider.prompts[1]
+    assert (
+        "cardinality" in provider.prompts[1] or "dtype kind changed" in provider.prompts[1]
+    )
+    import glob
+
+    assert len(glob.glob(str(uploads / "house_cleaned_agentic*.csv"))) == 1
+
+
+def test_transform_retry_exhaustion_records_all_attempts(round_env, experiment):
+    """Both attempts violate the contract -> rejected, but every attempt is
+    recorded as evidence (no silent regeneration)."""
+    uploads, _, _, _ = round_env
+    rows = ["median_income,housing_age,median_house_value"]
+    for i in range(200):
+        rows.append(f"{1.0 + (i % 40) * 0.3:.2f},{5 + (i % 30)},{450000 + (i % 50) * 1731.17:.2f}")
+    (uploads / "house_cleaned.csv").write_text("\n".join(rows), encoding="utf-8")
+
+    pack = {
+        "target": "median_house_value",
+        "eda_context": "regression",
+        "cleaned_dataset_id": "uploads/house_cleaned.csv",
+        "baseline_top_models": [],
+    }
+    provider = _RecordingProvider(
+        [
+            json.dumps({"code": _quantizing_transform_code(), "rationale": "bad 1"}),
+            json.dumps({"code": _quantizing_transform_code(), "rationale": "bad 2"}),
+        ]
+    )
+    record = _generate_transform(
+        provider, pack, {"findings": []}, RoundConfig()
+    )
+    assert record["status"] == "rejected", record
+    assert record["attempt_count"] == 2
+    assert [a["status"] for a in record["attempts"]] == ["rejected", "rejected"]
+    assert "dtype kind changed" in record["error"] or "cardinality" in record["error"]
+    import glob
+
+    assert not glob.glob(str(uploads / "house_cleaned_agentic*.csv"))
+    assert "FAILED deterministic validation" in provider.prompts[1]

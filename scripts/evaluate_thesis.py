@@ -49,6 +49,55 @@ class DatasetSpec:
         return f"{rq}[{self.name}]"
 
 
+def _churn_spec() -> DatasetSpec:
+    """Real-data arm (W3): bank-customer churn, 10k rows, 16 cleaned features.
+
+    Uses the repo-local cleaned upload (gitignored). The arm is SKIPPED when
+    the file is absent so fresh clones keep the evaluator green.
+    """
+    return DatasetSpec(
+        name="churn",
+        target="Exited",
+        task="classification",
+        model="logistic_regression",
+        metric_keys=["test_accuracy", "test_f1_macro"],
+        predict_row={
+            "RowNumber": 1,
+            "CustomerId": 15634602,
+            "CreditScore": 650,
+            "Age": 45,
+            "Tenure": 3,
+            "Balance": 80000.0,
+            "NumOfProducts": 1,
+            "HasCrCard": 1,
+            "IsActiveMember": 1,
+            "EstimatedSalary": 50000.0,
+            "Geography_France": 1,
+            "Geography_Germany": 0,
+            "Geography_Spain": 0,
+            "Gender_Female": 0,
+            "Gender_Male": 1,
+            "Surname_frequency": 0.05,
+        },
+        recommendation_grid=["logistic_regression"],
+    )
+
+
+def _churn_source() -> Path | None:
+    """Locate the repo-local cleaned churn upload; None when absent."""
+    candidates = [
+        Path("data/uploads/shrutimechlearn_churn-modelling_cleaned.csv"),
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "uploads"
+        / "shrutimechlearn_churn-modelling_cleaned.csv",
+    ]
+    for c in candidates:
+        if c.is_file():
+            return c
+    return None
+
+
 def _iris_spec() -> DatasetSpec:
     return DatasetSpec(
         name="iris",
@@ -81,6 +130,18 @@ def _housing_spec() -> DatasetSpec:
         },
         recommendation_grid=["ridge"],
     )
+
+
+def _churn_csv(path: Path) -> Path:
+    """Hermetic copy of the repo-local cleaned churn upload (10k rows)."""
+    import shutil
+
+    csv = path / "churn.csv"
+    source = _churn_source()
+    if source is None:
+        raise FileNotFoundError("cleaned churn upload not present in the repo")
+    shutil.copyfile(source, csv)
+    return csv
 
 
 def _iris_csv(path: Path) -> Path:
@@ -135,7 +196,7 @@ def _housing_csv(path: Path) -> Path:
 
 
 def _dataset_csv(workspace: Path, spec: DatasetSpec) -> Path:
-    builders = {"iris": _iris_csv, "housing": _housing_csv}
+    builders = {"iris": _iris_csv, "housing": _housing_csv, "churn": _churn_csv}
     return builders[spec.name](workspace / "uploads")
 
 
@@ -466,14 +527,14 @@ def _verified_claim_stats(claims: dict[str, float], metrics: dict[str, Any]) -> 
     return verified, len(claims)
 
 
-def _new_experiment(workspace: Path, label: str) -> Any:
+def _new_experiment(workspace: Path, label: str, spec: DatasetSpec) -> Any:
     from thelab.ide.experiment import Experiment, ExperimentStore
 
     experiment = Experiment(
         experiment_id=f"exp-eval-{label}",
-        goal="Predict the iris species (evaluator)",
-        dataset_id="uploads/iris.csv",
-        target="species",
+        goal=f"Evaluate {spec.target} prediction ({spec.name} arm, evaluator)",
+        dataset_id=f"uploads/{spec.name}.csv",
+        target=spec.target,
     )
     ExperimentStore().save(experiment)
     return experiment
@@ -499,14 +560,14 @@ async def _check_rq4_grounding(
     """
     from thelab.ide.agentic_round import run_agentic_round
 
-    grounded_experiment = _new_experiment(Path.cwd(), f"rq4-grounded-{spec.name}")
+    grounded_experiment = _new_experiment(Path.cwd(), f"rq4-grounded-{spec.name}", spec)
     grounded = await run_agentic_round(
         grounded_experiment,
         _build_deterministic_result(spec, run_id, metrics),
         provider=provider,
         require_approval=True,
     )
-    ungrounded_experiment = _new_experiment(Path.cwd(), f"rq4-ungrounded-{spec.name}")
+    ungrounded_experiment = _new_experiment(Path.cwd(), f"rq4-ungrounded-{spec.name}", spec)
     ungrounded = await run_agentic_round(
         ungrounded_experiment,
         _stripped_deterministic_result(spec),
@@ -560,13 +621,20 @@ async def _check_rq4_grounding(
 
 
 async def _check_rq5_agentic_capability(
-    workspace: Path, spec: DatasetSpec, run_id: str, metrics: dict[str, Any], provider: Any
+    workspace: Path,
+    spec: DatasetSpec,
+    run_id: str,
+    metrics: dict[str, Any],
+    provider: Any,
+    rounds: int = 1,
 ) -> dict[str, Any]:
     """RQ5: the round protocol end-to-end — gate blocks, approval enables.
 
     Suite bar (mock): the unapproved round cannot execute; the approved round
     runs through the factory and produces the comparison artifact.
     Live bar: script validity_rate >= 0.8.
+    W4: repeats the agentic round N times and reports per-round validity and
+    metric deltas — variance evidence, not a single-shot headline.
     """
     from thelab.agents.approval import (
         HumanApprovalRequired,
@@ -575,42 +643,80 @@ async def _check_rq5_agentic_capability(
     from thelab.agents.worker import ProposalStore
     from thelab.ide.agentic_round import execute_approved_round, run_agentic_round
 
-    experiment = _new_experiment(workspace, f"rq5-{spec.name}")
-    deterministic_result = _build_deterministic_result(spec, run_id, metrics)
-    record = await run_agentic_round(
-        experiment,
-        deterministic_result,
-        provider=provider,
-        require_approval=True,
-    )
-    if record.get("status") != "awaiting_approval":
-        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": f"round status: {record.get('status')}"}
-    proposal_id = record["proposal_id"]
-
-    # Gate: unapproved execution must be refused.
-    blocked = False
-    try:
-        execute_approved_round(experiment, proposal_id)
-    except HumanApprovalRequired:
-        blocked = True
-    if not blocked:
-        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": "execution was not blocked by the gate"}
-
-    record_human_approval(ProposalStore(os.environ["THELAB_PROPOSALS_DIR"]), proposal_id, principal="evaluator")
-    result = execute_approved_round(experiment, proposal_id)
-    comparison = result.get("comparison", {})
-    if result.get("status") not in {"completed", "failed"}:
-        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": f"execution status: {result.get('status')}"}
-    if "metric_delta" not in comparison or "validity_rate" not in comparison:
-        return {"rq": spec.label("RQ5"), "status": "FAIL", "reason": "comparison artifact incomplete"}
-
-    validity = comparison.get("validity_rate")
-    if provider is not None and result["status"] == "completed":
-        if validity is None or float(validity) < 0.8:
+    round_results: list[dict[str, Any]] = []
+    for index in range(max(1, rounds)):
+        experiment = _new_experiment(workspace, f"rq5-{spec.name}-r{index}", spec)
+        deterministic_result = _build_deterministic_result(spec, run_id, metrics)
+        record = await run_agentic_round(
+            experiment,
+            deterministic_result,
+            provider=provider,
+            require_approval=True,
+        )
+        if record.get("status") != "awaiting_approval":
             return {
                 "rq": spec.label("RQ5"),
                 "status": "FAIL",
-                "reason": f"validity_rate {validity} below 0.8 bar",
+                "reason": f"round {index} status: {record.get('status')}",
+            }
+        proposal_id = record["proposal_id"]
+
+        # Gate: unapproved execution must be refused.
+        blocked = False
+        try:
+            execute_approved_round(experiment, proposal_id)
+        except HumanApprovalRequired:
+            blocked = True
+        if not blocked:
+            return {
+                "rq": spec.label("RQ5"),
+                "status": "FAIL",
+                "reason": "execution was not blocked by the gate",
+            }
+
+        record_human_approval(
+            ProposalStore(os.environ["THELAB_PROPOSALS_DIR"]), proposal_id, principal="evaluator"
+        )
+        result = execute_approved_round(experiment, proposal_id)
+        comparison = result.get("comparison", {})
+        if result.get("status") not in {"completed", "failed"}:
+            return {
+                "rq": spec.label("RQ5"),
+                "status": "FAIL",
+                "reason": f"round {index} execution status: {result.get('status')}",
+            }
+        if "metric_delta" not in comparison or "validity_rate" not in comparison:
+            return {
+                "rq": spec.label("RQ5"),
+                "status": "FAIL",
+                "reason": "comparison artifact incomplete",
+            }
+        round_results.append(
+            {
+                "round": index,
+                "mode": record.get("mode"),
+                "validity_rate": comparison.get("validity_rate"),
+                "metric_delta": comparison.get("metric_delta", {}),
+                "agentic_completed": comparison.get("agentic_completed"),
+                "agentic_total": comparison.get("agentic_total"),
+                "agentic_best": comparison.get("agentic_best"),
+                "execution_status": result.get("status"),
+            }
+        )
+
+    validity = round_results[-1]["validity_rate"]
+    if provider is not None and round_results[-1]["execution_status"] == "completed":
+        validities = [
+            r["validity_rate"]
+            for r in round_results
+            if r["mode"] == "agentic" and r["validity_rate"] is not None
+        ]
+        if validities and (sum(validities) / len(validities)) < 0.8:
+            return {
+                "rq": spec.label("RQ5"),
+                "status": "FAIL",
+                "reason": f"mean validity {sum(validities) / len(validities):.2f} below 0.8 bar",
+                "rounds": round_results,
             }
 
     return {
@@ -618,9 +724,10 @@ async def _check_rq5_agentic_capability(
         "status": "PASS",
         "gate_blocked_unapproved": True,
         "validity_rate": validity,
-        "metric_delta": comparison.get("metric_delta", {}),
-        "agentic_completed": comparison.get("agentic_completed"),
-        "agentic_total": comparison.get("agentic_total"),
+        "metric_delta": round_results[-1]["metric_delta"],
+        "agentic_completed": round_results[-1]["agentic_completed"],
+        "agentic_total": round_results[-1]["agentic_total"],
+        "rounds": round_results,
     }
 
 
@@ -640,7 +747,7 @@ async def _check_rq6_orchestration(
         ("multi", RoundConfig(role_mode="multi")),
         ("single", RoundConfig(role_mode="single")),
     ):
-        experiment = _new_experiment(Path.cwd(), f"rq6-{label}-{spec.name}")
+        experiment = _new_experiment(Path.cwd(), f"rq6-{label}-{spec.name}", spec)
         record = await run_agentic_round(
             experiment,
             _build_deterministic_result(spec, run_id, metrics),
@@ -688,8 +795,14 @@ async def main() -> int:
     parser.add_argument(
         "--datasets",
         default="all",
-        choices=["all", "iris", "housing"],
-        help="Run the chain on one dataset arm or both (default: all)",
+        choices=["all", "iris", "housing", "churn"],
+        help="Run the chain on one dataset arm or all (default: all)",
+    )
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=1,
+        help="Repeat the RQ5 agentic round N times per dataset (variance evidence, W4)",
     )
     args = parser.parse_args()
 
@@ -706,11 +819,24 @@ async def main() -> int:
         mode = f"live ({args.live}" + (f":{args.model}" if args.model else "") + ")"
 
     specs = [_iris_spec(), _housing_spec()]
+    # Real-data arm (W3): only when the gitignored upload exists.
+    churn_available = _churn_source() is not None
+    if churn_available:
+        specs.append(_churn_spec())
     if args.datasets != "all":
-        specs = [s for s in specs if s.name == args.datasets]
+        selected = [s for s in specs if s.name == args.datasets]
+        specs = selected
     workspace = Path(tempfile.mkdtemp(prefix="thelab-eval-"))
     previous_env = {}
     report: dict[str, Any] = {"mode": mode, "results": []}
+    if args.datasets in {"all", "churn"} and not churn_available:
+        report["results"].append(
+            {
+                "rq": "RQ*[churn]",
+                "status": "SKIPPED",
+                "reason": "cleaned churn upload not present (data/uploads is gitignored)",
+            }
+        )
     try:
         # RQ3 is dataset-independent; run once.
         rq3 = _check_rq3_context_retrieval(workspace)
@@ -733,6 +859,7 @@ async def main() -> int:
                 return res
 
             agentic_tasks = []
+            total_rounds = max(1, args.rounds)
             for spec in specs:
                 rq1 = _check_rq1_reproducibility(workspace, spec)
                 report["results"].append(rq1)
@@ -763,8 +890,8 @@ async def main() -> int:
                 )
                 agentic_tasks.append(
                     _run_check(
-                        lambda s=spec, r=run_id, m=metrics: _check_rq5_agentic_capability(
-                            workspace, s, r, m, provider
+                        lambda s=spec, r=run_id, m=metrics, n=total_rounds: _check_rq5_agentic_capability(
+                            workspace, s, r, m, provider, rounds=n
                         )
                     )
                 )
@@ -785,7 +912,8 @@ async def main() -> int:
                     os.environ[key] = value
 
         _print_report(report)
-        return 0 if all(r["status"] == "PASS" for r in report["results"]) else 1
+        failed = [r for r in report["results"] if r["status"] not in {"PASS", "SKIPPED"}]
+        return 0 if not failed else 1
     finally:
         shutil.rmtree(workspace, ignore_errors=True)
 
