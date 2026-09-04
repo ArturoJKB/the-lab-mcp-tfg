@@ -47,6 +47,10 @@ def is_generation_ledger(data: dict[str, Any]) -> bool:
     return isinstance(data.get("slug"), str) and isinstance(data.get("generations"), list)
 
 
+def is_model_comparison(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("dataset"), str) and isinstance(data.get("rows"), list) and isinstance(data.get("baseline"), dict)
+
+
 def is_round_record(data: dict[str, Any]) -> bool:
     return "round_id" in data and "experiment_id" in data
 
@@ -258,6 +262,40 @@ def _fmt_s(value: Any) -> str:
 # ---------------------------------------------------------------------------
 # Ratchet ledger: generation + per-round capability tables
 # ---------------------------------------------------------------------------
+
+def build_model_comparison_table(data: dict[str, Any], source_stem: str) -> str:
+    baseline = data.get("baseline") or {}
+    base_model = baseline.get("model", "")
+    base_val = baseline.get("test_accuracy")
+    rows: list[list[str]] = []
+    for r in data.get("rows") or []:
+        model = str(r.get("model", "")).split("/")[-1][:30]
+        if model.startswith("{"):
+            model = "mixed team"
+        delta = r.get("delta_vs_baseline")
+        rows.append(
+            [
+                str(r.get("configuration", "")),
+                model,
+                str(r.get("mode", "")),
+                _fmt_v(r.get("validity_rate")),
+                _fmt_v(r.get("best_test_accuracy")),
+                f"{float(delta):+.4f}" if isinstance(delta, (int, float)) else "--",
+                "yes" if r.get("absorbed") else "no",
+            ]
+        )
+    caption = (
+        f"Model comparison on {_tex_escape(data['dataset'])}: deterministic "
+        f"try-all baseline {_tex_escape(base_model)} {_fmt_v(base_val)} vs "
+        "agentic team configurations. Delta = agentic best minus baseline."
+    )
+    return _booktabs_table(
+        caption,
+        f"tab:model-comparison-{_label_safe(source_stem)}",
+        ["Config", "Model", "Mode", "Validity", "Best acc", "Delta", "Absorbed"],
+        rows,
+    )
+
 
 def _fmt_v(value: Any) -> str:
     return f"{float(value):.4f}" if isinstance(value, (int, float)) else "--"
@@ -474,6 +512,7 @@ def main(argv: list[str] | None = None) -> int:
     reports: list[tuple[str, dict[str, Any]]] = []
     probes: list[tuple[str, dict[str, Any]]] = []
     ledgers: list[tuple[str, dict[str, Any]]] = []
+    comparisons: list[tuple[str, dict[str, Any]]] = []
     rounds: list[tuple[str, dict[str, Any]]] = []
     for path in sorted(raw_dir.glob("*.json")):
         try:
@@ -487,6 +526,8 @@ def main(argv: list[str] | None = None) -> int:
             probes.append((path.stem, data))
         elif is_generation_ledger(data):
             ledgers.append((path.stem, data))
+        elif is_model_comparison(data):
+            comparisons.append((path.stem, data))
         elif is_round_record(data):
             rounds.append((path.stem, data))
 
@@ -526,6 +567,14 @@ def main(argv: list[str] | None = None) -> int:
             f"- `ratchet_generations_{stem}.tex` — table `tab:ratchet-generations-{_label_safe(stem)}`"
             f" + `ratchet_rounds_{stem}.tex` (`tab:ratchet-rounds-{_label_safe(stem)}`)"
             f" from `raw/{stem}.json` (ratchet loop ledger).",
+        ]
+
+    for stem, data in comparisons:
+        tex = build_model_comparison_table(data, stem)
+        (args.out / f"model_comparison_{stem}.tex").write_text(tex, encoding="utf-8")
+        manifest += [
+            f"- `model_comparison_{stem}.tex` — table `tab:model-comparison-{_label_safe(stem)}`"
+            f" from `raw/{stem}.json` ({len(data.get('rows', []))} configurations).",
         ]
 
     comparison_tex = build_agentic_comparison([data for _, data in rounds])

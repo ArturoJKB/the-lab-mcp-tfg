@@ -10,5 +10,6 @@ byte-stable. Chapters consume tables via `\input{evidence/<file>}`.
 - `model_latency_latency_probe_openrouter.tex` — table `tab:latency-latency-probe-openrouter` from `raw/latency_probe_openrouter.json` (probe mode: `trivial`).
 - `model_latency_latency_probe_openrouter_realistic.tex` — table `tab:latency-latency-probe-openrouter-realistic` from `raw/latency_probe_openrouter_realistic.json` (probe mode: `realistic`).
 - `ratchet_generations_ratchet_ledger_titanic.tex` — table `tab:ratchet-generations-ratchet-ledger-titanic` + `ratchet_rounds_ratchet_ledger_titanic.tex` (`tab:ratchet-rounds-ratchet-ledger-titanic`) from `raw/ratchet_ledger_titanic.json` (ratchet loop ledger).
+- `model_comparison_model_comparison_titanic.tex` — table `tab:model-comparison-model-comparison-titanic` from `raw/model_comparison_titanic.json` (14 configurations).
 - `agentic_comparison.tex` — table `tab:agentic-comparison` from `raw/demo_churn_round_20260903.json`.
 - `validity_rates.pdf` — figure from the validity rates of all recorded RQ5 results and journeys (orange = below 0.5).

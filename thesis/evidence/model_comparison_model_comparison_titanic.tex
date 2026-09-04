@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\caption{Model comparison on titanic: deterministic try-all baseline logistic\textbackslash{}\_regression (try-all best of 9) 0.8045 vs agentic team configurations. Delta = agentic best minus baseline.}
+\label{tab:model-comparison-model-comparison-titanic}
+\begin{tabular}{lllllll}
+\toprule
+Config & Model & Mode & Validity & Best acc & Delta & Absorbed \\
+\midrule
+uniform & llama-3.3-70b-instruct & agentic & 0.8333 & 0.8212 & +0.0168 & yes \\
+uniform & llama-3.3-70b-instruct & agentic & 1.0000 & 0.8045 & +0.0000 & no \\
+uniform & llama-3.3-70b-instruct & agentic & 1.0000 & 0.8156 & +0.0112 & no \\
+uniform & mistral-small-24b-instruct-250 & degraded\_deterministic & 1.0000 & 0.8045 & +0.0000 & no \\
+uniform & mistral-small-24b-instruct-250 & degraded\_deterministic & 1.0000 & 0.8045 & +0.0000 & no \\
+uniform & mistral-small-24b-instruct-250 & degraded\_deterministic & 1.0000 & 0.8045 & +0.0000 & no \\
+uniform & mistral-small-24b-instruct-250 & agentic & 1.0000 & 0.8547 & +0.0503 & yes \\
+uniform & glm-5.3-flash & agentic & 0.0000 & -- & -- & no \\
+uniform & mixed team & degraded\_deterministic & 1.0000 & 0.8045 & +0.0000 & no \\
+uniform & llama-3.3-70b-instruct"} & agentic & 1.0000 & 0.8436 & +0.0391 & yes \\
+uniform & mistral-small-24b-instruct-250 & agentic & 1.0000 & 0.8212 & +0.0168 & yes \\
+mixed & llama-3.3-70b-instruct"} & agentic & 1.0000 & 0.8492 & +0.0447 & yes \\
+mixed & mistral-small-24b-instruct-250 & agentic & 0.7143 & 0.8436 & +0.0391 & yes \\
+uniform & glm-5.3-flash & agentic & 1.0000 & 0.7374 & -0.0670 & no \\
+\bottomrule
+\end{tabular}
+\end{table}

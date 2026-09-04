@@ -181,13 +181,16 @@ def build_provider(provider_name: str, model: str | None) -> Any:
     raise ValueError(f"unsupported provider: {provider_name}")
 
 
-def _deterministic_result(spec: DatasetCfg, baseline: dict[str, Any]) -> dict[str, Any]:
+def _deterministic_result(
+    spec: DatasetCfg, baseline: dict[str, Any], dataset_id: str | None = None
+) -> dict[str, Any]:
     metrics = baseline.get("metrics", {})
+    analysis_id = dataset_id or f"uploads/{Path(spec.dataset).name}"
     return {
         "status": "completed",
         "eda": {"eda_context": f"{spec.task} dataset; baseline from deterministic try-all"},
         "feature_engineering": {
-            "cleaned_dataset_id": f"uploads/{Path(spec.dataset).name}",
+            "cleaned_dataset_id": analysis_id,
             "clean_metadata": {"skipped": True, "reason": "ratchet analysis csv is clean"},
             "top_models": [{"model": baseline.get("model"), "metrics": dict(metrics)}],
         },
@@ -209,6 +212,7 @@ def run_cell_rounds(
     baseline: dict[str, Any],
     config: Any | None = None,
     cell_label: str | None = None,
+    dataset_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """One model cell: n gated agentic rounds; returns per-round records.
 
@@ -236,17 +240,18 @@ def run_cell_rounds(
     for index in range(n_rounds):
         t0 = time.time()
         exp_id = f"exp-ratchet-{spec.slug}-{model_short}-{index}-{time.strftime('%H%M%S')}"
+        analysis_id = dataset_id or f"uploads/{Path(spec.dataset).name}"
         experiment = Experiment(
             experiment_id=exp_id,
             goal=f"Ratchet loop: beat the deterministic try-all baseline ({spec.slug})",
-            dataset_id=f"uploads/{Path(spec.dataset).name}",
+            dataset_id=analysis_id,
             target=spec.target,
         )
         ExperimentStore().save(experiment)
         record = asyncio.run(
             run_agentic_round(
                 experiment,
-                _deterministic_result(spec, baseline),
+                _deterministic_result(spec, baseline, analysis_id),
                 provider=provider,
                 require_approval=True,
                 config=config,
@@ -361,6 +366,58 @@ def parse_stage_models(raw: str) -> dict[str, tuple[str, str]]:
     return out
 
 
+def _prepare_dataset(spec: DatasetCfg, ingest: bool) -> str | None:
+    """Ensure the spec's analysis CSV exists as a *cleaned* upload.
+
+    Returns the workspace-relative cleaned dataset id, or None when the file
+    is missing and ingest was not requested. Chain (Arm B): kaggle ingest ->
+    deterministic cleaning policy -> cleaned CSV. Idempotent: re-running
+    returns the existing cleaned dataset (the cleaning API rejects
+    re-cleaning an already-cleaned id).
+    """
+    raw_path = _ws() / spec.dataset
+    if raw_path.is_file() and "_cleaned_" in spec.dataset:
+        return spec.dataset  # already a cleaned analysis CSV
+
+    if not raw_path.is_file():
+        if not ingest or not spec.ingest_slug:
+            return None
+        from thelab.ide.kaggle_api import ingest_kaggle_dataset
+
+        print(f"  ingest: {spec.ingest_slug} ...", flush=True)
+        info = ingest_kaggle_dataset(spec.ingest_slug)
+        ingested_id = info.get("dataset_id") or ""
+        print(f"  ingested: {ingested_id}", flush=True)
+        if not ingested_id:
+            return None
+        raw_id = ingested_id
+    else:
+        # File exists but the registry points at the raw (uncleaned) name:
+        # resolve the actual uploaded id from the raw file's basename.
+        raw_id = f"uploads/{Path(spec.dataset).name}"
+
+    from thelab.ide.cleaning import clean_dataset
+
+    print(f"  clean: {raw_id} (target {spec.target}) ...", flush=True)
+    try:
+        metadata = clean_dataset(
+            raw_id,
+            spec.target,
+            drop_missing_target=True,
+            drop_empty_columns=True,
+            one_hot_encode=True,
+            numeric_impute_strategy="median",
+            categorical_impute_strategy="mode",
+        )
+    except ValueError as exc:
+        # Already-cleaned naming convention or clean-policy rejection: use raw.
+        print(f"  clean skipped ({exc}); using raw file directly", flush=True)
+        return raw_id
+    cleaned_id = metadata.get("dataset_id") or ""
+    print(f"  cleaned: {cleaned_id} ({metadata.get('rows_cleaned', '?')} rows)", flush=True)
+    return cleaned_id or None
+
+
 def run_dataset(
     slug: str,
     registry: dict[str, DatasetCfg] | None = None,
@@ -369,7 +426,9 @@ def run_dataset(
     rounds_override: int | None = None,
     mixed: dict[str, tuple[str, str]] | None = None,
     mixed_rounds: int = 1,
+    ingest: bool = False,
 ) -> dict[str, Any]:
+    from thelab.ide.datasets import dataset_id_to_relative_path
     from thelab.run.runner import try_all_models
 
     registry = registry or default_registry()
@@ -377,10 +436,21 @@ def run_dataset(
     ledger = load_ledger(slug)
     entry: dict[str, Any] = {"started_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "cells": []}
 
+    # Arm B chain: kaggle ingest -> deterministic clean -> cleaned analysis CSV.
+    analysis_id = _prepare_dataset(spec, ingest)
+    if analysis_id is None:
+        entry["error"] = f"dataset not available: {spec.dataset} (ingest={ingest})"
+        ledger.setdefault("generations", []).append(entry)
+        save_ledger(slug, ledger)
+        print("  FAILED: dataset not available", flush=True)
+        return entry
+    analysis_rel = dataset_id_to_relative_path(analysis_id)
+
     print(f"== ratchet: {slug} ({spec.task}, arm {spec.arm}) ==", flush=True)
+    print(f"  analysis dataset: {analysis_rel}", flush=True)
     print("  baseline: deterministic try-all (persisted)", flush=True)
     results = try_all_models(
-        dataset=spec.dataset,
+        dataset=analysis_rel,
         target=spec.target,
         seed=42,
         output="runs",
@@ -416,7 +486,7 @@ def run_dataset(
         print(f"  cell: mixed team {labels} x{mixed_rounds}", flush=True)
         cell_rounds = run_cell_rounds(
             spec, "mixed", "mixed", mixed_rounds, baseline,
-            config=config, cell_label="mixed",
+            config=config, cell_label="mixed", dataset_id=analysis_id,
         )
         entry["cells"].append({
             "provider": "mixed", "model": json.dumps(labels), "rounds": cell_rounds,
@@ -430,7 +500,7 @@ def run_dataset(
         n = rounds_override if rounds_override else n_rounds
         label = (model or provider_name).split("/")[-1][:34]
         print(f"  cell: {provider_name}/{label} x{n}", flush=True)
-        cell_rounds = run_cell_rounds(spec, provider_name, model, n, baseline)
+        cell_rounds = run_cell_rounds(spec, provider_name, model, n, baseline, dataset_id=analysis_id)
         entry["cells"].append({
             "provider": provider_name, "model": model, "rounds": cell_rounds,
         })
