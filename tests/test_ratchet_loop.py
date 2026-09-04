@@ -121,3 +121,34 @@ def test_run_dataset_mock_writes_ledger(loop_env, tmp_path, monkeypatch):
     assert len(ledger["generations"]) == 1
     saved = json.loads((tmp / ".thelab" / "generations" / "tiny.json").read_text())
     assert saved["generations"][0]["baseline"]["metrics"]
+
+
+def test_prepare_dataset_returns_uploads_form_for_cleaned_arm_a(tmp_path, monkeypatch):
+    """P6.A.0 regression: _prepare_dataset's early return for pre-cleaned Arm A
+    datasets must return the uploads-form id (uploads/<name>), not the
+    workspace-relative path (data/uploads/<name>) — the downstream resolver
+    and round calls expect the uploads-form."""
+    from scripts.ratchet_loop import DatasetCfg, _prepare_dataset
+
+    uploads = tmp_path / "uploads"
+    uploads.mkdir()
+    monkeypatch.setenv("THELAB_UPLOADS_DIR", str(uploads))
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
+
+    cleaned_name = "yasserh_titanic-dataset_cleaned_Survived.csv"
+    data_uploads = tmp_path / "data" / "uploads"
+    data_uploads.mkdir(parents=True, exist_ok=True)
+    (data_uploads / cleaned_name).write_text("a,b\n1,2\n", encoding="utf-8")
+
+    spec = DatasetCfg(
+        slug="test-arm-a",
+        dataset=f"data/uploads/{cleaned_name}",
+        target="b",
+        task="classification",
+        arm="A",
+        model_cells=[],
+    )
+    result = _prepare_dataset(spec, ingest=False)
+    assert result is not None
+    assert result.startswith("uploads/"), f"expected uploads-form id, got: {result}"
+    assert "_cleaned_" in result

@@ -377,7 +377,7 @@ def _prepare_dataset(spec: DatasetCfg, ingest: bool) -> str | None:
     """
     raw_path = _ws() / spec.dataset
     if raw_path.is_file() and "_cleaned_" in spec.dataset:
-        return spec.dataset  # already a cleaned analysis CSV
+        return f"uploads/{Path(spec.dataset).name}"  # uploads-form id (matches raw branch)
 
     if not raw_path.is_file():
         if not ingest or not spec.ingest_slug:
