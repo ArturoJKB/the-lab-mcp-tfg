@@ -1,0 +1,328 @@
+{
+  "slug": "california-housing",
+  "generations": [
+    {
+      "started_at": "2026-09-04T19:32:36",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "run_id": "run-20260904-173629-e7571fdd",
+                "metrics": {
+                  "train_samples": 16512,
+                  "test_samples": 4128,
+                  "train_rmse": 49885.92521713183,
+                  "test_rmse": 52346.617499008775,
+                  "train_mae": 34243.58825366969,
+                  "test_mae": 35613.42843808953,
+                  "train_r2": 0.8138355702672628,
+                  "test_r2": 0.7908921253526553
+                }
+              },
+              "metric_delta": {},
+              "seconds": 504.9
+            },
+            {
+              "round": 1,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "run_id": "run-20260904-174448-78f8445b",
+                "metrics": {
+                  "train_samples": 16512,
+                  "test_samples": 4128,
+                  "train_rmse": 37489.085076547715,
+                  "test_rmse": 44999.57456157911,
+                  "train_mae": 25529.023783002343,
+                  "test_mae": 29659.124352049315,
+                  "train_r2": 0.8948642723615831,
+                  "test_r2": 0.8454710136799095
+                }
+              },
+              "metric_delta": {},
+              "seconds": 209.2,
+              "metrics": {
+                "train_samples": 16512,
+                "test_samples": 4128,
+                "train_rmse": 37489.085076547715,
+                "test_rmse": 44999.57456157911,
+                "train_mae": 25529.023783002343,
+                "test_mae": 29659.124352049315,
+                "train_r2": 0.8948642723615831,
+                "test_r2": 0.8454710136799095
+              },
+              "config": {
+                "dataset": "data/uploads/camnugent_california-housing-prices_cleaned_median_house_value.csv",
+                "target": "median_house_value",
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 16512,
+          "test_samples": 4128,
+          "train_rmse": 41357.16435889521,
+          "test_rmse": 48106.58874534099,
+          "train_mae": 28381.369857106343,
+          "test_mae": 32456.620815744704,
+          "train_r2": 0.8720494522783184,
+          "test_r2": 0.8233952972590266
+        },
+        "run_id": "run-20260904-173236-91ec58b4"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/camnugent_california-housing-prices_cleaned_median_house_value.csv",
+          "target": "median_house_value",
+          "model": "hist_gradient_boosting_regressor",
+          "seed": 42,
+          "hyperparameters": null
+        },
+        "primary": "test_r2",
+        "baseline_value": 0.8233952972590266,
+        "agentic_value": 0.8454710136799095,
+        "delta": 0.022075716420882907
+      }
+    },
+    {
+      "started_at": "2026-09-04T19:49:40",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "run_id": "run-20260904-175116-c797d055",
+                "metrics": {
+                  "train_samples": 16512,
+                  "test_samples": 4128,
+                  "train_rmse": 66625.87966559832,
+                  "test_rmse": 69199.45241644577,
+                  "train_mae": 47509.50160803628,
+                  "test_mae": 48688.44729433636,
+                  "train_r2": 0.6679323613995265,
+                  "test_r2": 0.6345748316556762
+                }
+              },
+              "metric_delta": {},
+              "seconds": 238.2,
+              "metrics": {
+                "train_samples": 16512,
+                "test_samples": 4128,
+                "train_rmse": 66625.87966559832,
+                "test_rmse": 69199.45241644577,
+                "train_mae": 47509.50160803628,
+                "test_mae": 48688.44729433636,
+                "train_r2": 0.6679323613995265,
+                "test_r2": 0.6345748316556762
+              },
+              "config": {
+                "dataset": "data/uploads/camnugent_california-housing-prices_cleaned_median_house_value.csv",
+                "target": "median_house_value",
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "hyperparameters": {
+                  "n_estimators": 100,
+                  "max_depth": 5
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 16512,
+          "test_samples": 4128,
+          "train_rmse": 41357.16435889521,
+          "test_rmse": 48106.58874534099,
+          "train_mae": 28381.369857106343,
+          "test_mae": 32456.620815744704,
+          "train_r2": 0.8720494522783184,
+          "test_r2": 0.8233952972590266
+        },
+        "run_id": "run-20260904-174940-1e0ee8f6"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.634575 does not beat baseline 0.823395 (test_r2)"
+      }
+    },
+    {
+      "started_at": "2026-09-04T20:04:04",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "degraded_deterministic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "run_id": "run-20260904-180503-60038ce8",
+                "metrics": {
+                  "train_samples": 16512,
+                  "test_samples": 4128,
+                  "train_rmse": 41357.16435889521,
+                  "test_rmse": 48106.58874534099,
+                  "train_mae": 28381.369857106343,
+                  "test_mae": 32456.620815744704,
+                  "train_r2": 0.8720494522783184,
+                  "test_r2": 0.8233952972590266
+                }
+              },
+              "metric_delta": {},
+              "seconds": 41.1
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 16512,
+          "test_samples": 4128,
+          "train_rmse": 41357.16435889521,
+          "test_rmse": 48106.58874534099,
+          "train_mae": 28381.369857106343,
+          "test_mae": 32456.620815744704,
+          "train_r2": 0.8720494522783184,
+          "test_r2": 0.8233952972590266
+        },
+        "run_id": "run-20260904-180404-3fb547d7"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "no agentic round (all degraded or rejected)"
+      }
+    },
+    {
+      "started_at": "2026-09-04T20:09:40",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"google/gemini-3.5-flash-lite\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "run_id": "run-20260904-181042-6c641ec1",
+                "metrics": {
+                  "train_samples": 16512,
+                  "test_samples": 4128,
+                  "train_rmse": 77818.13107046335,
+                  "test_rmse": 78200.79866467215,
+                  "train_mae": 59637.90034131506,
+                  "test_mae": 59610.33306766664,
+                  "train_r2": 0.5469957940746482,
+                  "test_r2": 0.5333239459331323
+                }
+              },
+              "metric_delta": {},
+              "seconds": 102.2,
+              "metrics": {
+                "train_samples": 16512,
+                "test_samples": 4128,
+                "train_rmse": 77818.13107046335,
+                "test_rmse": 78200.79866467215,
+                "train_mae": 59637.90034131506,
+                "test_mae": 59610.33306766664,
+                "train_r2": 0.5469957940746482,
+                "test_r2": 0.5333239459331323
+              },
+              "config": {
+                "dataset": "data/uploads/camnugent_california-housing-prices_cleaned_median_house_value.csv",
+                "target": "median_house_value",
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "hyperparameters": {
+                  "learning_rate": 0.01,
+                  "max_depth": 3
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 16512,
+          "test_samples": 4128,
+          "train_rmse": 41357.16435889521,
+          "test_rmse": 48106.58874534099,
+          "train_mae": 28381.369857106343,
+          "test_mae": 32456.620815744704,
+          "train_r2": 0.8720494522783184,
+          "test_r2": 0.8233952972590266
+        },
+        "run_id": "run-20260904-180940-ffd2a711"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.533324 does not beat baseline 0.823395 (test_r2)"
+      }
+    }
+  ]
+}

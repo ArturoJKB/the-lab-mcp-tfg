@@ -5,7 +5,7 @@ recorded workspace evidence: `runs`, `.thelab/jobs`, `.thelab/experiments`.
 Every ticket cites its evidence; known signatures fixed in P5 are
 marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 
-**Summary:** 14 findings — major: 5, minor: 3, note: 6.
+**Summary:** 15 findings — major: 5, minor: 4, note: 6.
 
 ### P6-BLK-001: Foreign hyperparameters passed to estimator constructor
 - Severity:   major
@@ -67,7 +67,17 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        Parse tool responses strictly at the boundary (json.loads + typed contract) so string payloads fail at parse time, not at use time
 - Status:     proposed
 
-### P6-BLK-007: Provider configuration or connectivity failure
+### P6-BLK-007: Unclassified failure
+- Severity:   minor
+- Category:   run
+- Symptom:    Solver lbfgs supports only 'l2' or None penalties, got l1 penalty.
+- Evidence:   `runs/run-20260904-145055-1dc56faa`, `runs/run-20260904-145056-3abc7ff1`, `runs/run-20260904-145056-8adc5a0d`, `runs/run-20260904-145056-9ca388f0`, `runs/run-20260904-145056-d91e3a55`, `runs/run-20260904-145057-c8dce232`
+- Samples:    Solver lbfgs supports only 'l2' or None penalties, got l1 penalty.
+- Root cause: see evidence (no recorded hypothesis)
+- Fix:        triage: reproduce from the cited evidence, then classify
+- Status:     proposed
+
+### P6-BLK-008: Provider configuration or connectivity failure
 - Severity:   minor
 - Category:   job
 - Symptom:    [network] network error: [Errno 111] Connection refused
@@ -77,7 +87,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        Fail-fast with named provider and hint (implemented); run the provider setup check before starting live sessions
 - Status:     applied
 
-### P6-BLK-008: Invalid target column accepted at experiment entry
+### P6-BLK-009: Invalid target column accepted at experiment entry
 - Severity:   minor
 - Category:   run
 - Symptom:    target column 'quality' not found
@@ -87,37 +97,37 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        Validate target against dataset columns at experiment entry; report deterministic failures via OrchestrationFailed
 - Status:     proposed
 
-### P6-BLK-009: Constant feature columns rejected by validation
+### P6-BLK-010: Constant feature columns rejected by validation
 - Severity:   note
 - Category:   run
 - Symptom:    constant feature columns found: ['OrderDate_hour', 'SignupDate_hour']
-- Evidence:   `runs/run-20260830-222333-729d524c`, `runs/run-20260830-222333-c24187d0`, `runs/run-20260830-222334-8a4c2153`, `runs/run-20260831-001814-cedd5a3b`, `runs/run-20260831-001814-e2a43afb`, `runs/run-20260903-021131-63164b08`, `runs/run-20260903-183300-0575a23a`
+- Evidence:   `runs/run-20260830-222333-729d524c`, `runs/run-20260830-222333-c24187d0`, `runs/run-20260830-222334-8a4c2153`, `runs/run-20260831-001814-cedd5a3b`, `runs/run-20260831-001814-e2a43afb`, `runs/run-20260903-021131-63164b08`, `runs/run-20260903-183300-0575a23a`, `runs/run-20260904-141812-000bf7e3` (+14 more)
 - Samples:    constant feature columns found: ['OrderDate_hour', 'SignupDate_hour']
 - Root cause: Validation guardrail: constant columns carry no signal
 - Fix:        By-design first-class rejection (P0 AC-02); optionally surfaced by the cleaning policy as a drop report entry
 - Status:     applied
 
-### P6-BLK-010: Unsafe or unknown dataset id rejected
+### P6-BLK-011: Unsafe or unknown dataset id rejected
 - Severity:   note
 - Category:   run
 - Symptom:    dataset not found: uploads/sp500_analyst_cleaned.csv
-- Evidence:   `runs/run-20260829-144653-a5b569af`, `.thelab/jobs/job-20260829-184842-ebaa2970.json`
+- Evidence:   `runs/run-20260829-144653-a5b569af`, `runs/run-20260904-032727-441d321a`, `runs/run-20260904-032727-8a6e1290`, `runs/run-20260904-032728-34198f55`, `runs/run-20260904-032728-466cf960`, `runs/run-20260904-032728-52c9949c`, `runs/run-20260904-032728-5ad410ac`, `runs/run-20260904-032728-73782d5c` (+3 more)
 - Samples:    dataset not found: uploads/sp500_analyst_cleaned.csv
 - Root cause: Path-safety validation rejected the id
 - Fix:        By-design first-class rejection (path safety)
 - Status:     applied
 
-### P6-BLK-011: Wrong-task models in the training grid
+### P6-BLK-012: Wrong-task models in the training grid
 - Severity:   note
 - Category:   run
 - Symptom:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
-- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+10 more)
+- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+105 more)
 - Samples:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
 - Root cause: Model selection did not filter the registry by inferred task type
 - Fix:        Task-aware selection + deterministic post-filter (thelab/ide/agentic_round.py)
 - Status:     applied
 
-### P6-BLK-012: Scale guard rejected an impractical model/dataset pair
+### P6-BLK-013: Scale guard rejected an impractical model/dataset pair
 - Severity:   note
 - Category:   run
 - Symptom:    model 'svc' is limited to 50000 training rows (dataset has 164231 rows); choose a scalable model or subsample the data
@@ -127,7 +137,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        By-design first-class rejection (P2.6.5 scale guards)
 - Status:     applied
 
-### P6-BLK-013: Non-numeric feature columns rejected before training
+### P6-BLK-014: Non-numeric feature columns rejected before training
 - Severity:   note
 - Category:   run
 - Symptom:    not all feature columns are numeric: ['a']
@@ -137,7 +147,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        By-design first-class rejection; run the cleaning policy first
 - Status:     applied
 
-### P6-BLK-014: Target column with missing values rejected
+### P6-BLK-015: Target column with missing values rejected
 - Severity:   note
 - Category:   run
 - Symptom:    target column contains 5602 missing values

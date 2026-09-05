@@ -283,6 +283,9 @@ RQ3: PASS
 - The Research panel is a local context **search** UI over stored evidence —
   it is not an autonomous agent and produces no generative answers (kept as
   search by design decision).
+- Clustering/unsupervised learning consciously deferred (P6.C): the
+  architecture permits it but the thesis's claims and instruments are all
+  supervised learning; recorded as post-thesis future work.
 - Dependency lock is a `pip freeze` style pin without hashes; reproducibility
   relies on PyPI package availability.
 - The iris fixture is 30 rows (6-row test splits): quoted 1.0000 accuracies

@@ -142,6 +142,15 @@ Autonomous multi-hour self-improvement, agent-to-agent free chat, cloud
 deployment, multi-user, any change to the deterministic training path
 (RQ1–RQ3 stays byte-for-byte untouched), new research questions.
 
+### P6.C clustering card — consciously deferred (2026-09-04)
+
+The feature harvest proposed a clustering-profile card as the cheapest
+candidate. Deferred: the thesis's claims and instruments are all supervised
+learning (RQ1–RQ6); adding unsupervised learning at the final phase
+introduces a new paradigm without a research question to evaluate it. The
+architecture permits it (sandbox whitelists sklearn's KMeans; the EDA card
+grid has space) — recorded as post-thesis future work, not a gap.
+
 ## Verification
 
 ```bash
