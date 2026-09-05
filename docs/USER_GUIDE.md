@@ -155,8 +155,9 @@ Note: HTTP paths reference datasets by id (`uploads/<file>` or
 
 Seven stdio servers expose the factory to independent clients — catalog,
 registry (list models, predict), workspace (artifacts), context (read +
-write), EDA, and agent (orchestration, training jobs). Smoke-test without an
-MCP client:
+write), EDA, and agent (orchestration, training jobs). All seven are
+configured in `opencode.json` — an external coding agent (opencode, Claude
+Code) sees the full surface. Smoke-test without an MCP client:
 
 ```bash
 thelab-mcp-demo model_registry --run-id <run_id>
