@@ -1,0 +1,153 @@
+{
+  "slug": "e-commerce",
+  "generations": [
+    {
+      "started_at": "2026-09-05T16:16:34",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "linear_regression",
+                "seed": 42,
+                "run_id": "run-20260905-142122-32c710ce",
+                "metrics": {
+                  "train_samples": 39377,
+                  "test_samples": 9845,
+                  "train_rmse": 1.8573004364370482e-13,
+                  "test_rmse": 1.8432941940768987e-13,
+                  "train_mae": 1.467871544742609e-13,
+                  "test_mae": 1.4583483678607733e-13,
+                  "train_r2": 1.0,
+                  "test_r2": 1.0
+                }
+              },
+              "metric_delta": {},
+              "seconds": 258.8,
+              "metrics": {
+                "train_samples": 39377,
+                "test_samples": 9845,
+                "train_rmse": 1.8573004364370482e-13,
+                "test_rmse": 1.8432941940768987e-13,
+                "train_mae": 1.467871544742609e-13,
+                "test_mae": 1.4583483678607733e-13,
+                "train_r2": 1.0,
+                "test_r2": 1.0
+              },
+              "config": {
+                "dataset": "data/uploads/erfan4524_e-commerce-sales-data-analysis-and-eda_cleaned.csv",
+                "target": "Sales",
+                "model": "linear_regression",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "linear_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 39377,
+          "test_samples": 9845,
+          "train_rmse": 1.2975203262867503e-13,
+          "test_rmse": 1.2961993174879783e-13,
+          "train_mae": 1.03818419183895e-13,
+          "test_mae": 1.0365046668710109e-13,
+          "train_r2": 1.0,
+          "test_r2": 1.0
+        },
+        "run_id": "run-20260905-141637-3e7745ad"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 1.000000 does not beat baseline 1.000000 (test_r2)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T16:31:52",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 18,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "linear_regression",
+                "seed": 42,
+                "run_id": "run-20260905-143234-e803cf33",
+                "metrics": {
+                  "train_samples": 39377,
+                  "test_samples": 9845,
+                  "train_rmse": 1.2975203262867503e-13,
+                  "test_rmse": 1.2961993174879783e-13,
+                  "train_mae": 1.03818419183895e-13,
+                  "test_mae": 1.0365046668710109e-13,
+                  "train_r2": 1.0,
+                  "test_r2": 1.0
+                }
+              },
+              "metric_delta": {},
+              "seconds": 83.9,
+              "metrics": {
+                "train_samples": 39377,
+                "test_samples": 9845,
+                "train_rmse": 1.2975203262867503e-13,
+                "test_rmse": 1.2961993174879783e-13,
+                "train_mae": 1.03818419183895e-13,
+                "test_mae": 1.0365046668710109e-13,
+                "train_r2": 1.0,
+                "test_r2": 1.0
+              },
+              "config": {
+                "dataset": "data/uploads/erfan4524_e-commerce-sales-data-analysis-and-eda_cleaned.csv",
+                "target": "Sales",
+                "model": "linear_regression",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "linear_regression",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 39377,
+          "test_samples": 9845,
+          "train_rmse": 1.2975203262867503e-13,
+          "test_rmse": 1.2961993174879783e-13,
+          "train_mae": 1.03818419183895e-13,
+          "test_mae": 1.0365046668710109e-13,
+          "train_r2": 1.0,
+          "test_r2": 1.0
+        },
+        "run_id": "run-20260905-143154-206834f6"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 1.000000 does not beat baseline 1.000000 (test_r2)"
+      }
+    }
+  ]
+}

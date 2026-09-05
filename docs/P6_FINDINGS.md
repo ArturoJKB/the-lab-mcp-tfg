@@ -5,7 +5,7 @@ recorded workspace evidence: `runs`, `.thelab/jobs`, `.thelab/experiments`.
 Every ticket cites its evidence; known signatures fixed in P5 are
 marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 
-**Summary:** 15 findings — major: 5, minor: 4, note: 6.
+**Summary:** 19 findings — major: 5, minor: 8, note: 6.
 
 ### P6-BLK-001: Foreign hyperparameters passed to estimator constructor
 - Severity:   major
@@ -77,7 +77,47 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        triage: reproduce from the cited evidence, then classify
 - Status:     proposed
 
-### P6-BLK-008: Provider configuration or connectivity failure
+### P6-BLK-008: Unclassified failure
+- Severity:   minor
+- Category:   run
+- Symptom:    The 'learning_rate'<long>'adaptive', 'pa2', 'invscaling', 'optimal', 'pa1', 'constant'}. Got 0.1 instead.
+- Evidence:   `runs/run-20260905-170542-93e97a87`, `runs/run-20260905-170543-92e2de81`, `runs/run-20260905-170543-ae40370f`, `runs/run-20260905-170623-8d7351f7`, `runs/run-20260905-170623-ca44d4a5`, `runs/run-20260905-170623-d46f637b`
+- Samples:    The 'learning_rate' parameter of SGDClassifier must be a str among {'adaptive', 'pa2', 'invscaling', 'optimal', 'pa1', 'constant'}. Got 0.1 instead.
+- Root cause: see evidence (no recorded hypothesis)
+- Fix:        triage: reproduce from the cited evidence, then classify
+- Status:     proposed
+
+### P6-BLK-009: Unclassified failure
+- Severity:   minor
+- Category:   run
+- Symptom:    The 'learning_rate'<long>'adaptive', 'pa2', 'invscaling', 'optimal', 'pa1', 'constant'}. Got 0.5 instead.
+- Evidence:   `runs/run-20260905-170543-137c903a`, `runs/run-20260905-170543-79d8e95f`, `runs/run-20260905-170543-85a35025`, `runs/run-20260905-170623-0c0be5be`, `runs/run-20260905-170623-6a49a016`, `runs/run-20260905-170623-f22c3128`
+- Samples:    The 'learning_rate' parameter of SGDClassifier must be a str among {'adaptive', 'pa2', 'invscaling', 'optimal', 'pa1', 'constant'}. Got 0.5 instead.
+- Root cause: see evidence (no recorded hypothesis)
+- Fix:        triage: reproduce from the cited evidence, then classify
+- Status:     proposed
+
+### P6-BLK-010: Unclassified failure
+- Severity:   minor
+- Category:   run
+- Symptom:    The 'learning_rate'<long>'constant', 'optimal', 'pa2', 'pa1', 'invscaling', 'adaptive'}. Got 0.1 instead.
+- Evidence:   `runs/run-20260905-151346-255bccbc`, `runs/run-20260905-151349-76080711`, `runs/run-20260905-151352-950cdfe9`
+- Samples:    The 'learning_rate' parameter of SGDClassifier must be a str among {'constant', 'optimal', 'pa2', 'pa1', 'invscaling', 'adaptive'}. Got 0.1 instead.
+- Root cause: see evidence (no recorded hypothesis)
+- Fix:        triage: reproduce from the cited evidence, then classify
+- Status:     proposed
+
+### P6-BLK-011: Unclassified failure
+- Severity:   minor
+- Category:   run
+- Symptom:    The 'learning_rate'<long>'constant', 'optimal', 'pa2', 'pa1', 'invscaling', 'adaptive'}. Got 0.5 instead.
+- Evidence:   `runs/run-20260905-151348-ae05e2eb`, `runs/run-20260905-151350-c3b3a47d`, `runs/run-20260905-151353-0ce76144`
+- Samples:    The 'learning_rate' parameter of SGDClassifier must be a str among {'constant', 'optimal', 'pa2', 'pa1', 'invscaling', 'adaptive'}. Got 0.5 instead.
+- Root cause: see evidence (no recorded hypothesis)
+- Fix:        triage: reproduce from the cited evidence, then classify
+- Status:     proposed
+
+### P6-BLK-012: Provider configuration or connectivity failure
 - Severity:   minor
 - Category:   job
 - Symptom:    [network] network error: [Errno 111] Connection refused
@@ -87,7 +127,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        Fail-fast with named provider and hint (implemented); run the provider setup check before starting live sessions
 - Status:     applied
 
-### P6-BLK-009: Invalid target column accepted at experiment entry
+### P6-BLK-013: Invalid target column accepted at experiment entry
 - Severity:   minor
 - Category:   run
 - Symptom:    target column 'quality' not found
@@ -97,7 +137,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        Validate target against dataset columns at experiment entry; report deterministic failures via OrchestrationFailed
 - Status:     proposed
 
-### P6-BLK-010: Constant feature columns rejected by validation
+### P6-BLK-014: Constant feature columns rejected by validation
 - Severity:   note
 - Category:   run
 - Symptom:    constant feature columns found: ['OrderDate_hour', 'SignupDate_hour']
@@ -107,7 +147,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        By-design first-class rejection (P0 AC-02); optionally surfaced by the cleaning policy as a drop report entry
 - Status:     applied
 
-### P6-BLK-011: Unsafe or unknown dataset id rejected
+### P6-BLK-015: Unsafe or unknown dataset id rejected
 - Severity:   note
 - Category:   run
 - Symptom:    dataset not found: uploads/sp500_analyst_cleaned.csv
@@ -117,27 +157,27 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        By-design first-class rejection (path safety)
 - Status:     applied
 
-### P6-BLK-012: Wrong-task models in the training grid
+### P6-BLK-016: Wrong-task models in the training grid
 - Severity:   note
 - Category:   run
 - Symptom:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
-- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+105 more)
+- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+166 more)
 - Samples:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
 - Root cause: Model selection did not filter the registry by inferred task type
 - Fix:        Task-aware selection + deterministic post-filter (thelab/ide/agentic_round.py)
 - Status:     applied
 
-### P6-BLK-013: Scale guard rejected an impractical model/dataset pair
+### P6-BLK-017: Scale guard rejected an impractical model/dataset pair
 - Severity:   note
 - Category:   run
 - Symptom:    model 'svc' is limited to 50000 training rows (dataset has 164231 rows); choose a scalable model or subsample the data
-- Evidence:   `runs/run-20260903-033054-a8895ee5`, `runs/run-20260903-183519-86af43ae`
+- Evidence:   `runs/run-20260903-033054-a8895ee5`, `runs/run-20260903-183519-86af43ae`, `runs/run-20260905-144010-b81eea21`, `runs/run-20260905-145226-872f09ab`, `runs/run-20260905-152052-5b5e02b3`, `runs/run-20260905-170950-00a6ed43`, `runs/run-20260905-180357-ab838a37`, `runs/run-20260905-181409-090bbbee`
 - Samples:    model 'svc' is limited to 50000 training rows (dataset has 164231 rows); choose a scalable model or subsample the data
 - Root cause: Registry scale guards reject super-linear models on large datasets
 - Fix:        By-design first-class rejection (P2.6.5 scale guards)
 - Status:     applied
 
-### P6-BLK-014: Non-numeric feature columns rejected before training
+### P6-BLK-018: Non-numeric feature columns rejected before training
 - Severity:   note
 - Category:   run
 - Symptom:    not all feature columns are numeric: ['a']
@@ -147,7 +187,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Fix:        By-design first-class rejection; run the cleaning policy first
 - Status:     applied
 
-### P6-BLK-015: Target column with missing values rejected
+### P6-BLK-019: Target column with missing values rejected
 - Severity:   note
 - Category:   run
 - Symptom:    target column contains 5602 missing values

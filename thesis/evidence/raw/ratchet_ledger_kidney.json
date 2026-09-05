@@ -1,0 +1,306 @@
+{
+  "slug": "kidney",
+  "generations": [
+    {
+      "started_at": "2026-09-05T18:48:05",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "run_id": "run-20260905-165443-47f1b755",
+                "metrics": {
+                  "train_samples": 1327,
+                  "test_samples": 332,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.9367469879518072,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.6994698047329626
+                }
+              },
+              "metric_delta": {},
+              "seconds": 402.0,
+              "metrics": {
+                "train_samples": 1327,
+                "test_samples": 332,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.9367469879518072,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.6994698047329626
+              },
+              "config": {
+                "dataset": "data/uploads/rabieelkharoua_chronic-kidney-disease-dataset-analysis.csv",
+                "target": "Diagnosis",
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "hyperparameters": {
+                  "learning_rate": 0.1,
+                  "max_depth": 3
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 1327,
+          "test_samples": 332,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.9307228915662651,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7010531261010845
+        },
+        "run_id": "run-20260905-164805-304601f6"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/rabieelkharoua_chronic-kidney-disease-dataset-analysis.csv",
+          "target": "Diagnosis",
+          "model": "hist_gradient_boosting",
+          "seed": 84,
+          "hyperparameters": {
+            "learning_rate": 0.1,
+            "max_depth": 3
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.9307228915662651,
+        "agentic_value": 0.9367469879518072,
+        "delta": 0.0060240963855421326
+      }
+    },
+    {
+      "started_at": "2026-09-05T18:55:33",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"anthropic/claude-haiku-4.5\", \"FeatureEngineer\": \"deepseek/deepseek-v4-flash-0731\", \"ModelSelector\": \"openai/gpt-5.6-luna\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 14,
+              "agentic_total": 14,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 17,
+                "run_id": "run-20260905-170353-1d82a5b6",
+                "metrics": {
+                  "train_samples": 1327,
+                  "test_samples": 332,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.9186746987951807,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.6136040346566662
+                }
+              },
+              "metric_delta": {},
+              "seconds": 525.6,
+              "metrics": {
+                "train_samples": 1327,
+                "test_samples": 332,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.9186746987951807,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.6136040346566662
+              },
+              "config": {
+                "dataset": "data/uploads/rabieelkharoua_chronic-kidney-disease-dataset-analysis.csv",
+                "target": "Diagnosis",
+                "model": "hist_gradient_boosting",
+                "seed": 17,
+                "hyperparameters": {
+                  "learning_rate": 0.05,
+                  "max_iter": 150
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 1327,
+          "test_samples": 332,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.9307228915662651,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7010531261010845
+        },
+        "run_id": "run-20260905-165533-bffa0a66"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.918675 does not beat baseline 0.930723 (test_accuracy)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T19:04:46",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.75,
+              "agentic_completed": 18,
+              "agentic_total": 24,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 87,
+                "run_id": "run-20260905-170533-ef0f87bf",
+                "metrics": {
+                  "train_samples": 1327,
+                  "test_samples": 332,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.9397590361445783,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7565982404692082
+                }
+              },
+              "metric_delta": {},
+              "seconds": 53.9
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.6667,
+              "agentic_completed": 12,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 27,
+                "run_id": "run-20260905-170619-6f910765",
+                "metrics": {
+                  "train_samples": 1327,
+                  "test_samples": 332,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.9337349397590361,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7529761904761905
+                }
+              },
+              "metric_delta": {},
+              "seconds": 40.0
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 15,
+              "agentic_total": 15,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 3,
+                "run_id": "run-20260905-170819-36b584b8",
+                "metrics": {
+                  "train_samples": 1327,
+                  "test_samples": 332,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.9487951807228916,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7886379807512265
+                }
+              },
+              "metric_delta": {},
+              "seconds": 118.8,
+              "metrics": {
+                "train_samples": 1327,
+                "test_samples": 332,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.9487951807228916,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.7886379807512265
+              },
+              "config": {
+                "dataset": "data/uploads/rabieelkharoua_chronic-kidney-disease-dataset-analysis.csv",
+                "target": "Diagnosis",
+                "model": "hist_gradient_boosting",
+                "seed": 3,
+                "hyperparameters": {
+                  "learning_rate": 0.5
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 1327,
+          "test_samples": 332,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.9307228915662651,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7010531261010845
+        },
+        "run_id": "run-20260905-170446-f2635994"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/rabieelkharoua_chronic-kidney-disease-dataset-analysis.csv",
+          "target": "Diagnosis",
+          "model": "hist_gradient_boosting",
+          "seed": 3,
+          "hyperparameters": {
+            "learning_rate": 0.5
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.9307228915662651,
+        "agentic_value": 0.9487951807228916,
+        "delta": 0.01807228915662651
+      }
+    }
+  ]
+}

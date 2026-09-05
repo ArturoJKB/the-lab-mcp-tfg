@@ -1,0 +1,277 @@
+{
+  "slug": "sp500",
+  "generations": [
+    {
+      "started_at": "2026-09-05T16:36:29",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.6667,
+              "agentic_completed": 6,
+              "agentic_total": 9,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "run_id": "run-20260905-144311-723a2e88",
+                "metrics": {
+                  "train_samples": 131384,
+                  "test_samples": 32847,
+                  "train_accuracy": 0.9887353102356451,
+                  "test_accuracy": 0.9859043443845709,
+                  "train_f1_macro": 0.9718537783207077,
+                  "test_f1_macro": 0.9659517608204318
+                }
+              },
+              "metric_delta": {},
+              "seconds": 193.5,
+              "metrics": {
+                "train_samples": 131384,
+                "test_samples": 32847,
+                "train_accuracy": 0.9887353102356451,
+                "test_accuracy": 0.9859043443845709,
+                "train_f1_macro": 0.9718537783207077,
+                "test_f1_macro": 0.9659517608204318
+              },
+              "config": {
+                "dataset": "data/uploads/sp500_analyst.csv",
+                "target": "action",
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "hyperparameters": null
+              }
+            },
+            {
+              "round": 1,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 42,
+                "run_id": "run-20260905-144608-fb2db2ea",
+                "metrics": {
+                  "train_samples": 131384,
+                  "test_samples": 32847,
+                  "train_accuracy": 0.9876468976435486,
+                  "test_accuracy": 0.9845343562578013,
+                  "train_f1_macro": 0.9691893963141348,
+                  "test_f1_macro": 0.9625090726640959
+                }
+              },
+              "metric_delta": {},
+              "seconds": 168.4
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 131384,
+          "test_samples": 32847,
+          "train_accuracy": 0.9876468976435486,
+          "test_accuracy": 0.9845343562578013,
+          "train_f1_macro": 0.9691893963141348,
+          "test_f1_macro": 0.9625090726640959
+        },
+        "run_id": "run-20260905-143633-ad026c04"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/sp500_analyst.csv",
+          "target": "action",
+          "model": "hist_gradient_boosting",
+          "seed": 84,
+          "hyperparameters": null
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.9845343562578013,
+        "agentic_value": 0.9859043443845709,
+        "delta": 0.0013699881267695835
+      }
+    },
+    {
+      "started_at": "2026-09-05T16:51:25",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.6667,
+              "agentic_completed": 12,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 87,
+                "run_id": "run-20260905-145328-44df7b2b",
+                "metrics": {
+                  "train_samples": 131384,
+                  "test_samples": 32847,
+                  "train_accuracy": 0.9874946721061926,
+                  "test_accuracy": 0.9846561329801808,
+                  "train_f1_macro": 0.9690397815347522,
+                  "test_f1_macro": 0.9625741779937623
+                }
+              },
+              "metric_delta": {},
+              "seconds": 1287.4,
+              "metrics": {
+                "train_samples": 131384,
+                "test_samples": 32847,
+                "train_accuracy": 0.9874946721061926,
+                "test_accuracy": 0.9846561329801808,
+                "train_f1_macro": 0.9690397815347522,
+                "test_f1_macro": 0.9625741779937623
+              },
+              "config": {
+                "dataset": "data/uploads/sp500_analyst.csv",
+                "target": "action",
+                "model": "hist_gradient_boosting",
+                "seed": 87,
+                "hyperparameters": {
+                  "learning_rate": 0.1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 131384,
+          "test_samples": 32847,
+          "train_accuracy": 0.9876468976435486,
+          "test_accuracy": 0.9845343562578013,
+          "train_f1_macro": 0.9691893963141348,
+          "test_f1_macro": 0.9625090726640959
+        },
+        "run_id": "run-20260905-145130-3ea23422"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/sp500_analyst.csv",
+          "target": "action",
+          "model": "hist_gradient_boosting",
+          "seed": 87,
+          "hyperparameters": {
+            "learning_rate": 0.1
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.9845343562578013,
+        "agentic_value": 0.9846561329801808,
+        "delta": 0.00012177672237956294
+      }
+    },
+    {
+      "started_at": "2026-09-05T17:19:34",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"google/gemini-3.5-flash-lite\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 18,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "run_id": "run-20260905-152304-b63e8d8b",
+                "metrics": {
+                  "train_samples": 131384,
+                  "test_samples": 32847,
+                  "train_accuracy": 0.9900748949643792,
+                  "test_accuracy": 0.9861478978293299,
+                  "train_f1_macro": 0.9747708509092193,
+                  "test_f1_macro": 0.9662057655769235
+                }
+              },
+              "metric_delta": {},
+              "seconds": 345.2,
+              "metrics": {
+                "train_samples": 131384,
+                "test_samples": 32847,
+                "train_accuracy": 0.9900748949643792,
+                "test_accuracy": 0.9861478978293299,
+                "train_f1_macro": 0.9747708509092193,
+                "test_f1_macro": 0.9662057655769235
+              },
+              "config": {
+                "dataset": "data/uploads/sp500_analyst.csv",
+                "target": "action",
+                "model": "hist_gradient_boosting",
+                "seed": 84,
+                "hyperparameters": {
+                  "max_depth": 5,
+                  "learning_rate": 0.1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "hist_gradient_boosting",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 131384,
+          "test_samples": 32847,
+          "train_accuracy": 0.9876468976435486,
+          "test_accuracy": 0.9845343562578013,
+          "train_f1_macro": 0.9691893963141348,
+          "test_f1_macro": 0.9625090726640959
+        },
+        "run_id": "run-20260905-151939-a67290d6"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/sp500_analyst.csv",
+          "target": "action",
+          "model": "hist_gradient_boosting",
+          "seed": 84,
+          "hyperparameters": {
+            "max_depth": 5,
+            "learning_rate": 0.1
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.9845343562578013,
+        "agentic_value": 0.9861478978293299,
+        "delta": 0.0016135415715285983
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+\begin{table}[htbp]
+\centering
+\caption{Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}
+\label{tab:ratchet-generations-ratchet-ledger-sp500}
+\begin{tabular}{lllllll}
+\toprule
+Gen & Baseline & Agentic best & Delta & Validity & Absorbed & Champion \\
+\midrule
+g0 & hist\_gradient\_boosting 0.9845 & hist\_gradient\_boosting 0.9859 & +0.0014 & 0.67/1.00 & True & hist\_gradient\_boosting s84 \\
+g1 & hist\_gradient\_boosting 0.9845 & hist\_gradient\_boosting 0.9847 & +0.0001 & 0.67 & True & hist\_gradient\_boosting s87 learning\_rate=0.1 \\
+g2 & hist\_gradient\_boosting 0.9845 & hist\_gradient\_boosting 0.9861 & +0.0016 & 1.00 & True & hist\_gradient\_boosting s84 max\_depth=5 learning\_rate=0.1 \\
+\bottomrule
+\end{tabular}
+\end{table}

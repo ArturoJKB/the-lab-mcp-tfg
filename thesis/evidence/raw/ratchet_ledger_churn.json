@@ -1,0 +1,330 @@
+{
+  "slug": "churn",
+  "generations": [
+    {
+      "started_at": "2026-09-05T15:33:04",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-133420-fba48198",
+                "metrics": {
+                  "train_samples": 8000,
+                  "test_samples": 2000,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.8615,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7452638151847596
+                }
+              },
+              "metric_delta": {},
+              "seconds": 70.4
+            },
+            {
+              "round": 1,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 128,
+                "run_id": "run-20260905-133540-950f9600",
+                "metrics": {
+                  "train_samples": 8000,
+                  "test_samples": 2000,
+                  "train_accuracy": 0.870375,
+                  "test_accuracy": 0.871,
+                  "train_f1_macro": 0.7618090499296295,
+                  "test_f1_macro": 0.7636167733139829
+                }
+              },
+              "metric_delta": {},
+              "seconds": 79.5,
+              "metrics": {
+                "train_samples": 8000,
+                "test_samples": 2000,
+                "train_accuracy": 0.870375,
+                "test_accuracy": 0.871,
+                "train_f1_macro": 0.7618090499296295,
+                "test_f1_macro": 0.7636167733139829
+              },
+              "config": {
+                "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+                "target": "Exited",
+                "model": "hist_gradient_boosting",
+                "seed": 128,
+                "hyperparameters": {
+                  "max_depth": 3
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8000,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.8615,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7420471122546712
+        },
+        "run_id": "run-20260905-133305-8594762c"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+          "target": "Exited",
+          "model": "hist_gradient_boosting",
+          "seed": 128,
+          "hyperparameters": {
+            "max_depth": 3
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8615,
+        "agentic_value": 0.871,
+        "delta": 0.009499999999999953
+      }
+    },
+    {
+      "started_at": "2026-09-05T15:45:24",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-134601-cf8c2129",
+                "metrics": {
+                  "train_samples": 8000,
+                  "test_samples": 2000,
+                  "train_accuracy": 0.90175,
+                  "test_accuracy": 0.8665,
+                  "train_f1_macro": 0.8181619644800451,
+                  "test_f1_macro": 0.7461821566056094
+                }
+              },
+              "metric_delta": {},
+              "seconds": 50.6,
+              "metrics": {
+                "train_samples": 8000,
+                "test_samples": 2000,
+                "train_accuracy": 0.90175,
+                "test_accuracy": 0.8665,
+                "train_f1_macro": 0.8181619644800451,
+                "test_f1_macro": 0.7461821566056094
+              },
+              "config": {
+                "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+                "target": "Exited",
+                "model": "random_forest",
+                "seed": 42,
+                "hyperparameters": {
+                  "n_estimators": 200,
+                  "max_depth": 10
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8000,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.8615,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7420471122546712
+        },
+        "run_id": "run-20260905-134524-3d87dbd6"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+          "target": "Exited",
+          "model": "random_forest",
+          "seed": 42,
+          "hyperparameters": {
+            "n_estimators": 200,
+            "max_depth": 10
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8615,
+        "agentic_value": 0.8665,
+        "delta": 0.0050000000000000044
+      }
+    },
+    {
+      "started_at": "2026-09-05T15:51:18",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "mistralai/mistral-small-24b-instruct-2501",
+              "status": "completed",
+              "mode": "degraded_deterministic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-135149-5298f5bb",
+                "metrics": {
+                  "train_samples": 8000,
+                  "test_samples": 2000,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.8615,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7420471122546712
+                }
+              },
+              "metric_delta": {},
+              "seconds": 27.2
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8000,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.8615,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7420471122546712
+        },
+        "run_id": "run-20260905-135119-3dea58e6"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "no agentic round (all degraded or rejected)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T15:56:43",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"google/gemini-3.5-flash-lite\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-135712-307bc6b1",
+                "metrics": {
+                  "train_samples": 8000,
+                  "test_samples": 2000,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.865,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.7526222046309123
+                }
+              },
+              "metric_delta": {},
+              "seconds": 24.1,
+              "metrics": {
+                "train_samples": 8000,
+                "test_samples": 2000,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.865,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.7526222046309123
+              },
+              "config": {
+                "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+                "target": "Exited",
+                "model": "random_forest",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8000,
+          "test_samples": 2000,
+          "train_accuracy": 1.0,
+          "test_accuracy": 0.8615,
+          "train_f1_macro": 1.0,
+          "test_f1_macro": 0.7420471122546712
+        },
+        "run_id": "run-20260905-135644-d5a2f75f"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+          "target": "Exited",
+          "model": "random_forest",
+          "seed": 42,
+          "hyperparameters": null
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8615,
+        "agentic_value": 0.865,
+        "delta": 0.0034999999999999476
+      }
+    }
+  ]
+}
