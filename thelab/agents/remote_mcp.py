@@ -14,8 +14,8 @@ import os
 from pathlib import Path
 from typing import Any
 
-_REMOTE_CACHE_PATH = Path(".thelab") / "remote-mcp-cache.json"
-
+# Cache file for the remote MCP server registry (tool inventory)
+_REMOTE_CACHE_RELPATH = os.path.join(".thelab", "remote-mcp.json")
 
 def remote_servers_config() -> list[dict[str, Any]]:
     """Parse THELAB_REMOTE_MCP_SERVERS env (JSON list) fail-soft."""
@@ -200,9 +200,6 @@ def discover_remote_tools() -> dict[str, Any]:
 
 def _registry_cache_path() -> Path:
     return Path(os.environ.get("THELAB_WORKSPACE_ROOT", ".")) / _REMOTE_CACHE_RELPATH
-
-
-_REMOTE_CACHE_RELPATH = os.path.join(".thelab", "remote-mcp.json")
 
 
 def save_registry_cache(registry: dict[str, Any]) -> None:

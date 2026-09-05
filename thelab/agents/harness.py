@@ -74,7 +74,13 @@ class AgentHarness:
         self._tool_to_session: dict[str, ClientSession] = {}
 
     async def _discover_tools(self) -> None:
-        """List tools from every connected server and pin the allowlist."""
+        """List tools from every connected server and pin the allowlist.
+
+        Tools are keyed by bare name across servers. Today names are distinct
+        across The Lab's 7 servers; if two servers expose the same tool name,
+        the last one connected silently shadows the first (documented known
+        limitation — the tool-to-session map keeps one entry per name).
+    """
         tools: list[ToolSpec] = []
         allowlist: set[str] = set()
         mapping: dict[str, ClientSession] = {}
