@@ -1,0 +1,297 @@
+{
+  "slug": "crypto",
+  "generations": [
+    {
+      "started_at": "2026-09-05T20:29:18",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "svc",
+                "seed": 42,
+                "run_id": "run-20260905-183208-7a1801c6",
+                "metrics": {
+                  "train_samples": 8824,
+                  "test_samples": 2207,
+                  "train_accuracy": 0.5771758839528558,
+                  "test_accuracy": 0.5532396918894427,
+                  "train_f1_macro": 0.5771569800189431,
+                  "test_f1_macro": 0.5532190536571906
+                }
+              },
+              "metric_delta": {},
+              "seconds": 169.6,
+              "metrics": {
+                "train_samples": 8824,
+                "test_samples": 2207,
+                "train_accuracy": 0.5771758839528558,
+                "test_accuracy": 0.5532396918894427,
+                "train_f1_macro": 0.5771569800189431,
+                "test_f1_macro": 0.5532190536571906
+              },
+              "config": {
+                "dataset": "data/uploads/sudalairajkumar_cryptocurrencypricehistory.csv",
+                "target": "direction",
+                "model": "svc",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "svc",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8824,
+          "test_samples": 2207,
+          "train_accuracy": 0.5485040797824116,
+          "test_accuracy": 0.5459900317172632,
+          "train_f1_macro": 0.5463645356506048,
+          "test_f1_macro": 0.5434999628427755
+        },
+        "run_id": "run-20260905-182922-b805143a"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/sudalairajkumar_cryptocurrencypricehistory.csv",
+          "target": "direction",
+          "model": "svc",
+          "seed": 42,
+          "hyperparameters": null
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.5459900317172632,
+        "agentic_value": 0.5532396918894427,
+        "delta": 0.0072496601721794285
+      }
+    },
+    {
+      "started_at": "2026-09-05T20:36:47",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"anthropic/claude-haiku-4.5\", \"FeatureEngineer\": \"deepseek/deepseek-v4-flash-0731\", \"ModelSelector\": \"openai/gpt-5.6-luna\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 4,
+              "agentic_total": 4,
+              "agentic_best": {
+                "model": "svc",
+                "seed": 17,
+                "run_id": "run-20260905-184147-7d6ff9c7",
+                "metrics": {
+                  "train_samples": 8824,
+                  "test_samples": 2207,
+                  "train_accuracy": 0.5700362647325476,
+                  "test_accuracy": 0.5346624376982329,
+                  "train_f1_macro": 0.5698492286691665,
+                  "test_f1_macro": 0.5342202631403192
+                }
+              },
+              "metric_delta": {},
+              "seconds": 345.7,
+              "metrics": {
+                "train_samples": 8824,
+                "test_samples": 2207,
+                "train_accuracy": 0.5700362647325476,
+                "test_accuracy": 0.5346624376982329,
+                "train_f1_macro": 0.5698492286691665,
+                "test_f1_macro": 0.5342202631403192
+              },
+              "config": {
+                "dataset": "data/uploads/sudalairajkumar_cryptocurrencypricehistory.csv",
+                "target": "direction",
+                "model": "svc",
+                "seed": 17,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "svc",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8824,
+          "test_samples": 2207,
+          "train_accuracy": 0.5485040797824116,
+          "test_accuracy": 0.5459900317172632,
+          "train_f1_macro": 0.5463645356506048,
+          "test_f1_macro": 0.5434999628427755
+        },
+        "run_id": "run-20260905-183650-f45b7006"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.534662 does not beat baseline 0.545990 (test_accuracy)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T20:44:16",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.8571,
+              "agentic_completed": 18,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 42,
+                "run_id": "run-20260905-184550-3f9445f2",
+                "metrics": {
+                  "train_samples": 8824,
+                  "test_samples": 2207,
+                  "train_accuracy": 0.7694922937443336,
+                  "test_accuracy": 0.564567285908473,
+                  "train_f1_macro": 0.7694860293092063,
+                  "test_f1_macro": 0.5643612208575663
+                }
+              },
+              "metric_delta": {},
+              "seconds": 85.8,
+              "metrics": {
+                "train_samples": 8824,
+                "test_samples": 2207,
+                "train_accuracy": 0.7694922937443336,
+                "test_accuracy": 0.564567285908473,
+                "train_f1_macro": 0.7694860293092063,
+                "test_f1_macro": 0.5643612208575663
+              },
+              "config": {
+                "dataset": "data/uploads/sudalairajkumar_cryptocurrencypricehistory.csv",
+                "target": "direction",
+                "model": "hist_gradient_boosting",
+                "seed": 42,
+                "hyperparameters": {
+                  "max_depth": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.8333,
+              "agentic_completed": 15,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-184618-0304ac7a",
+                "metrics": {
+                  "train_samples": 8824,
+                  "test_samples": 2207,
+                  "train_accuracy": 0.5970081595648232,
+                  "test_accuracy": 0.5478024467603081,
+                  "train_f1_macro": 0.5969584464498211,
+                  "test_f1_macro": 0.5478023539227667
+                }
+              },
+              "metric_delta": {},
+              "seconds": 30.8
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "hist_gradient_boosting",
+                "seed": 42,
+                "run_id": "run-20260905-184713-3439279b",
+                "metrics": {
+                  "train_samples": 8824,
+                  "test_samples": 2207,
+                  "train_accuracy": 0.7694922937443336,
+                  "test_accuracy": 0.564567285908473,
+                  "train_f1_macro": 0.7694860293092063,
+                  "test_f1_macro": 0.5643612208575663
+                }
+              },
+              "metric_delta": {},
+              "seconds": 76.1
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "svc",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 8824,
+          "test_samples": 2207,
+          "train_accuracy": 0.5485040797824116,
+          "test_accuracy": 0.5459900317172632,
+          "train_f1_macro": 0.5463645356506048,
+          "test_f1_macro": 0.5434999628427755
+        },
+        "run_id": "run-20260905-184419-e3d1d8b2"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/sudalairajkumar_cryptocurrencypricehistory.csv",
+          "target": "direction",
+          "model": "hist_gradient_boosting",
+          "seed": 42,
+          "hyperparameters": {
+            "max_depth": 10
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.5459900317172632,
+        "agentic_value": 0.564567285908473,
+        "delta": 0.018577254191209813
+      }
+    }
+  ]
+}

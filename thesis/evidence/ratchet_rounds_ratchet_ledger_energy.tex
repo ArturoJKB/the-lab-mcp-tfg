@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Per-round capability matrix for the ratchet loop: which provider/model produced valid, factory-safe agentic rounds (per-stage capability discovery).}
+\label{tab:ratchet-rounds-ratchet-ledger-energy}
+\begin{tabular}{lllllll}
+\toprule
+Gen/round & Provider & Model & Mode & Validity & Entries & Best \\
+\midrule
+g0 r0 & mixed & mixed & agentic & 1.0000 & 1/1 & random\_forest\_regressor 0.9590 \\
+g1 r0 & mixed & mixed & agentic & 1.0000 & 24/24 & hist\_gradient\_boosting\_regressor 0.8167 \\
+g2 r0 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 1.0000 & 21/21 & random\_forest\_regressor 0.5395 \\
+g2 r0 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 1.0000 & 21/21 & random\_forest\_regressor 0.5395 \\
+g2 r0 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 1.0000 & 15/15 & hist\_gradient\_boosting\_regressor 0.8192 \\
+\bottomrule
+\end{tabular}
+\end{table}

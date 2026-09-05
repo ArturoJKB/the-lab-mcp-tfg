@@ -161,7 +161,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Severity:   note
 - Category:   run
 - Symptom:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
-- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+166 more)
+- Evidence:   `runs/run-20260824-220627-41391468`, `runs/run-20260824-221138-d1fe42dc`, `runs/run-20260825-193854-d00ae76a`, `runs/run-20260825-193902-80d4b5a1`, `runs/run-20260829-185550-58db686e`, `runs/run-20260829-185550-a82c5088`, `runs/run-20260829-185551-32e32c23`, `runs/run-20260829-185551-44eebc84` (+199 more)
 - Samples:    model 'logistic_regression' is a classification model, but the dataset resolves to regression
 - Root cause: Model selection did not filter the registry by inferred task type
 - Fix:        Task-aware selection + deterministic post-filter (thelab/ide/agentic_round.py)
@@ -171,7 +171,7 @@ marked `applied`. Remaining `proposed` tickets are the P6.B.1 backlog.
 - Severity:   note
 - Category:   run
 - Symptom:    model 'svc' is limited to 50000 training rows (dataset has 164231 rows); choose a scalable model or subsample the data
-- Evidence:   `runs/run-20260903-033054-a8895ee5`, `runs/run-20260903-183519-86af43ae`, `runs/run-20260905-144010-b81eea21`, `runs/run-20260905-145226-872f09ab`, `runs/run-20260905-152052-5b5e02b3`, `runs/run-20260905-170950-00a6ed43`, `runs/run-20260905-180357-ab838a37`, `runs/run-20260905-181409-090bbbee`
+- Evidence:   `runs/run-20260903-033054-a8895ee5`, `runs/run-20260903-183519-86af43ae`, `runs/run-20260905-144010-b81eea21`, `runs/run-20260905-145226-872f09ab`, `runs/run-20260905-152052-5b5e02b3`, `runs/run-20260905-170950-00a6ed43`, `runs/run-20260905-180357-ab838a37`, `runs/run-20260905-181409-090bbbee` (+6 more)
 - Samples:    model 'svc' is limited to 50000 training rows (dataset has 164231 rows); choose a scalable model or subsample the data
 - Root cause: Registry scale guards reject super-linear models on large datasets
 - Fix:        By-design first-class rejection (P2.6.5 scale guards)

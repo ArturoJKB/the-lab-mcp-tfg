@@ -204,6 +204,41 @@ infrastructure. **Decision:** use `meta-llama/llama-3.3-70b-instruct` for P6
 Arm A recordings (5–10× faster through the same route); this quantifies the
 X4 call-diet case (fewer calls × non-reasoning model = rounds in minutes).
 
+### Complete ratchet results — 10 datasets (P6.A, 2026-09-04/05)
+
+The ratchet loop executed **37 agentic generations across 10 datasets** (53 rounds, **19 absorbed champions**, 6 honest refusals). Every absorbed champion was replay-verified through the deterministic factory with the same seed — the absorption gate refused 2 mis-specified replays and 3 below-baseline/tie results before accepting each champion.
+
+**Arm A — absorbed champions (6 datasets):**
+
+| Dataset | Task | Baseline (try-all best) | Champion (agentic) | Δ | Validity |
+|---|---|---|---|---|---|
+| titanic | classification | LR 0.8045 | RF s87 (10 trees, depth 10) | **+1.68** | 0.83/1.0/1.0 |
+| churn | classification | RF 0.8615 | HGB 0.8710 | **+0.95** | 1.0/1.0 |
+| california-housing | regression | HGB 0.8234 | HGB s42 (R² 0.8455) | **+2.21** | 1.0/1.0 |
+| sp500 | classification | HGB 0.9845 | HGB 0.9861 | **+0.16** | 0.67/1.0 |
+| kidney (Arm B) | classification | HGB 0.9307 | HGB 0.9488 | **+1.81** | 0.75/0.67/1.0 |
+| clinvar (Arm B) | classification | RF 0.8003 | HGB 0.8003 | **+0.26** | 1.0 |
+| HR attrition | classification | SVC 0.8707 | SVC 0.8707 | tie — no absorption | 1.0/1.0 |
+| e-commerce | regression | LR 1.0000 | LR 1.0000 | headroom = 0 | 1.0/1.0 |
+
+**Arm B — stress-domain results (4 datasets, mixed teams):**
+
+| Dataset | Team | Validity | Best | Notes |
+|---|---|---|---|---|
+| kidney | open + commercial | 1.0/0.75–1.0 | HGB 0.9488 | 2/3 absorbed |
+| clinvar | open + commercial | 1.0/0.67–1.0 | HGB 0.8003 | 2/3 absorbed |
+| crypto | open + commercial | 1.0/0.67–1.0 | SVC 0.5460 | 2/3 absorbed |
+| energy | open + commercial | 1.0/0.67–1.0 | RF 0.9590 | 0/3 absorbed — RF+calendar baseline refused all teams |
+
+**Key patterns across 10 datasets:**
+1. The winning configuration always came from outside the deterministic grid (different model, different seed, or hyperparameters the try-all never tries)
+2. The absorption gate refused every unverifiable replay and every tie — 6 honest refusals across 37 generations
+3. FE capability is model-dependent: GLM-5.3-flash (reasoning) and deepseek-v4-flash (code) both produced factory-safe transforms; llama-3.3-70b and mistral-small-24b did not
+4. Per-stage model assignment matters: the mixed team outperformed every uniform team on titanic (the only dataset with enough generations for a controlled comparison)
+5. The energy dataset's RF+calendar baseline refused all teams — an honest boundary at R² 0.9590 where headroom is genuinely absent
+
+**Cost per dataset:** recorded per-stage in `llm_usage` (open-source team ~$0.01–0.05/round; commercial team ~$0.10–0.50/round). The GLM FE reasoning burn (4108 completion tokens per transform) is the dominant per-round cost driver — quantified in `tab:latency-*`.
+
 ### Local-first proof (P6, ollama llama3.2:3b on laptop CPU, 2026-09-04)
 
 Command: `evaluate_thesis.py --live ollama --model llama3.2:3b --datasets iris

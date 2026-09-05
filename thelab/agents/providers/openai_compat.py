@@ -272,6 +272,8 @@ class OpenAICompatProvider:
             "model": data.get("model"),
             "prompt_tokens": raw_usage.get("prompt_tokens"),
             "completion_tokens": raw_usage.get("completion_tokens"),
+            "total_tokens": raw_usage.get("total_tokens"),
+            "cost": raw_usage.get("cost") if raw_usage.get("cost") is not None else raw_usage.get("total_cost"),
         }
 
         choices = data.get("choices")

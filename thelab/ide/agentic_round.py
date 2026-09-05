@@ -460,6 +460,9 @@ def _generate_transform(
             record["rationale"] = (parsed or {}).get("rationale", "")
         if fe_usage:
             record.setdefault("llm_usage", []).append({"stage": "feature_engineering", **fe_usage})
+        record.setdefault("prompts", []).append(
+            {"stage": "feature_engineering", "attempt": attempt, "instruction": instruction}
+        )
         if not isinstance(code, str) or not code.strip():
             attempts.append({"attempt": attempt, "status": "no_code"})
             if attempt == 1:
@@ -624,6 +627,7 @@ def _generate_selection(
             parsed["seeds"] = (seeds or [42])[:3]
             parsed["hyperparameter_grid"] = {k: v[:per_list] for k, v in hp_items}
             parsed["grid_capped"] = capped
+            parsed["_instruction"] = instruction
             return parsed, True, sel_usage
     return _selection_fallback(pack), False, sel_usage
 
@@ -761,6 +765,8 @@ async def run_agentic_round(
         config.provider_for("ModelSelector", provider), pack, brief, transform_record, config
     )
     selection["source"] = "llm" if selector_llm_used else "deterministic_fallback"
+    if sel_instruction := selection.pop("_instruction", None):
+        record.setdefault("prompts", []).append({"stage": "model_selector", "instruction": sel_instruction})
     record["selector_llm_used"] = selector_llm_used
 
     # Provenance mode (P5.B8): a round in which no stage produced LLM content

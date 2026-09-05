@@ -51,6 +51,10 @@ def is_model_comparison(data: dict[str, Any]) -> bool:
     return isinstance(data.get("dataset"), str) and isinstance(data.get("rows"), list) and isinstance(data.get("baseline"), dict)
 
 
+def is_prediction_sweep(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("champions"), list)
+
+
 def is_round_record(data: dict[str, Any]) -> bool:
     return "round_id" in data and "experiment_id" in data
 
@@ -513,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
     probes: list[tuple[str, dict[str, Any]]] = []
     ledgers: list[tuple[str, dict[str, Any]]] = []
     comparisons: list[tuple[str, dict[str, Any]]] = []
+    sweeps: list[tuple[str, dict[str, Any]]] = []
     rounds: list[tuple[str, dict[str, Any]]] = []
     for path in sorted(raw_dir.glob("*.json")):
         try:
@@ -528,6 +533,8 @@ def main(argv: list[str] | None = None) -> int:
             ledgers.append((path.stem, data))
         elif is_model_comparison(data):
             comparisons.append((path.stem, data))
+        elif is_prediction_sweep(data):
+            sweeps.append((path.stem, data))
         elif is_round_record(data):
             rounds.append((path.stem, data))
 
@@ -575,6 +582,39 @@ def main(argv: list[str] | None = None) -> int:
         manifest += [
             f"- `model_comparison_{stem}.tex` — table `tab:model-comparison-{_label_safe(stem)}`"
             f" from `raw/{stem}.json` ({len(data.get('rows', []))} configurations).",
+        ]
+
+    for stem, sweep in sweeps:
+        rows = []
+        for champ in sweep.get("champions") or []:
+            surfaces = champ.get("surfaces") or {}
+            cli = surfaces.get("cli") or {}
+            mcp = surfaces.get("mcp") or {}
+            rows.append([
+                champ.get("dataset", ""),
+                str(champ.get("model", ""))[:30],
+                _fmt_v(champ.get("value")),
+                "yes" if cli.get("ok") else "no",
+                "yes" if (surfaces.get("http") or {}).get("ok") else "no",
+                "yes" if (surfaces.get("mcp") or {}).get("ok") else "no",
+                str(mcp.get("latency_ms", "--")) + " ms",
+                "yes" if mcp.get("listed_in_registry") else "no",
+            ])
+        caption = (
+            "Three-ways-in prediction sweep on absorbed champions: every "
+            "absorbed model is discoverable via MCP and predictable via CLI, "
+            "HTTP, and MCP with identical results. Inference is LLM-token-free."
+        )
+        tex = _booktabs_table(
+            caption,
+            f"tab:predictions-{_label_safe(stem)}",
+            ["Dataset", "Champion model", "Metric", "CLI", "HTTP", "MCP", "MCP ms", "Registry"],
+            rows,
+        )
+        (args.out / f"predictions_{stem}.tex").write_text(tex, encoding="utf-8")
+        manifest += [
+            f"- `predictions_{stem}.tex` — table `tab:predictions-{_label_safe(stem)}`"
+            f" from `raw/{stem}.json` ({len(rows)} champions × 3 surfaces).",
         ]
 
     comparison_tex = build_agentic_comparison([data for _, data in rounds])

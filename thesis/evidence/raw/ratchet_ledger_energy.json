@@ -1,0 +1,298 @@
+{
+  "slug": "energy",
+  "generations": [
+    {
+      "started_at": "2026-09-05T20:52:19",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 1,
+              "agentic_total": 1,
+              "agentic_best": {
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "run_id": "run-20260905-185652-b6b543da",
+                "metrics": {
+                  "train_samples": 97018,
+                  "test_samples": 24255,
+                  "train_rmse": 198.98719166265712,
+                  "test_rmse": 524.1764138377875,
+                  "train_mae": 126.27171356518033,
+                  "test_mae": 334.39403360131934,
+                  "train_r2": 0.9941054665693404,
+                  "test_r2": 0.9590330503299072
+                }
+              },
+              "metric_delta": {},
+              "seconds": 270.7,
+              "metrics": {
+                "train_samples": 97018,
+                "test_samples": 24255,
+                "train_rmse": 198.98719166265712,
+                "test_rmse": 524.1764138377875,
+                "train_mae": 126.27171356518033,
+                "test_mae": 334.39403360131934,
+                "train_r2": 0.9941054665693404,
+                "test_r2": 0.9590330503299072
+              },
+              "config": {
+                "dataset": "data/uploads/robikscube_hourly-energy-consumption.csv",
+                "target": "AEP_MW",
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "hyperparameters": null
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 97018,
+          "test_samples": 24255,
+          "train_rmse": 198.98719166265712,
+          "test_rmse": 524.1764138377875,
+          "train_mae": 126.27171356518033,
+          "test_mae": 334.39403360131934,
+          "train_r2": 0.9941054665693404,
+          "test_r2": 0.9590330503299072
+        },
+        "run_id": "run-20260905-185221-b6fa898f"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.959033 does not beat baseline 0.959033 (test_r2)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T21:01:52",
+      "cells": [
+        {
+          "provider": "mixed",
+          "model": "{\"Analyst\": \"anthropic/claude-haiku-4.5\", \"FeatureEngineer\": \"deepseek/deepseek-v4-flash-0731\", \"ModelSelector\": \"openai/gpt-5.6-luna\"}",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "mixed",
+              "model": "mixed",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 24,
+              "agentic_total": 24,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 17,
+                "run_id": "run-20260905-190402-3a8eaf65",
+                "metrics": {
+                  "train_samples": 97018,
+                  "test_samples": 24255,
+                  "train_rmse": 1092.8920927411577,
+                  "test_rmse": 1112.8900769629927,
+                  "train_mae": 845.611359158916,
+                  "test_mae": 859.6922857544201,
+                  "train_r2": 0.821855068434476,
+                  "test_r2": 0.816706891617948
+                }
+              },
+              "metric_delta": {},
+              "seconds": 489.5,
+              "metrics": {
+                "train_samples": 97018,
+                "test_samples": 24255,
+                "train_rmse": 1092.8920927411577,
+                "test_rmse": 1112.8900769629927,
+                "train_mae": 845.611359158916,
+                "test_mae": 859.6922857544201,
+                "train_r2": 0.821855068434476,
+                "test_r2": 0.816706891617948
+              },
+              "config": {
+                "dataset": "data/uploads/robikscube_hourly-energy-consumption.csv",
+                "target": "AEP_MW",
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 17,
+                "hyperparameters": {
+                  "max_depth": 12,
+                  "min_samples_leaf": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 97018,
+          "test_samples": 24255,
+          "train_rmse": 198.98719166265712,
+          "test_rmse": 524.1764138377875,
+          "train_mae": 126.27171356518033,
+          "test_mae": 334.39403360131934,
+          "train_r2": 0.9941054665693404,
+          "test_r2": 0.9590330503299072
+        },
+        "run_id": "run-20260905-190154-aae56589"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.816707 does not beat baseline 0.959033 (test_r2)"
+      }
+    },
+    {
+      "started_at": "2026-09-05T21:11:22",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "run_id": "run-20260905-191258-4cfd718c",
+                "metrics": {
+                  "train_samples": 97018,
+                  "test_samples": 24255,
+                  "train_rmse": 1764.0028745758684,
+                  "test_rmse": 1757.354043224081,
+                  "train_mae": 1389.6542514435305,
+                  "test_mae": 1383.976219498013,
+                  "train_r2": 0.5367688385776272,
+                  "test_r2": 0.5395343822664378
+                }
+              },
+              "metric_delta": {},
+              "seconds": 248.3
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 21,
+              "agentic_total": 21,
+              "agentic_best": {
+                "model": "random_forest_regressor",
+                "seed": 42,
+                "run_id": "run-20260905-191655-a3dbcbb8",
+                "metrics": {
+                  "train_samples": 97018,
+                  "test_samples": 24255,
+                  "train_rmse": 1764.0028745758684,
+                  "test_rmse": 1757.354043224081,
+                  "train_mae": 1389.6542514435305,
+                  "test_mae": 1383.976219498013,
+                  "train_r2": 0.5367688385776272,
+                  "test_r2": 0.5395343822664378
+                }
+              },
+              "metric_delta": {},
+              "seconds": 240.3
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 15,
+              "agentic_total": 15,
+              "agentic_best": {
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "run_id": "run-20260905-192032-c4ead19c",
+                "metrics": {
+                  "train_samples": 97018,
+                  "test_samples": 24255,
+                  "train_rmse": 1093.1818897314988,
+                  "test_rmse": 1101.296542009736,
+                  "train_mae": 846.8406287852629,
+                  "test_mae": 852.0064226655368,
+                  "train_r2": 0.8220966827535457,
+                  "test_r2": 0.8191630269632064
+                }
+              },
+              "metric_delta": {},
+              "seconds": 342.8,
+              "metrics": {
+                "train_samples": 97018,
+                "test_samples": 24255,
+                "train_rmse": 1093.1818897314988,
+                "test_rmse": 1101.296542009736,
+                "train_mae": 846.8406287852629,
+                "test_mae": 852.0064226655368,
+                "train_r2": 0.8220966827535457,
+                "test_r2": 0.8191630269632064
+              },
+              "config": {
+                "dataset": "data/uploads/robikscube_hourly-energy-consumption.csv",
+                "target": "AEP_MW",
+                "model": "hist_gradient_boosting_regressor",
+                "seed": 42,
+                "hyperparameters": {
+                  "learning_rate": 0.1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest_regressor",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 97018,
+          "test_samples": 24255,
+          "train_rmse": 198.98719166265712,
+          "test_rmse": 524.1764138377875,
+          "train_mae": 126.27171356518033,
+          "test_mae": 334.39403360131934,
+          "train_r2": 0.9941054665693404,
+          "test_r2": 0.9590330503299072
+        },
+        "run_id": "run-20260905-191125-a09fc028"
+      },
+      "absorption": {
+        "absorbed": false,
+        "reason": "agentic best 0.819163 does not beat baseline 0.959033 (test_r2)"
+      }
+    }
+  ]
+}

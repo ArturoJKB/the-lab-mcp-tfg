@@ -1,0 +1,2350 @@
+{
+  "rows": [
+    {
+      "dataset": "california-housing",
+      "generation_started": "2026-09-04T19:32:36",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting_regressor",
+      "baseline_value": 0.8233952972590266,
+      "primary_metric": "test_r2",
+      "best_value": 0.7908921253526553,
+      "delta_vs_baseline": -0.032503,
+      "absorbed_this_generation": false,
+      "seconds": 504.9,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 420,
+            "completion_tokens": 8382
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 784,
+          "completion_tokens": 289
+        }
+      }
+    },
+    {
+      "dataset": "california-housing",
+      "generation_started": "2026-09-04T19:32:36",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting_regressor",
+      "baseline_value": 0.8233952972590266,
+      "primary_metric": "test_r2",
+      "best_value": 0.8454710136799095,
+      "delta_vs_baseline": 0.022076,
+      "absorbed_this_generation": true,
+      "seconds": 209.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 420,
+            "completion_tokens": 16129
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 780,
+          "completion_tokens": 306
+        }
+      }
+    },
+    {
+      "dataset": "california-housing",
+      "generation_started": "2026-09-04T19:49:40",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "random_forest_regressor",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting_regressor",
+      "baseline_value": 0.8233952972590266,
+      "primary_metric": "test_r2",
+      "best_value": 0.6345748316556762,
+      "delta_vs_baseline": -0.18882,
+      "absorbed_this_generation": false,
+      "seconds": 238.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 414,
+            "completion_tokens": 279,
+            "total_tokens": 693,
+            "cost": 0.00013068
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 439,
+          "completion_tokens": 130,
+          "total_tokens": 569,
+          "cost": 0.00010907
+        }
+      }
+    },
+    {
+      "dataset": "california-housing",
+      "generation_started": "2026-09-04T20:04:04",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 0,
+      "mode": "degraded_deterministic",
+      "analyst_llm": false,
+      "fe_status": "rejected",
+      "fe_attempts": 2,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting_regressor",
+      "baseline_value": 0.8233952972590266,
+      "primary_metric": "test_r2",
+      "best_value": 0.8233952972590266,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 41.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "mistralai/mistral-small-24b-instruct-2501",
+            "prompt_tokens": 430,
+            "completion_tokens": 231,
+            "total_tokens": 661,
+            "cost": 3.998e-05
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "mistralai/mistral-small-24b-instruct-2501",
+            "prompt_tokens": 458,
+            "completion_tokens": 313,
+            "total_tokens": 771,
+            "cost": 4.794e-05
+          }
+        ]
+      }
+    },
+    {
+      "dataset": "california-housing",
+      "generation_started": "2026-09-04T20:09:40",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "google/gemini-3.5-flash-lite",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "google/gemini-3.5-flash-lite",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting_regressor",
+      "baseline_value": 0.8233952972590266,
+      "primary_metric": "test_r2",
+      "best_value": 0.5333239459331323,
+      "delta_vs_baseline": -0.290071,
+      "absorbed_this_generation": false,
+      "seconds": 102.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "google/gemini-3.5-flash-lite",
+            "prompt_tokens": 420,
+            "completion_tokens": 524,
+            "total_tokens": 944,
+            "cost": 0.001436
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "google/gemini-3.5-flash-lite",
+            "prompt_tokens": 453,
+            "completion_tokens": 358,
+            "total_tokens": 811,
+            "cost": 0.0010309
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 592,
+          "completion_tokens": 227,
+          "total_tokens": 819,
+          "cost": 4.776e-05
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "generation_started": "2026-09-05T15:33:04",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8615,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8615,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 70.4,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 428,
+            "completion_tokens": 4170,
+            "total_tokens": 4598,
+            "cost": 0.0010746
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 647,
+          "completion_tokens": 322,
+          "total_tokens": 969,
+          "cost": 5.811e-05
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "generation_started": "2026-09-05T15:33:04",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 128,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8615,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.871,
+      "delta_vs_baseline": 0.0095,
+      "absorbed_this_generation": true,
+      "seconds": 79.5,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 408,
+            "completion_tokens": 1564,
+            "total_tokens": 1972,
+            "cost": 0.0008432
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 615,
+          "completion_tokens": 210,
+          "total_tokens": 825,
+          "cost": 4.755e-05
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "generation_started": "2026-09-05T15:45:24",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8615,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8665,
+      "delta_vs_baseline": 0.005,
+      "absorbed_this_generation": true,
+      "seconds": 50.6,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 409,
+            "completion_tokens": 341,
+            "total_tokens": 750,
+            "cost": 0.00015002
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 393,
+          "completion_tokens": 122,
+          "total_tokens": 515,
+          "cost": 0.000101855
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "generation_started": "2026-09-05T15:51:18",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 0,
+      "mode": "degraded_deterministic",
+      "analyst_llm": false,
+      "fe_status": "rejected",
+      "fe_attempts": null,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8615,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8615,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 27.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "mistralai/mistral-small-24b-instruct-2501",
+            "prompt_tokens": 408,
+            "completion_tokens": 384,
+            "total_tokens": 792,
+            "cost": 5.112e-05
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "mistralai/mistral-small-24b-instruct-2501",
+            "prompt_tokens": 436,
+            "completion_tokens": 215,
+            "total_tokens": 651,
+            "cost": 3.9e-05
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 500,
+          "completion_tokens": 209,
+          "total_tokens": 709,
+          "cost": 4.172e-05
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "generation_started": "2026-09-05T15:56:43",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "google/gemini-3.5-flash-lite",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "google/gemini-3.5-flash-lite",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8615,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.865,
+      "delta_vs_baseline": 0.0035,
+      "absorbed_this_generation": true,
+      "seconds": 24.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "google/gemini-3.5-flash-lite",
+            "prompt_tokens": 398,
+            "completion_tokens": 495,
+            "total_tokens": 893,
+            "cost": 0.0013569
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 478,
+          "completion_tokens": 277,
+          "total_tokens": 755,
+          "cost": 4.606e-05
+        }
+      }
+    },
+    {
+      "dataset": "clinvar",
+      "generation_started": "2026-09-05T19:09:21",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8002761159687068,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.7972848596410492,
+      "delta_vs_baseline": -0.002991,
+      "absorbed_this_generation": false,
+      "seconds": 490.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 413,
+            "completion_tokens": 8777,
+            "total_tokens": 9190,
+            "cost": 0.002225225
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 546,
+            "completion_tokens": 6940,
+            "total_tokens": 7486,
+            "cost": 0.00175291
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 642,
+          "completion_tokens": 291,
+          "total_tokens": 933,
+          "cost": 5.538e-05
+        }
+      }
+    },
+    {
+      "dataset": "clinvar",
+      "generation_started": "2026-09-05T20:03:27",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "deepseek/deepseek-v4-flash-0731",
+      "stage_models": {
+        "Analyst": "anthropic/claude-haiku-4.5",
+        "FeatureEngineer": "deepseek/deepseek-v4-flash-0731",
+        "ModelSelector": "openai/gpt-5.6-luna"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 12,
+      "entries_total": 12,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 17,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8002761159687068,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8028838778953827,
+      "delta_vs_baseline": 0.002608,
+      "absorbed_this_generation": true,
+      "seconds": 198.6,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "deepseek/deepseek-v4-flash-0731",
+            "prompt_tokens": 480,
+            "completion_tokens": 3478,
+            "total_tokens": 3958,
+            "cost": 0.00066444
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "openai/gpt-5.6-luna",
+          "prompt_tokens": 492,
+          "completion_tokens": 684,
+          "total_tokens": 1176,
+          "cost": 0.0009192
+        }
+      }
+    },
+    {
+      "dataset": "clinvar",
+      "generation_started": "2026-09-05T20:13:29",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 18,
+      "entries_total": 18,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8002761159687068,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.7746586899831263,
+      "delta_vs_baseline": -0.025617,
+      "absorbed_this_generation": false,
+      "seconds": 220.9,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 413,
+            "completion_tokens": 357,
+            "total_tokens": 770,
+            "cost": 0.00026936
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 427,
+          "completion_tokens": 146,
+          "total_tokens": 573,
+          "cost": 0.00036727
+        }
+      }
+    },
+    {
+      "dataset": "clinvar",
+      "generation_started": "2026-09-05T20:13:29",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 18,
+      "entries_total": 18,
+      "best_model": "random_forest",
+      "best_seed": 27,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8002761159687068,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.778110139591962,
+      "delta_vs_baseline": -0.022166,
+      "absorbed_this_generation": false,
+      "seconds": 157.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 413,
+            "completion_tokens": 250,
+            "total_tokens": 663,
+            "cost": 0.00029075
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 408,
+          "completion_tokens": 125,
+          "total_tokens": 533,
+          "cost": 0.00015226
+        }
+      }
+    },
+    {
+      "dataset": "clinvar",
+      "generation_started": "2026-09-05T20:13:29",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.6667,
+      "entries_completed": 12,
+      "entries_total": 18,
+      "best_model": "random_forest",
+      "best_seed": 13,
+      "baseline_model": "random_forest",
+      "baseline_value": 0.8002761159687068,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8023469857340083,
+      "delta_vs_baseline": 0.002071,
+      "absorbed_this_generation": true,
+      "seconds": 194.9,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 413,
+            "completion_tokens": 354,
+            "total_tokens": 767,
+            "cost": 0.00026786
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 407,
+          "completion_tokens": 122,
+          "total_tokens": 529,
+          "cost": 7.974e-05
+        }
+      }
+    },
+    {
+      "dataset": "crypto",
+      "generation_started": "2026-09-05T20:29:18",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "svc",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.5459900317172632,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.5532396918894427,
+      "delta_vs_baseline": 0.00725,
+      "absorbed_this_generation": true,
+      "seconds": 169.6,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 413,
+            "completion_tokens": 6346,
+            "total_tokens": 6759,
+            "cost": 0.00323495
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 443,
+            "completion_tokens": 2512,
+            "total_tokens": 2955,
+            "cost": 0.00132245
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 741,
+          "completion_tokens": 363,
+          "total_tokens": 1104,
+          "cost": 6.609e-05
+        }
+      }
+    },
+    {
+      "dataset": "crypto",
+      "generation_started": "2026-09-05T20:36:47",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "deepseek/deepseek-v4-flash-0731",
+      "stage_models": {
+        "Analyst": "anthropic/claude-haiku-4.5",
+        "FeatureEngineer": "deepseek/deepseek-v4-flash-0731",
+        "ModelSelector": "openai/gpt-5.6-luna"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 4,
+      "entries_total": 4,
+      "best_model": "svc",
+      "best_seed": 17,
+      "baseline_model": "svc",
+      "baseline_value": 0.5459900317172632,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.5346624376982329,
+      "delta_vs_baseline": -0.011328,
+      "absorbed_this_generation": false,
+      "seconds": 345.7,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "deepseek/deepseek-v4-flash-0731",
+            "prompt_tokens": 479,
+            "completion_tokens": 18688,
+            "total_tokens": 19167,
+            "cost": 0.0052997
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "openai/gpt-5.6-luna",
+          "prompt_tokens": 498,
+          "completion_tokens": 694,
+          "total_tokens": 1192,
+          "cost": 0.0009324
+        }
+      }
+    },
+    {
+      "dataset": "crypto",
+      "generation_started": "2026-09-05T20:44:16",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.8571,
+      "entries_completed": 18,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.5459900317172632,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.564567285908473,
+      "delta_vs_baseline": 0.018577,
+      "absorbed_this_generation": true,
+      "seconds": 85.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 410,
+            "completion_tokens": 456,
+            "total_tokens": 866,
+            "cost": 0.00018692
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 406,
+          "completion_tokens": 90,
+          "total_tokens": 496,
+          "cost": 0.00035216
+        }
+      }
+    },
+    {
+      "dataset": "crypto",
+      "generation_started": "2026-09-05T20:44:16",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.8333,
+      "entries_completed": 15,
+      "entries_total": 18,
+      "best_model": "random_forest",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.5459900317172632,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.5478024467603081,
+      "delta_vs_baseline": 0.001812,
+      "absorbed_this_generation": true,
+      "seconds": 30.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 410,
+            "completion_tokens": 268,
+            "total_tokens": 678,
+            "cost": 0.00012676
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 406,
+          "completion_tokens": 99,
+          "total_tokens": 505,
+          "cost": 0.00013882
+        }
+      }
+    },
+    {
+      "dataset": "crypto",
+      "generation_started": "2026-09-05T20:44:16",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.5459900317172632,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.564567285908473,
+      "delta_vs_baseline": 0.018577,
+      "absorbed_this_generation": true,
+      "seconds": 76.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 410,
+            "completion_tokens": 215,
+            "total_tokens": 625,
+            "cost": 0.0001098
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 405,
+          "completion_tokens": 147,
+          "total_tokens": 552,
+          "cost": 8.754e-05
+        }
+      }
+    },
+    {
+      "dataset": "e-commerce",
+      "generation_started": "2026-09-05T16:16:34",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "linear_regression",
+      "best_seed": 42,
+      "baseline_model": "linear_regression",
+      "baseline_value": 1.0,
+      "primary_metric": "test_r2",
+      "best_value": 1.0,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 258.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 416,
+            "completion_tokens": 7528,
+            "total_tokens": 7944,
+            "cost": 0.0019132
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 444,
+            "completion_tokens": 4317,
+            "total_tokens": 4761,
+            "cost": 0.00111255
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 772,
+          "completion_tokens": 245,
+          "total_tokens": 1017,
+          "cost": 5.82e-05
+        }
+      }
+    },
+    {
+      "dataset": "e-commerce",
+      "generation_started": "2026-09-05T16:31:52",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 18,
+      "entries_total": 18,
+      "best_model": "linear_regression",
+      "best_seed": 42,
+      "baseline_model": "linear_regression",
+      "baseline_value": 1.0,
+      "primary_metric": "test_r2",
+      "best_value": 1.0,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 83.9,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 435,
+            "completion_tokens": 302,
+            "total_tokens": 737,
+            "cost": 0.00053064
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 462,
+          "completion_tokens": 145,
+          "total_tokens": 607,
+          "cost": 0.0001662
+        }
+      }
+    },
+    {
+      "dataset": "energy",
+      "generation_started": "2026-09-05T20:52:19",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "random_forest_regressor",
+      "best_seed": 42,
+      "baseline_model": "random_forest_regressor",
+      "baseline_value": 0.9590330503299072,
+      "primary_metric": "test_r2",
+      "best_value": 0.9590330503299072,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 270.7,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 417,
+            "completion_tokens": 10057,
+            "total_tokens": 10474,
+            "cost": 0.002545525
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 755,
+          "completion_tokens": 284,
+          "total_tokens": 1039,
+          "cost": 6.047e-05
+        }
+      }
+    },
+    {
+      "dataset": "energy",
+      "generation_started": "2026-09-05T21:01:52",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "deepseek/deepseek-v4-flash-0731",
+      "stage_models": {
+        "Analyst": "anthropic/claude-haiku-4.5",
+        "FeatureEngineer": "deepseek/deepseek-v4-flash-0731",
+        "ModelSelector": "openai/gpt-5.6-luna"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 24,
+      "entries_total": 24,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 17,
+      "baseline_model": "random_forest_regressor",
+      "baseline_value": 0.9590330503299072,
+      "primary_metric": "test_r2",
+      "best_value": 0.816706891617948,
+      "delta_vs_baseline": -0.142326,
+      "absorbed_this_generation": false,
+      "seconds": 489.5,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "deepseek/deepseek-v4-flash-0731",
+            "prompt_tokens": 409,
+            "completion_tokens": 2039,
+            "total_tokens": 2448,
+            "cost": 0.00034669
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "openai/gpt-5.6-luna",
+          "prompt_tokens": 543,
+          "completion_tokens": 608,
+          "total_tokens": 1151,
+          "cost": 0.0008382
+        }
+      }
+    },
+    {
+      "dataset": "energy",
+      "generation_started": "2026-09-05T21:11:22",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "random_forest_regressor",
+      "best_seed": 42,
+      "baseline_model": "random_forest_regressor",
+      "baseline_value": 0.9590330503299072,
+      "primary_metric": "test_r2",
+      "best_value": 0.5395343822664378,
+      "delta_vs_baseline": -0.419499,
+      "absorbed_this_generation": false,
+      "seconds": 248.3,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 421,
+            "completion_tokens": 378,
+            "total_tokens": 799,
+            "cost": 0.000208035
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 443,
+          "completion_tokens": 105,
+          "total_tokens": 548,
+          "cost": 0.000101805
+        }
+      }
+    },
+    {
+      "dataset": "energy",
+      "generation_started": "2026-09-05T21:11:22",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "random_forest_regressor",
+      "best_seed": 42,
+      "baseline_model": "random_forest_regressor",
+      "baseline_value": 0.9590330503299072,
+      "primary_metric": "test_r2",
+      "best_value": 0.5395343822664378,
+      "delta_vs_baseline": -0.419499,
+      "absorbed_this_generation": false,
+      "seconds": 240.3,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 421,
+            "completion_tokens": 309,
+            "total_tokens": 730,
+            "cost": 0.000337
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 442,
+          "completion_tokens": 137,
+          "total_tokens": 579,
+          "cost": 8.804e-05
+        }
+      }
+    },
+    {
+      "dataset": "energy",
+      "generation_started": "2026-09-05T21:11:22",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 15,
+      "entries_total": 15,
+      "best_model": "hist_gradient_boosting_regressor",
+      "best_seed": 42,
+      "baseline_model": "random_forest_regressor",
+      "baseline_value": 0.9590330503299072,
+      "primary_metric": "test_r2",
+      "best_value": 0.8191630269632064,
+      "delta_vs_baseline": -0.13987,
+      "absorbed_this_generation": false,
+      "seconds": 342.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 422,
+            "completion_tokens": 333,
+            "total_tokens": 755,
+            "cost": 0.00025934
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 444,
+          "completion_tokens": 179,
+          "total_tokens": 623,
+          "cost": 0.00024525
+        }
+      }
+    },
+    {
+      "dataset": "hr-attrition",
+      "generation_started": "2026-09-04T18:31:18",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "svc",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.8707482993197279,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8537414965986394,
+      "delta_vs_baseline": -0.017007,
+      "absorbed_this_generation": false,
+      "seconds": 83.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 415,
+            "completion_tokens": 4303
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 714,
+          "completion_tokens": 246
+        }
+      }
+    },
+    {
+      "dataset": "hr-attrition",
+      "generation_started": "2026-09-04T18:31:18",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "svc",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.8707482993197279,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8605442176870748,
+      "delta_vs_baseline": -0.010204,
+      "absorbed_this_generation": false,
+      "seconds": 365.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 533,
+            "completion_tokens": 16483
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 885,
+          "completion_tokens": 327
+        }
+      }
+    },
+    {
+      "dataset": "hr-attrition",
+      "generation_started": "2026-09-04T18:49:21",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "svc",
+      "best_seed": 42,
+      "baseline_model": "svc",
+      "baseline_value": 0.8707482993197279,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8707482993197279,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 58.1,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 413,
+            "completion_tokens": 261
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 405,
+          "completion_tokens": 113
+        }
+      }
+    },
+    {
+      "dataset": "kidney",
+      "generation_started": "2026-09-05T18:48:05",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 84,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9307228915662651,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9367469879518072,
+      "delta_vs_baseline": 0.006024,
+      "absorbed_this_generation": true,
+      "seconds": 402.0,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 417,
+            "completion_tokens": 13028,
+            "total_tokens": 13445,
+            "cost": 0.003288275
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 637,
+          "completion_tokens": 252,
+          "total_tokens": 889,
+          "cost": 5.201e-05
+        }
+      }
+    },
+    {
+      "dataset": "kidney",
+      "generation_started": "2026-09-05T18:55:33",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "deepseek/deepseek-v4-flash-0731",
+      "stage_models": {
+        "Analyst": "anthropic/claude-haiku-4.5",
+        "FeatureEngineer": "deepseek/deepseek-v4-flash-0731",
+        "ModelSelector": "openai/gpt-5.6-luna"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 14,
+      "entries_total": 14,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 17,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9307228915662651,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9186746987951807,
+      "delta_vs_baseline": -0.012048,
+      "absorbed_this_generation": false,
+      "seconds": 525.6,
+      "llm_usage": {
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "openai/gpt-5.6-luna",
+          "prompt_tokens": 400,
+          "completion_tokens": 351,
+          "total_tokens": 751,
+          "cost": 0.0005012
+        }
+      }
+    },
+    {
+      "dataset": "kidney",
+      "generation_started": "2026-09-05T19:04:46",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.75,
+      "entries_completed": 18,
+      "entries_total": 24,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 87,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9307228915662651,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9397590361445783,
+      "delta_vs_baseline": 0.009036,
+      "absorbed_this_generation": true,
+      "seconds": 53.9,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 415,
+            "completion_tokens": 241,
+            "total_tokens": 656,
+            "cost": 0.000152425
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 401,
+          "completion_tokens": 126,
+          "total_tokens": 527,
+          "cost": 0.00015122
+        }
+      }
+    },
+    {
+      "dataset": "kidney",
+      "generation_started": "2026-09-05T19:04:46",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.6667,
+      "entries_completed": 12,
+      "entries_total": 18,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 27,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9307228915662651,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9337349397590361,
+      "delta_vs_baseline": 0.003012,
+      "absorbed_this_generation": true,
+      "seconds": 40.0,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 415,
+            "completion_tokens": 219,
+            "total_tokens": 634,
+            "cost": 0.000143625
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 401,
+          "completion_tokens": 146,
+          "total_tokens": 547,
+          "cost": 0.00020975
+        }
+      }
+    },
+    {
+      "dataset": "kidney",
+      "generation_started": "2026-09-05T19:04:46",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 15,
+      "entries_total": 15,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 3,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9307228915662651,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9487951807228916,
+      "delta_vs_baseline": 0.018072,
+      "absorbed_this_generation": true,
+      "seconds": 118.8,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 414,
+            "completion_tokens": 351,
+            "total_tokens": 765,
+            "cost": 0.00015372
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 400,
+          "completion_tokens": 144,
+          "total_tokens": 544,
+          "cost": 8.608e-05
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "generation_started": "2026-09-05T16:36:29",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 0.6667,
+      "entries_completed": 6,
+      "entries_total": 9,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 84,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9845343562578013,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9859043443845709,
+      "delta_vs_baseline": 0.00137,
+      "absorbed_this_generation": true,
+      "seconds": 193.5,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 450,
+            "completion_tokens": 3202,
+            "total_tokens": 3652,
+            "cost": 0.00083425
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 697,
+          "completion_tokens": 248,
+          "total_tokens": 945,
+          "cost": 5.469e-05
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "generation_started": "2026-09-05T16:36:29",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "rejected",
+      "fe_attempts": 2,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 42,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9845343562578013,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9845343562578013,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 168.4,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 440,
+            "completion_tokens": 3379,
+            "total_tokens": 3819,
+            "cost": 0.00087775
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 481,
+            "completion_tokens": 4643,
+            "total_tokens": 5124,
+            "cost": 0.001196825
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 731,
+          "completion_tokens": 300,
+          "total_tokens": 1031,
+          "cost": 6.055e-05
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "generation_started": "2026-09-05T16:51:25",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": true,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.6667,
+      "entries_completed": 12,
+      "entries_total": 18,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 87,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9845343562578013,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9846561329801808,
+      "delta_vs_baseline": 0.000122,
+      "absorbed_this_generation": true,
+      "seconds": 1287.4,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "meta-llama/llama-3.3-70b-instruct",
+            "prompt_tokens": 457,
+            "completion_tokens": 296,
+            "total_tokens": 753,
+            "cost": 0.00024372
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "prompt_tokens": 435,
+          "completion_tokens": 161,
+          "total_tokens": 596,
+          "cost": 9.502e-05
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "generation_started": "2026-09-05T17:19:34",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "google/gemini-3.5-flash-lite",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "google/gemini-3.5-flash-lite",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 18,
+      "entries_total": 18,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 84,
+      "baseline_model": "hist_gradient_boosting",
+      "baseline_value": 0.9845343562578013,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.9861478978293299,
+      "delta_vs_baseline": 0.001614,
+      "absorbed_this_generation": true,
+      "seconds": 345.2,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "google/gemini-3.5-flash-lite",
+            "prompt_tokens": 410,
+            "completion_tokens": 488,
+            "total_tokens": 898,
+            "cost": 0.001343
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "mistralai/mistral-small-24b-instruct-2501",
+          "prompt_tokens": 544,
+          "completion_tokens": 177,
+          "total_tokens": 721,
+          "cost": 4.136e-05
+        }
+      }
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T06:06:23",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 0.8333,
+      "entries_completed": 15,
+      "entries_total": 18,
+      "best_model": "random_forest",
+      "best_seed": 87,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8212290502793296,
+      "delta_vs_baseline": 0.01676,
+      "absorbed_this_generation": true,
+      "seconds": 38.3,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T06:06:23",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 15,
+      "entries_total": 15,
+      "best_model": "logistic_regression",
+      "best_seed": 42,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8044692737430168,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 31.1,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T06:06:23",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "meta-llama/llama-3.3-70b-instruct",
+      "stage_models": null,
+      "round": 2,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 15,
+      "entries_total": 15,
+      "best_model": "random_forest",
+      "best_seed": 87,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8156424581005587,
+      "delta_vs_baseline": 0.011173,
+      "absorbed_this_generation": true,
+      "seconds": 36.2,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:07:31",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 0,
+      "mode": "degraded_deterministic",
+      "analyst_llm": null,
+      "fe_status": null,
+      "fe_attempts": null,
+      "selector_llm": null,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "logistic_regression",
+      "best_seed": 42,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8044692737430168,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 17.0,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:07:31",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 1,
+      "mode": "degraded_deterministic",
+      "analyst_llm": null,
+      "fe_status": null,
+      "fe_attempts": null,
+      "selector_llm": null,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "logistic_regression",
+      "best_seed": 42,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8044692737430168,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 15.9,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:12:57",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 0,
+      "mode": "degraded_deterministic",
+      "analyst_llm": false,
+      "fe_status": "rejected",
+      "fe_attempts": 2,
+      "selector_llm": false,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "logistic_regression",
+      "best_seed": 42,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8044692737430168,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 27.1,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:12:57",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "mistralai/mistral-small-24b-instruct-2501",
+      "stage_models": null,
+      "round": 1,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "rejected",
+      "fe_attempts": 2,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 9,
+      "entries_total": 9,
+      "best_model": "random_forest",
+      "best_seed": 456,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8547486033519553,
+      "delta_vs_baseline": 0.050279,
+      "absorbed_this_generation": true,
+      "seconds": 28.6,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:15:21",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": null,
+      "fe_status": null,
+      "fe_attempts": null,
+      "selector_llm": null,
+      "validity_rate": 0.0,
+      "entries_completed": 0,
+      "entries_total": 15,
+      "best_model": null,
+      "best_seed": null,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": null,
+      "delta_vs_baseline": null,
+      "absorbed_this_generation": false,
+      "seconds": 168.5,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:30:48",
+      "configuration": "uniform",
+      "provider": "mixed",
+      "driver_model": "{\"Analyst\": \"llama\", \"FeatureEngineer\": \"glm\", \"ModelSelector\": \"mistral\"}",
+      "stage_models": null,
+      "round": 0,
+      "mode": "degraded_deterministic",
+      "analyst_llm": null,
+      "fe_status": null,
+      "fe_attempts": null,
+      "selector_llm": null,
+      "validity_rate": 1.0,
+      "entries_completed": 1,
+      "entries_total": 1,
+      "best_model": "logistic_regression",
+      "best_seed": 42,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8044692737430168,
+      "delta_vs_baseline": 0.0,
+      "absorbed_this_generation": false,
+      "seconds": 13.2,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:31:37",
+      "configuration": "uniform",
+      "provider": "mixed",
+      "driver_model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"meta-llama/llama-3.3-70b-instruct\"}",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": null,
+      "fe_status": null,
+      "fe_attempts": null,
+      "selector_llm": null,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 27,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8435754189944135,
+      "delta_vs_baseline": 0.039106,
+      "absorbed_this_generation": true,
+      "seconds": 76.9,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:33:33",
+      "configuration": "uniform",
+      "provider": "mixed",
+      "driver_model": "{\"Analyst\": \"meta-llama/llama-3.3-70b-instruct\", \"FeatureEngineer\": \"z-ai/glm-5.3-flash\", \"ModelSelector\": \"mistralai/mistral-small-24b-instruct-2501\"}",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "skipped",
+      "fe_attempts": null,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 21,
+      "entries_total": 21,
+      "best_model": "random_forest",
+      "best_seed": 87,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8212290502793296,
+      "delta_vs_baseline": 0.01676,
+      "absorbed_this_generation": true,
+      "seconds": 38.4,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:41:59",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "meta-llama/llama-3.3-70b-instruct"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 1,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 15,
+      "entries_total": 15,
+      "best_model": "random_forest",
+      "best_seed": 13,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8491620111731844,
+      "delta_vs_baseline": 0.044693,
+      "absorbed_this_generation": true,
+      "seconds": 100.6,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:44:14",
+      "configuration": "mixed",
+      "provider": "mixed",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": {
+        "Analyst": "meta-llama/llama-3.3-70b-instruct",
+        "FeatureEngineer": "z-ai/glm-5.3-flash",
+        "ModelSelector": "mistralai/mistral-small-24b-instruct-2501"
+      },
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": true,
+      "validity_rate": 0.7143,
+      "entries_completed": 15,
+      "entries_total": 21,
+      "best_model": "logistic_regression",
+      "best_seed": 84,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.8435754189944135,
+      "delta_vs_baseline": 0.039106,
+      "absorbed_this_generation": true,
+      "seconds": 400.6,
+      "llm_usage": null
+    },
+    {
+      "dataset": "titanic",
+      "generation_started": "2026-09-04T16:59:09",
+      "configuration": "uniform",
+      "provider": "openrouter",
+      "driver_model": "z-ai/glm-5.3-flash",
+      "stage_models": null,
+      "round": 0,
+      "mode": "agentic",
+      "analyst_llm": false,
+      "fe_status": "completed",
+      "fe_attempts": 2,
+      "selector_llm": true,
+      "validity_rate": 1.0,
+      "entries_completed": 12,
+      "entries_total": 12,
+      "best_model": "hist_gradient_boosting",
+      "best_seed": 0,
+      "baseline_model": "logistic_regression",
+      "baseline_value": 0.8044692737430168,
+      "primary_metric": "test_accuracy",
+      "best_value": 0.7374301675977654,
+      "delta_vs_baseline": -0.067039,
+      "absorbed_this_generation": false,
+      "seconds": 392.4,
+      "llm_usage": {
+        "feature_engineering": [
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 416,
+            "completion_tokens": 4108
+          },
+          {
+            "stage": "feature_engineering",
+            "provider": "openai_compat",
+            "model": "z-ai/glm-5.3-flash",
+            "prompt_tokens": 456,
+            "completion_tokens": 4102
+          }
+        ],
+        "model_selector": {
+          "provider": "openai_compat",
+          "model": "z-ai/glm-5.3-flash",
+          "prompt_tokens": 642,
+          "completion_tokens": 2013
+        }
+      }
+    }
+  ]
+}

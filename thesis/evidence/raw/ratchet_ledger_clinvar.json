@@ -153,6 +153,151 @@
         "agentic_value": 0.8028838778953827,
         "delta": 0.002607761926675889
       }
+    },
+    {
+      "started_at": "2026-09-05T20:13:29",
+      "cells": [
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 18,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 42,
+                "run_id": "run-20260905-181457-d54ae14a",
+                "metrics": {
+                  "train_samples": 52150,
+                  "test_samples": 13038,
+                  "train_accuracy": 0.7892042186001917,
+                  "test_accuracy": 0.7746586899831263,
+                  "train_f1_macro": 0.6001512794428877,
+                  "test_f1_macro": 0.5585817049741318
+                }
+              },
+              "metric_delta": {},
+              "seconds": 220.9
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 1.0,
+              "agentic_completed": 18,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 27,
+                "run_id": "run-20260905-181937-502e641d",
+                "metrics": {
+                  "train_samples": 52150,
+                  "test_samples": 13038,
+                  "train_accuracy": 0.791869606903164,
+                  "test_accuracy": 0.778110139591962,
+                  "train_f1_macro": 0.6108486887574336,
+                  "test_f1_macro": 0.576055723857373
+                }
+              },
+              "metric_delta": {},
+              "seconds": 157.2
+            }
+          ]
+        },
+        {
+          "provider": "openrouter",
+          "model": "meta-llama/llama-3.3-70b-instruct",
+          "rounds": [
+            {
+              "round": 0,
+              "provider": "openrouter",
+              "model": "meta-llama/llama-3.3-70b-instruct",
+              "status": "completed",
+              "mode": "agentic",
+              "validity_rate": 0.6667,
+              "agentic_completed": 12,
+              "agentic_total": 18,
+              "agentic_best": {
+                "model": "random_forest",
+                "seed": 13,
+                "run_id": "run-20260905-182148-917b7d40",
+                "metrics": {
+                  "train_samples": 52150,
+                  "test_samples": 13038,
+                  "train_accuracy": 1.0,
+                  "test_accuracy": 0.8023469857340083,
+                  "train_f1_macro": 1.0,
+                  "test_f1_macro": 0.6814070462781963
+                }
+              },
+              "metric_delta": {},
+              "seconds": 194.9,
+              "metrics": {
+                "train_samples": 52150,
+                "test_samples": 13038,
+                "train_accuracy": 1.0,
+                "test_accuracy": 0.8023469857340083,
+                "train_f1_macro": 1.0,
+                "test_f1_macro": 0.6814070462781963
+              },
+              "config": {
+                "dataset": "data/uploads/kevinarvai_clinvar-conflicting.csv",
+                "target": "CLASS",
+                "model": "random_forest",
+                "seed": 13,
+                "hyperparameters": {
+                  "n_estimators": 200
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline": {
+        "model": "random_forest",
+        "seed": 42,
+        "metrics": {
+          "train_samples": 52150,
+          "test_samples": 13038,
+          "train_accuracy": 0.9999808245445829,
+          "test_accuracy": 0.8002761159687068,
+          "train_f1_macro": 0.999974573850556,
+          "test_f1_macro": 0.678411841962882
+        },
+        "run_id": "run-20260905-181345-04614ad2"
+      },
+      "absorption": {
+        "absorbed": true,
+        "reason": "agentic win reproduced exactly by the deterministic factory",
+        "champion": {
+          "dataset": "data/uploads/kevinarvai_clinvar-conflicting.csv",
+          "target": "CLASS",
+          "model": "random_forest",
+          "seed": 13,
+          "hyperparameters": {
+            "n_estimators": 200
+          }
+        },
+        "primary": "test_accuracy",
+        "baseline_value": 0.8002761159687068,
+        "agentic_value": 0.8023469857340083,
+        "delta": 0.002070869765301464
+      }
     }
   ]
 }
