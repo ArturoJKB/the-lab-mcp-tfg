@@ -1,0 +1,136 @@
+\chapter{Discussion}
+\label{ch:discussion}
+
+This chapter interprets the results: it answers the research questions (Section~\ref{sec:rqanswers}), extracts the design lessons the project validated or falsified (Section~\ref{sec:lessons}), characterizes agent reliability (Section~\ref{sec:agentreliability}), and states the limitations and threats to validity (Section~\ref{sec:limitations}). Sections~\ref{sec:regulatory} and~\ref{sec:socioeconomic} cover the two mandatory dimensions of the engineering TFG: the regulatory framework and the socio-economic environment.
+
+\section{Answering the research questions}
+\label{sec:rqanswers}
+
+\textbf{RQ1 --- Reproducible run: yes.} Two identical seeded executions produce identical metrics at $10^{-12}$ tolerance, and the manifest carries the seed, configuration, input hash, and dependency versions needed to explain the run. At real scale the same property held (a 113k-row training run in $\sim$1.3~s with full provenance). The deeper finding is architectural: reproducibility survived because the agent layer was \emph{excluded} from execution by design. Every time execution stayed deterministic, metrics matched; the single non-deterministic element (provider choice in proposals) affects \emph{which} runs happen, never \emph{what} a run computes.
+
+\textbf{RQ2 --- MCP interoperability: yes.} An independent stdio client --- sharing no code with the training pipeline --- discovered the tools, listed the approved model, and obtained typed predictions; Experiment~1 extended this to driving training itself. The protocol boundary held under the strictest reading: the client never needed pipeline internals, and the servers never leaked them (schemas with \texttt{additionalProperties: false}; path-safety helpers at every entry point).
+
+\textbf{RQ3 --- Context retrieval: yes, functionally.} The redacted, fingerprinted store returns relevant evidence under keyword search with structured filters, and retrieval is provably non-mutating (byte-identical database). The case study shows the memory being used for real work (finding prior runs, refusing to over-claim). The honest qualification is recall: keyword FTS5 misses paraphrases, and the evaluation does not characterize retrieval quality beyond the functional bar --- semantic hybrid search is the natural next step, kept out of scope to preserve verifiability.
+
+\textbf{RQ4 -- RQ6 (agentic group): yes, with evidence from three datasets and two model families.} The agentic round completed fully agentic at validity 1.0 on three datasets (titanic, churn, california-housing) and two provider families (OpenRouter GLM and llama-3.3-70b; Ollama llama3.2:3b offline). The grounding ablation found that verified-claim rate was 1.0 for both grounded and ungrounded arms on well-documented schemas, with the grounding instrument's value as protective on ambiguous datasets. The capability experiment showed that GLM-5.3-flash was the only model that produced factory-safe feature-engineering code across 3 rounds, while gemini-2.5-flash-lite produced safe but quality-degrading transforms (R$^2$ 0.533 vs.\ baseline 0.823) --- the validator and repair loop, not the mixed-team brief, made the reasoning model factory-safe. Per-stage model assignment converted that safety into performance: the mixed team absorbed champions on 4 of 8 titanic generations and matched or exceeded the deterministic baseline on all 3 completed Arm A datasets. The single-agent control produced valid but shallower rounds (1/1 entries vs.\ the multi-agent team's 15--21), and its round-1 result honestly matched the baseline with no win. The most consistent finding across datasets: the mixed team's validity was 1.0 on every post-fix round, while no uniform GLM round pre-fix achieved validity above 0.83.
+
+Overall, the hypothesis is supported at the evaluated scales: a local, typed-contract, MCP-based orchestration executed reproducible data-to-model workflows and exposed the artifacts to independent agents, with four swappable providers and zero mandatory cloud dependency.
+
+\section{Design lessons}
+\label{sec:lessons}
+
+Five lessons emerged with enough evidence to state as transferable findings:
+
+\begin{enumerate}
+	\item \textbf{Rejection is an asset, not an error.} Treating validation failures as first-class outcomes turned the system's refusals into training signal for its agents: the scale-guard rejection became a proposal-time constraint; the unsupported-model rejection in the case study was self-corrected by the agent from the Pydantic error message; the constant-column rejection produced a permanent cleaning-policy improvement. A system that swallows failures teaches its agents nothing.
+	\item \textbf{Capability is derived from state, not intent.} Gating serving/predict/publish on validated status --- rather than on checks that could be bypassed --- is what made the approval boundary enforceable. The same pattern generalizes: an agent's proposal is not ``executed''; it becomes an artifact that must pass through the same validate--approve--transition machinery as any other input.
+	\item \textbf{Typed contracts are the agent interface.} Strict Pydantic contracts plus schema-bounded MCP tools gave agents and humans one shared language. Integration errors surface as validation messages (which agents can read and fix) instead of as silent misbehaviour. The strictness tax (\texttt{extra="forbid"}, no coercions) was paid once and repaid continuously.
+	\item \textbf{The sandbox is compute isolation, not confinement.} The adversarial audit demonstrated that syntax-level policy (AST checks, import hooks) can be escaped through permitted modules --- two chains were found and mitigated, and the filesystem gap (BLK-01) requires OS-level isolation. The transferable lesson: capability policy and syntax policy are different problems; only the latter is solvable inside the interpreter.
+	\item \textbf{Claims must match code, and the gap is a failure mode.} The first-review audit found the documentation's agentic claims ahead of the implementation --- shared prompts where roles were claimed, self-approving paths where a human boundary was claimed, unread feedback where responsiveness was claimed. In an agentic system this gap is more dangerous than a bug: it corrupts the evidence a tribunal, an auditor, or another agent would rely on. The remedy was procedural, not technical --- every overstated claim was fixed (or retracted) before any new capability was built, and the thesis's own pass bars (RQ4--RQ6) are stated with reserved result slots rather than asserted numbers.
+\end{enumerate}
+
+\section{Agent reliability in practice}
+\label{sec:agentreliability}
+
+The recorded agent behaviour supports a differentiated view of LLM reliability in orchestration systems:
+
+\begin{itemize}
+	\item \textbf{Grounding enforcement changes failure modes.} With claim-level verification --- one shared implementation across harness, chat, and global agents --- agent failure becomes visible and structured --- a refusal with a reason --- instead of fluent overconfidence. The harness's max-steps refusal and the grounding failures recorded in the case study are examples.
+	\item \textbf{Model scale matters at the proposal layer.} The 3B-parameter local model failed to produce a valid regression proposal while succeeding on classification, and its FeatureEngineer interpretation exhausted retries on Titanic; the larger routed model succeeded across domains. Provider-agnosticism turned this from a blocker into a recorded observation.
+	\item \textbf{Deterministic fallbacks keep the system useful.} Every agent path (worker, stage interpretations, chat) has a deterministic fallback; the entire test suite runs on the mock provider. The system's usefulness is therefore independent of LLM availability, quality, or cost --- at the price of losing the agent's added value when providers fail.
+	\item \textbf{Tool-trace transparency enables diagnosis.} Persisting every tool call (including failures) in the session timeline made the case study's anomalies (repeated EDAs, a sandboxed lambda) diagnosable from the record alone --- evidence that the ``glass box'' goal was met where it matters most.
+	\item \textbf{Ablations make value measurable, not anecdotal.} The RQ4--RQ6 protocol converts ``the agents help'' from a demo impression into pass/fail bars (verified-claim rate, script validity, completion parity) --- the same standard the deterministic side was already held to.
+\end{itemize}
+
+\section{Limitations and threats to validity}
+\label{sec:limitations}
+
+\subsection{System limitations}
+
+\begin{itemize}
+	\item \textbf{Sandbox filesystem confinement (BLK-01, open).} The sandbox restricts compute, not filesystem access: whitelisted modules can read files the process can read. Mitigations (per-run workspaces, read-only dataset copies, output caps) bound the damage; OS-level isolation (UID separation, landlock/nsjail-style confinement) is future work.
+	\item \textbf{Approval semantics are social, not cryptographic.} There is no authentication or user identity: the recorded \texttt{auto:} mandates mean ``a human initiated this flow'' --- not ``a human saw this specific proposal''. Mid-run approval of the agentic round is the intended boundary; a local-first single-user system accepts this documented trade-off.
+	\item \textbf{Sub-agents execute in-process.} Sub-agent isolation via subprocesses was formally descoped; role agents share the orchestrator's process, bounded by prompts, tool allowlists, and the sandbox for code.
+	\item \textbf{MCP transport is stdio only.} The HTTP service is not an MCP transport; remote MCP clients are out of scope. Experiment~2's independent client is local by construction. The protocol ecosystem itself has moved toward Streamable HTTP as the preferred remote transport \cite{mcp2025transports}, so the extension path is standard, not bespoke.
+	\item \textbf{Redaction is best-effort.} Twelve regex families cover common secret shapes; the evaluation verifies retrieval and idempotence, not exhaustive secret-family coverage.
+	\item \textbf{The dependency lock is not hash-verified.} Reproducibility relies on PyPI availability of the pinned versions.
+	\item \textbf{Agentic-group results are dataset-specific.} The RQ4--RQ6 results are recorded on three datasets (titanic, churn, california-housing) with two model families (GLM reasoning, llama/mistral non-reasoning); the capability findings are observed per dataset, not significance-tested across a benchmark suite. The FE-capability finding (GLM's reasoning-driven code is uniquely factory-safe among tested models) is supported by one negative control (gemini-lite: safe but quality-degrading) and should be replicated on additional datasets.
+\end{itemize}
+
+\subsection{Evaluation threats}
+
+\begin{itemize}
+	\item \textbf{Fixture-based automated checks.} RQ1--RQ3 run on a small synthetic fixture; real-scale claims rest on recorded experiments rather than the evaluator. This is a deliberate two-scale design, but it means the evaluator alone does not prove real-data behaviour.
+	\item \textbf{Prediction correctness is not semantically verified.} RQ2 verifies typed, non-empty predictions; the predicted class's correctness is established by the fixture's separability and manual inspection, not asserted by the evaluator.
+	\item \textbf{Retrieval recall is uncharacterized.} The single-event RQ3 check verifies function, not retrieval quality; no IR benchmark is claimed.
+	\item \textbf{Benchmark scope reduction.} The cross-domain benchmark was planned for six domains and executed on three; Experiment~4 (ten datasets) supersedes it, but the scope history is recorded here for honesty.
+	\item \textbf{Single-machine timing.} All wall-clock numbers come from one commodity laptop; they characterize feasibility, not performance engineering.
+\end{itemize}
+
+\section{Regulatory framework}
+\label{sec:regulatory}
+
+This section analyses the applicable legislation, technical standards, and intellectual-property considerations of the work, as required by the engineering TFG regulations.
+
+\subsection{Data protection}
+
+The system processes datasets provided by the user, which may contain personal data. The applicable regulation is the General Data Protection Regulation (EU) 2016/679 (GDPR) \cite{gdpr2016}. The architecture's regulatory posture follows directly from its design:
+
+\begin{itemize}
+	\item \textbf{Local processing and storage minimization.} All execution and evidence remain on the user's machine; no third party receives dataset contents or agent transcripts by default. This supports the data-minimization principle (Art.\ 5(1)(c)) and keeps the typical personal use within the household exemption (Recital 15), while any organizational deployment would treat the operator as data controller.
+	\item \textbf{Data protection by design.} The context store's twelve redaction families and four privacy levels implement privacy-by-design and by-default (Art.\ 25 GDPR \cite{gdpr2016}, interpreted per the EDPB Guidelines 4/2019 \cite{edpb2020art25}) at the evidence layer: secrets and classified entries are excluded from retrieval surfaces unless explicitly overridden.
+	\item \textbf{Right to erasure as file deletion.} Because all state is local files (runs, context database, uploads), erasure is complete and verifiable by deletion --- an accidental benefit of the local-first stance.
+\end{itemize}
+
+\subsection{AI regulation and risk management}
+
+The EU Artificial Intelligence Act (Regulation (EU) 2024/1689) \cite{euaiact2024} classifies AI systems by risk. The Lab is a development tool in which LLMs propose and interpret, but decisions about training and serving are deterministic and human-approved; it does not make autonomous decisions about natural persons. Its most plausible classification is as a limited-risk/general-purpose-AI \emph{consumer} (the system calls external LLM providers subject to their own obligations), with transparency obligations satisfied by design: agent activity is logged, proposals are attributable, and the approval record names the human principal. Complementing the legal frame, the system's risk posture was mapped against the NIST AI Risk Management Framework and its Generative AI profile \cite{nist2023airmf,nist2024genai}: the ``govern'' function is realized by the approval boundary and audit trail, ``measure'' by the automated evaluator and agent reliability metrics, and ``manage'' by the redaction, sandbox, and scale-guard controls --- a mapping that also anticipates the EU AI Act's risk-management documentation expectations for downstream deployers.
+
+\subsection{Licenses and intellectual property}
+
+\begin{itemize}
+	\item \textbf{Software.} The repository is distributed under the MIT license; all runtime dependencies are permissively licensed (MIT/BSD/Apache-2.0), verified at the lock level. No copyleft obligation is propagated by the stack.
+	\item \textbf{Datasets.} Kaggle datasets carry per-dataset licenses; the ingestion adapter records the source slug and page context in the context pack, giving each experiment a traceable provenance record. The thesis benchmarks use publicly documented datasets with attribution.
+	\item \textbf{Originality.} The system is original work; third-party standards it implements (MCP, JSON-RPC, nbformat, the OpenAI-compatible API convention) are open specifications, and no patentable industrial property is claimed. The work is published under Creative Commons BY-NC-ND for the document and MIT for the code, per the cover page.
+\end{itemize}
+
+\subsection{Technical standards}
+
+The work implements or conforms to: the Model Context Protocol specification (JSON-RPC 2.0 over stdio) \cite{mcp2024spec}; the JSON schema dialect used by MCP tool declarations; nbformat (Jupyter notebook schema) for generated notebooks \cite{nbformat2024}; SQL via SQLite with the FTS5 extension \cite{sqlite2024fts5}; and HTTP/1.1 with server-sent events for the service layer. Python code follows PEP~8 as enforced by the ruff configuration (line length 100, rule sets \texttt{E,F,I,UP,W,B}) and is statically typed under a strict-ish mypy configuration.
+
+\section{Socio-economic environment}
+\label{sec:socioeconomic}
+
+\subsection{Budget}
+
+The project was developed on existing personal hardware (a consumer laptop with 16~GB RAM, no GPU), so its capital cost is zero marginal. The development tooling costs are recorded in the project log and summarized in Table~\ref{tab:budget}; the production system itself costs \emph{nothing per run} --- the deterministic core runs offline, and the optional LLM usage is bounded by the adapter configuration (a fully local Ollama setup has zero marginal cost).
+
+\begin{table}[H]
+\centering
+\caption{Development budget (recorded costs, first three weeks of the project).}
+\label{tab:budget}
+\small
+\begin{tabular}{p{6.4cm}p{3.2cm}p{4.4cm}}
+\toprule
+\textbf{Item} & \textbf{Cost} & \textbf{Notes} \\
+\midrule
+Hardware (existing laptop) & EUR 0 & No GPU; all experiments commodity-CPU \\
+LLM subscriptions (research/audit assistants) & $\sim$EUR 40/month & Credit-metered; one week of intensive use exhausted a monthly credit pack \\
+Coding-agent API usage & $\sim$EUR 35--45 & $\sim$EUR 10 per large-context run; audit runs EUR 0.3--4 \\
+One-shot P0 generation attempt & $\sim$EUR 30 & Produced unreadable code; process redesigned (Section~\ref{sec:process}) \\
+Ollama local models & EUR 0 & qwen3:4b / qwen2.5-coder served locally \\
+\midrule
+\textbf{Total (development)} & \textbf{$\sim$EUR 100--115} & \textbf{3 weeks, recorded} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Socio-economic impact analysis}
+
+\begin{itemize}
+	\item \textbf{Economic.} The system demonstrates that a complete, auditable ML factory runs on commodity hardware with zero per-experiment cloud cost. For students, researchers, and small organizations priced out of cloud MLOps stacks (or paying metered agent subscriptions), this lowers the entry cost of disciplined ML practice to the electricity consumed. The recorded budget above doubles as evidence: the dominant costs were development-time LLM usage, not operation.
+	\item \textbf{Social.} The approval boundary and the evidence trail give non-expert users a supervised path to agentic ML: the human approves, the factory executes, and every claim is checkable. This is a concrete answer to the trust problem of opaque AI-generated analytics. A negative impact is acknowledged and analyzed: local-first tools shift the burden of security and backup to the user, and a poorly secured local workspace is a real (if bounded) risk; the honest audit trail and the documented sandbox limits are the mitigations this project contributes.
+	\item \textbf{Environmental.} CPU-only training of the registered model families consumes watts, not datacenter-hours; the scale guards actively prevent wasted computation (rejecting infeasible runs in milliseconds rather than burning hours or crashing on memory). No GPU or cloud training was used in any reported experiment.
+	\item \textbf{Ethical.} The design separates proposing from executing, which keeps a human meaningfully in the loop for anything consequential; the redaction layer prevents the evidence store from becoming a secret-leak liability; and the thesis reports failures (agent failures, audit findings, rejected runs) with the same care as successes, as a professional-standard practice. The health, genomics, and financial datasets of the stress experiments are used strictly as \emph{analysis proxies} to exercise the data-to-model loop on realistic high-stakes tabular data; no model produced here is a clinical, diagnostic, or financial-decision tool, and the approval-boundary and local-first design deliberately prevent such use by construction.
+	\item \textbf{Exploitation path.} The repository is open-sourced (MIT) as a reference architecture and a usable tool; the plausible adoption paths are education (a complete, inspectable agentic-ML system to teach from), privacy-sensitive individual analytics, and as scaffolding for MCP-based agent ecosystems --- each of which the evaluation supports with recorded evidence.
+\end{itemize}

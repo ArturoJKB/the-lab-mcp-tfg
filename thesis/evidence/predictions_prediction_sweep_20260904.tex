@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\caption{Three-ways-in prediction sweep on absorbed champions: every absorbed model is discoverable via MCP and predictable via CLI, HTTP, and MCP with identical results. Inference is LLM-token-free.}
+\label{tab:predictions-prediction-sweep-20260904}
+\begin{tabular}{llllllll}
+\toprule
+Dataset & Champion model & Metric & CLI & HTTP & MCP & MCP ms & Registry \\
+\midrule
+california-housing & hist\_gradient\_boosting\_regress & 0.8455 & yes & yes & yes & 54 ms & yes \\
+churn & hist\_gradient\_boosting & 0.8710 & yes & yes & yes & 24 ms & yes \\
+churn & random\_forest & 0.8665 & yes & yes & yes & 103 ms & yes \\
+churn & random\_forest & 0.8650 & yes & yes & yes & 51 ms & yes \\
+sp500 & hist\_gradient\_boosting & 0.9861 & yes & yes & yes & 91 ms & yes \\
+sp500 & hist\_gradient\_boosting & 0.9859 & yes & yes & yes & 41 ms & yes \\
+sp500 & hist\_gradient\_boosting & 0.9847 & yes & yes & yes & 39 ms & yes \\
+titanic & random\_forest & 0.8547 & yes & yes & yes & 44 ms & yes \\
+titanic & random\_forest & 0.8492 & yes & yes & yes & 43 ms & yes \\
+titanic & logistic\_regression & 0.8436 & yes & yes & yes & 6 ms & yes \\
+titanic & random\_forest & 0.8212 & yes & yes & yes & 14 ms & yes \\
+\bottomrule
+\end{tabular}
+\end{table}

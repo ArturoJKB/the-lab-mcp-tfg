@@ -1,0 +1,369 @@
+{
+  "champions": [
+    {
+      "dataset": "california-housing",
+      "run_id": "run-20260904-174448-78f8445b",
+      "model": "hist_gradient_boosting_regressor",
+      "seed": 42,
+      "hyperparameters": null,
+      "value": 0.8454710136799095,
+      "primary": "test_r2",
+      "dataset_csv": "data/uploads/camnugent_california-housing-prices_cleaned_median_house_value.csv",
+      "target": "median_house_value",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[411546.69323073496]",
+          "latency_ms": 55
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[411546.69323073496]",
+          "latency_ms": 27
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[411546.69323073496]",
+          "latency_ms": 54,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "run_id": "run-20260905-133540-950f9600",
+      "model": "hist_gradient_boosting",
+      "seed": 128,
+      "hyperparameters": {
+        "max_depth": 3
+      },
+      "value": 0.871,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+      "target": "Exited",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 21
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 26
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 24,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "run_id": "run-20260905-134601-cf8c2129",
+      "model": "random_forest",
+      "seed": 42,
+      "hyperparameters": {
+        "n_estimators": 200,
+        "max_depth": 10
+      },
+      "value": 0.8665,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+      "target": "Exited",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 82
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 75
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 103,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "churn",
+      "run_id": "run-20260905-134558-ec41a359",
+      "model": "random_forest",
+      "seed": 42,
+      "hyperparameters": null,
+      "value": 0.865,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/shrutimechlearn_churn-modelling_cleaned.csv",
+      "target": "Exited",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 43
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 39
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 51,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "run_id": "run-20260905-152304-b63e8d8b",
+      "model": "hist_gradient_boosting",
+      "seed": 84,
+      "hyperparameters": {
+        "max_depth": 5,
+        "learning_rate": 0.1
+      },
+      "value": 0.9861478978293299,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/sp500_analyst.csv",
+      "target": "action",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 95
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 75
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 91,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "run_id": "run-20260905-144311-723a2e88",
+      "model": "hist_gradient_boosting",
+      "seed": 84,
+      "hyperparameters": null,
+      "value": 0.9859043443845709,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/sp500_analyst.csv",
+      "target": "action",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 50
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 41
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 41,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "sp500",
+      "run_id": "run-20260905-145328-44df7b2b",
+      "model": "hist_gradient_boosting",
+      "seed": 87,
+      "hyperparameters": {
+        "learning_rate": 0.1
+      },
+      "value": 0.9846561329801808,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/sp500_analyst.csv",
+      "target": "action",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 44
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 33
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[\"init\"]",
+          "latency_ms": 39,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "titanic",
+      "run_id": "run-20260904-141355-fd60e276",
+      "model": "random_forest",
+      "seed": 456,
+      "hyperparameters": null,
+      "value": 0.8547486033519553,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+      "target": "Survived",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 50
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 44
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 44,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "titanic",
+      "run_id": "run-20260904-144344-2a62bfc7",
+      "model": "random_forest",
+      "seed": 13,
+      "hyperparameters": {
+        "max_depth": 10
+      },
+      "value": 0.8491620111731844,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+      "target": "Survived",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 47
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 43
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 43,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "titanic",
+      "run_id": "run-20260904-145056-180a50ef",
+      "model": "logistic_regression",
+      "seed": 84,
+      "hyperparameters": {
+        "C": 1.0,
+        "penalty": "l2"
+      },
+      "value": 0.8435754189944135,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+      "target": "Survived",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 8
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 7
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 6,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    },
+    {
+      "dataset": "titanic",
+      "run_id": "run-20260904-040702-75711389",
+      "model": "random_forest",
+      "seed": 87,
+      "hyperparameters": {
+        "n_estimators": 10,
+        "max_depth": 10
+      },
+      "value": 0.8212290502793296,
+      "primary": "test_accuracy",
+      "dataset_csv": "data/uploads/yasserh_titanic-dataset_cleaned_Survived.csv",
+      "target": "Survived",
+      "best_for_dataset": true,
+      "surfaces": {
+        "cli": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 12
+        },
+        "http": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 10
+        },
+        "mcp": {
+          "ok": true,
+          "prediction": "[0]",
+          "latency_ms": 14,
+          "error": null,
+          "listed_in_registry": true
+        }
+      }
+    }
+  ],
+  "success_rates": {
+    "cli": "11/11",
+    "http": "11/11",
+    "mcp": "11/11"
+  },
+  "generated_at": "2026-09-05T16:15:09.355589+00:00"
+}

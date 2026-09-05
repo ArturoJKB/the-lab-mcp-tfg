@@ -13,5 +13,6 @@ byte-stable. Chapters consume tables via `\input{evidence/<file>}`.
 - `ratchet_generations_ratchet_ledger_hr_attrition.tex` — table `tab:ratchet-generations-ratchet-ledger-hr-attrition` + `ratchet_rounds_ratchet_ledger_hr_attrition.tex` (`tab:ratchet-rounds-ratchet-ledger-hr-attrition`) from `raw/ratchet_ledger_hr_attrition.json` (ratchet loop ledger).
 - `ratchet_generations_ratchet_ledger_titanic.tex` — table `tab:ratchet-generations-ratchet-ledger-titanic` + `ratchet_rounds_ratchet_ledger_titanic.tex` (`tab:ratchet-rounds-ratchet-ledger-titanic`) from `raw/ratchet_ledger_titanic.json` (ratchet loop ledger).
 - `model_comparison_model_comparison_titanic.tex` — table `tab:model-comparison-model-comparison-titanic` from `raw/model_comparison_titanic.json` (14 configurations).
+- `predictions_prediction_sweep_20260904.tex` — table `tab:predictions-prediction-sweep-20260904` from `raw/prediction_sweep_20260904.json` (11 champions × 3 surfaces).
 - `agentic_comparison.tex` — table `tab:agentic-comparison` from `raw/demo_churn_round_20260903.json`.
 - `validity_rates.pdf` — figure from the validity rates of all recorded RQ5 results and journeys (orange = below 0.5).

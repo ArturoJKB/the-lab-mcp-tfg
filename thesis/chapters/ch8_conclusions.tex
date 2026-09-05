@@ -1,0 +1,39 @@
+\chapter{Conclusions and Future Work}
+\label{ch:conclusions}
+
+\section{Conclusions}
+
+This thesis set out to demonstrate that a local, multi-agent orchestration architecture --- built on typed contracts and the Model Context Protocol --- can execute a reproducible data-to-model workflow and expose its artifacts to independent agents without coupling to any specific LLM provider. The work supports that claim with a complete implementation and a recorded evaluation, concluding per objective:
+
+\begin{itemize}
+	\item \textbf{O1 (Deterministic factory) --- achieved.} The pipeline turns a local CSV into a registered, locally servable model with a complete eleven-artifact evidence set per run; rejection is a first-class outcome with full provenance, validated at real scale (164k rows) and protected by traceable scale guards.
+	\item \textbf{O2 (Typed contracts) --- achieved.} Six strict Pydantic contracts form the system's shared language; the strictness rejected integration errors and agent mistakes alike, converting both into readable validation messages.
+	\item \textbf{O3 (MCP surface) --- achieved.} Seven stdio servers with 25 schema-bounded tools expose datasets, profiles, contracts, models, artifacts, context, EDA skills, and orchestration; RQ2 and Experiment~1 verify independent consumption end-to-end.
+	\item \textbf{O4 (Context store) --- achieved.} The SQLite+FTS5 store provides redacted, fingerprinted, privacy-leveled evidence with provably read-only retrieval (RQ3); the case study shows it functioning as genuine agent memory.
+	\item \textbf{O5 (Agentic layer) --- achieved.} Four provider adapters behind one typed protocol; role-specialized agents with distinct prompt contracts, the orchestrator, and the grounded chat operate through a single approval chokepoint with claim-level grounding --- agent-initiated execution defaults to \texttt{awaiting\_approval} and rejected proposals are unexecutable; the agentic round adds bounded, sandboxed exploration over the deterministic baseline's artifacts; the entire test suite (495 tests) runs provider-free on the mock adapter, proving provider-agnosticism structurally.
+	\item \textbf{O6 (Evaluation) --- achieved.} The three system research questions pass under an automated hermetic evaluator at every milestone; four recorded experiments (three-ways-in with the provider dimension, S\&P-scale validation, the grounded-autonomy agentic round, ten-dataset Kaggle post-validation) extend the evidence to realistic data; agent reliability is characterized with task success rates (8/9 recorded proposal cycles) and recorded token-efficiency measurements, completing the registered performance-evaluation objective; the agentic pass bars (RQ4--RQ6) were evaluated across three datasets and two model families --- validity 1.0 on every post-fix agentic round, the mixed team outperforming every uniform team, and the GLM ablation isolating the validator-and-repair mechanism --- with limitations documented with the same care as results.
+\end{itemize}
+
+Beyond the objectives, two results deserve final emphasis. First, the central architectural invariant --- \emph{LLMs decide, deterministic code executes} --- proved to be more than a safety posture: it is what made reproducibility measurable (RQ1), auditability natural (rejection as evidence), provider-agnosticism free (the mock provider exercises everything), and the provider-dimension result possible (three LLM brains, byte-identical outcomes). Second, the development process itself --- small auditable slices, four quality gates, adversarial audit roles, and a self-audit that corrected the project's own overstated claims before building further --- became part of the thesis's evidence that disciplined agentic development is a process problem before it is a model problem.
+
+\section{Future work}
+\label{sec:futurework}
+
+The following extensions are concrete, ordered roughly by expected impact:
+
+\begin{enumerate}
+	\item \textbf{OS-level sandbox confinement.} Close BLK-01 with UID separation or kernel confinement (landlock/nsjail), upgrading the sandbox from compute isolation to filesystem confinement.
+	\item \textbf{Semantic hybrid retrieval.} Add an optional local embedding index alongside FTS5, preserving the redaction and immutability guarantees, to recover paraphrase recall without cloud vector stores --- the layer protected by the project's descope checkpoint (Section~\ref{sec:process}), and whose design can draw on graph-structured memory approaches for code and knowledge bases \cite{mempalace2026,codebasememory2026}.
+	\item \textbf{Provenance and cluster visualizations.} Render the dataset--run--model--proposal provenance graph (every node resolving to a persisted artifact) and deterministic cluster-profiling views in the workspace --- descoped from the final scope to protect the agentic-round core, and natural consumers of the comparison artifacts Experiment 3 now produces.
+	\item \textbf{HTTP MCP transport.} Serve the same tool surface over HTTP+SSE to reach remote MCP clients, with the existing path-safety and schema layers unchanged.
+	\item \textbf{Live-provider automated evaluation.} Extend the evaluator with a provider-configurable profile so RQ-level checks can exercise Ollama/OpenRouter end-to-end, not only the deterministic fallback.
+	\item \textbf{Capability-benchmark evaluation.} Run an external ML-agent capability benchmark (e.g., MLE-bench's suite \cite{chan2024mlebench}) over the agent layer as a complementary evaluation axis to the system-property checks of this thesis (Section~\ref{sec:bg-benchmarks}).
+	\item \textbf{Notebook execution in the sandbox.} Execute generated \texttt{report.ipynb} cells sequentially in the sandbox with per-cell state, closing the loop from artifact to verified reproduction.
+	\item \textbf{The human--machine learning cycle.} Persist agent sessions as learning material: generated exercises from the user's own conversations, so both sides improve --- the original vision recorded in the project notes, unimplemented by design in this scope.
+	\item \textbf{Agent self-improvement loop.} Feed experiment outcomes and rejection reasons back into proposal strategies (the case study's self-correction, generalized), with the same approval boundary.
+	\item \textbf{Scale-out paths.} Partitioned batch execution for datasets beyond single-machine memory, and a multi-user mode with authentication --- both deliberately descoped here.
+\end{enumerate}
+
+\section{Closing remark}
+
+The broader significance of this work is its argument by construction: the interesting question for agentic ML is not how capable the model is, but how much the surrounding system can prove about what happened. The Lab's answer --- typed contracts, deterministic execution, redacted memory, protocol-bounded interoperability, a single approval gate, and rejections kept as evidence --- fits in a single repository that runs on a laptop. That such a system can answer its system-level research questions automatically, on every run, while holding its agentic claims to stated pass bars, is the thesis's final and most practical claim.
