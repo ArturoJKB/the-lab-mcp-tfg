@@ -41,7 +41,7 @@ The four registered objectives are the following:
 	\item (4) a \emph{performance evaluation} analyzing the impact of the orchestration on context optimization, token efficiency, success rates and costs.
 \end{itemize}
 
-The general objective of this thesis is to fulfill these objectives through an autonomous ML factory --- autonomous in its data-to-model execution, human-gated at every agentic boundary --- used as the architecture's demonstrator.
+The general objective of this thesis is to fulfill these objectives through an autonomous ML factory, autonomous in its data-to-model execution and human-gated at every agentic boundary, used as the architecture's demonstrator.
 
 More specific objectives can be derived from the ones above:
 
@@ -97,7 +97,7 @@ The contributions of this thesis are:
 	\item \textbf{An architecture} for auditable agentic ML. LLMs make the decisions and a deterministic pipeline executes them, connected through typed contracts and a single human approval gate. On top of it, a grounded autonomy round lets role-specialized agents explore beyond the deterministic grid. The agents start from the pipeline's artifacts, and their output is validated deterministically.
 	\item \textbf{A working implementation} of approximately 16{,}900 lines of Python plus a React/TypeScript workspace. It includes the deterministic factory, seven MCP servers, a redacted context store, a provider-agnostic agent layer with per-role prompt contracts, and an AST-restricted code sandbox. It is verified by 546 automated tests.
 	\item \textbf{An automated evaluation protocol} (\texttt{evaluate\_thesis.py}). Every check runs inside a disposable temporary workspace. RQ1--RQ3 run on every demand, and the agentic questions (RQ4--RQ6) use comparison runs that measure what grounding, generated code, and role specialization each add. Four recorded experiments complement it on fixture, real and public (Kaggle) data, comparing different LLM providers.
-	\item \textbf{An honest record of limitations}. It includes an adversarial audit of the full system --- more than 500 checks across the CLI, HTTP service, MCP surface, and sandbox, plus an internal review of the project's agentic performance --- which found five defects (an SSE serialization crash, hyperparameter-grid misapplication, a fixtures-cleaning restriction, a phantom approval principal, and a feature-name mismatch), all fixed and regression-tested. The findings, both fixed and open, are documented as evidence.
+	\item \textbf{An honest record of limitations}. It includes an adversarial audit of the full system, more than 500 checks across the CLI, HTTP service, MCP surface, and sandbox, plus an internal review of the project's agentic performance, which found five defects (an SSE serialization crash, hyperparameter-grid misapplication, a fixtures-cleaning restriction, a phantom approval principal, and a feature-name mismatch), all fixed and regression-tested. The findings, both fixed and open, are documented as evidence.
 \end{enumerate}
 
 

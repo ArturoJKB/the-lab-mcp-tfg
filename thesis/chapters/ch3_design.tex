@@ -40,7 +40,8 @@ Five principles were established at the start of the project before any code was
 \node[core] (pipe)    at (0,2.2)    {\textbf{Deterministic pipeline}\\validate $\rightarrow$ train $\rightarrow$ register};
 \node[core] (agents)  at (4.3,2.2)  {\textbf{Agent layer}\\harness, worker, chat, sub-agents};
 \node[core] (mcpsrv)  at (8.6,2.2)  {\textbf{7 MCP servers}\\stdio, JSON-RPC};
-% Sandbox (row 3, col 2-3 gap)
+% Gate + sandbox (row 3)
+\node[core] (gate)    at (2.15,0)   {\textbf{Approval gate}\ one chokepoint};
 \node[core] (sandbox) at (6.45,0)   {\textbf{Code sandbox}\\AST-restricted};
 % Stores (row 4)
 \node[store] (runs)   at (0,-2.2)   {\textbf{runs/\textlangle id\textrangle/}\\manifest, metrics, model};
@@ -54,10 +55,14 @@ Five principles were established at the start of the project before any code was
 \draw[arr] (mcpsrv.west) -- (agents.east);
 \draw[arr] (mcpsrv.south) -- (data.north);
 \draw[arr] (pipe.south) -- (runs.north);
-\draw[arr] (agents.south) -- (ctx.north);
+\draw[arr] (agents.south) to[bend right=12] (ctx.north);
 \draw[arr] (agents.south east) -- (sandbox.north west);
+\draw[arr] (agents.south west) -- (gate.north east);
+\draw[arr] (gate.west) -- (pipe.south east);
+\draw[arr] (runs.east) -- (ctx.west);
+\draw[arr, dashed] (ctx.west) to[bend right=18] node[midway, above, font=\tiny, align=center] {absorbed champion\\configs} (pipe.west);
 \end{tikzpicture}
-\caption{\emph{thelab-mcp} architecture: three ways in (CLI, HTTP/UI, MCP) over one deterministic core; agents and the sandbox mediate non-deterministic decisions; all state lands in local, inspectable stores.}
+\caption{\emph{thelab-mcp} architecture: three ways in (CLI, HTTP/UI, MCP) over one deterministic core; the agent layer explores, the approval gate decides, the factory executes, and the dashed feedback returns replay-verified champion configurations to the baseline (the ratchet loop). All state lands in local, inspectable stores.}
 \label{fig:architecture}
 \end{figure}
 
@@ -85,6 +90,23 @@ The implementation is organized into ten Python packages, summarized in Table~\r
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{The life of a dataset}
+\label{sec:lifeof}
+
+A single worked path explains the architecture better than any component list. The sections that follow describe the pieces; this one follows one dataset through all of them, in the order the system actually executes.
+
+\textbf{Arrival.} A researcher brings a tabular CSV, a bank's customer records for example, and wants the best predictive model the system can produce and defend. The dataset enters through any of the three surfaces: uploaded in the browser, pointed at from the CLI, or ingested from a public repository. From this moment every object the system touches is typed: the dataset, the training configuration, the seed, and later every artifact are Pydantic contracts (Section~\ref{sec:contracts}), not loose dictionaries.
+
+\textbf{Validation and cleaning.} The deterministic pipeline first validates: does the target column exist, are the features numeric, is any column constant, are there enough rows per class to stratify? A failed check does not raise an error to be hidden. It produces a \emph{rejected run}: a complete, persisted record with the reason (Section~\ref{sec:pipeline}). The cleaning policy then applies its rules deterministically (datetime parsing, cardinality-aware encoding of categoricals, median imputation) and reports what it changed, column by column.
+
+\textbf{The floor.} Before any agent acts, the system trains \emph{every} registered model on the cleaned data with default hyperparameters and persists each run (Section~\ref{sec:pipeline}). This try-all baseline is deliberately agent-free: it is the floor that the agentic layer must beat for its work to count, and it is reproducible byte-for-byte from the dataset, the configuration, and a seed.
+
+\textbf{The agentic round.} Now the LLM layer explores. Three role-specialized agents run in sequence (Section~\ref{sec:agenticround}), each an LLM with its own system-prompt contract and, optionally, its own model. The \emph{Analyst} reads the baseline's metrics and prior evidence through read-only MCP tools (MCP, the Model Context Protocol, is a standard that lets LLM agents call tools through a typed JSON-RPC interface; here each tool server is a local child process, so the surface is files and functions, never a network). The \emph{FeatureEngineer} writes one pandas transform that executes \emph{only} inside a code sandbox, a subprocess that admits a whitelisted set of imports and forbids anything else, and the result is validated deterministically (target untouched, no constant features, no row explosion) before it may reach training. The \emph{ModelSelector} proposes training configurations beyond the default grid: other model families, other seeds, hyperparameters the deterministic pipeline never tries. Every proposal passes one approval gate: a human says yes, and the record shows who initiated and what was approved.
+
+\textbf{Training and artifacts.} Approved configurations are executed by the same deterministic factory, never by the LLM, and each run lands as eleven artifacts in \texttt{runs/\textlangle id\textrangle/}: manifest, metrics, validation report, the trained model, and more (Section~\ref{sec:pipeline}). A win counts only after the factory replays the winning configuration with the same seed and reproduces its metrics exactly; only then is it absorbed as the dataset's champion configuration, and the next generation must beat it.
+
+\textbf{Memory and serving.} Everything (run summaries, round records with the exact prompts and token costs, prediction events) is appended to a local context store (SQLite with full-text search, redacted on arrival) and indexed, so the next question can be answered from evidence instead of memory. The champion models are servable through all three surfaces at once: a CLI one-liner, an HTTP endpoint, and an MCP tool return identical predictions, which makes every claim in this thesis independently checkable. Section~\ref{sec:exp-kaggle} measures what this loop achieves across ten datasets.
 
 \section{Typed contracts}
 \label{sec:contracts}
@@ -153,6 +175,7 @@ The task type (classification or regression) is inferred from the target column 
 \caption{Registered model families and their guards.}
 \label{tab:models}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llll}
 \toprule
 \textbf{Name} & \textbf{Task} & \textbf{Estimator} & \textbf{Guard} \\
@@ -167,7 +190,7 @@ The task type (classification or regression) is inferred from the target column 
 \texttt{random\_forest\_regressor} & regression & \texttt{RandomForestRegressor} & \\
 \texttt{hist\_gradient\_boosting\_regressor} & regression & \texttt{HistGradientBoosting...} & \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 The seed is injected into every estimator (\texttt{random\_state=seed}) and into the train/test split. Preprocessing is a fixed \texttt{StandardScaler} pipeline and metrics are computed consistently throughout runs: accuracy and macro-F1 for classification, RMSE, MAE, and $R^2$ for regression, on both train and test partitions.
@@ -199,7 +222,7 @@ per dataset.
 \section{The MCP surface}
 \label{sec:mcp}
 
-Seven MCP servers expose the factory to independent clients over \emph{stdio} --- chosen deliberately for a local-first system: servers run as plain child processes with no network surface, no ports, and no authentication layer to configure, and the single-job split lets a client connect only to what it needs:
+Seven MCP servers expose the factory to independent clients over \emph{stdio}, chosen deliberately for a local-first system. Servers run as plain child processes with no network surface, no ports, and no authentication layer to configure, and the single-job split lets a client connect only to what it needs:
 
 \begin{itemize}
 	\item \texttt{data\_catalog}: what datasets exist, with their profiles and contracts.
@@ -272,7 +295,9 @@ Three role-specialized agents (\texttt{EDAAnalyst}, \texttt{FeatureEngineer}, \t
 \subsection{The agentic round}
 \label{sec:agenticround}
 
-The agentic round is the system's \emph{grounded autonomy} mechanism and the multi-orquestration claims. It is an additional exploration stage that runs \emph{after} the deterministic batch, starts from the artifacts that batch produced, and validates everything deterministically before it can affect training. A context pack (EDA brief, baseline metrics, prior-run evidence, and user feedback, assembled without any LLM) grounds three sequential roles: Each role can be assigned its own LLM provider (per-stage model assignment): the round's configuration accepts a role-to-provider mapping, so a mixed team --- for example, a fast analyst, a reasoning feature-engineer, and a cheap selector --- runs through the same gated pipeline. Every stage records its assigned model and, where the provider reports them, per-stage token counts and cost, making the role-to-model assignment a measured rather than assumed choice. The loop that wraps these rounds is recorded as a typed evidence artifact: a per-dataset generation ledger storing the deterministic baseline, every round (validity, mode, entries, the exact prompts sent to each stage, and per-stage token counts and cost), the absorption decision with its replay proof, and the champion configuration (model, seed, hyperparameters). The ledger is what makes the loop auditable after the fact: every claim about an absorption resolves to a recorded entry.
+Two design decisions define this mechanism. First, the round runs \emph{after} the deterministic batch, never instead of it: the batch's persisted artifacts are the evidence the roles reason over, so the agents are always grounded in something real and the factory's reproducibility is untouched by anything an LLM produces. Second, the roles \emph{propose} but never \emph{execute}: an LLM may decide which model to train, which seeds, and which feature transform to attempt, but the training itself is carried out by the deterministic factory, and every proposal crosses the approval gate before it can run. The separation bounds the blast radius of anything non-deterministic: the worst a hallucinating agent can do is waste compute on a rejected attempt, recorded as evidence.
+
+The agentic round is the system's \emph{grounded autonomy} mechanism and its multi-orchestration claim. It is an additional exploration stage that runs \emph{after} the deterministic batch, starts from the artifacts that batch produced, and validates everything deterministically before it can affect training. A context pack (EDA brief, baseline metrics, prior-run evidence, and user feedback, assembled without any LLM) grounds three sequential roles: Each role can be assigned its own LLM provider (per-stage model assignment): the round's configuration accepts a role-to-provider mapping, so a mixed team (a fast analyst, a reasoning feature-engineer, a cheap selector) runs through the same gated pipeline. Every stage records its assigned model and, where the provider reports them, per-stage token counts and cost, making the role-to-model assignment a measured rather than assumed choice. The loop that wraps these rounds is recorded as a typed evidence artifact: a per-dataset generation ledger storing the deterministic baseline, every round (validity, mode, entries, the exact prompts sent to each stage, and per-stage token counts and cost), the absorption decision with its replay proof, and the champion configuration (model, seed, hyperparameters). The ledger is what makes the loop auditable after the fact: every claim about an absorption resolves to a recorded entry.
 
 \begin{enumerate}
 	\item \textbf{Analyst}: reads the context store and EDA evidence through read-only MCP tools to explain \emph{why} the baseline performs as it does and what to try next; output is a typed findings brief (findings, opportunities, risks) with deterministic fallback.
@@ -337,15 +362,15 @@ A note on provenance of this decision: the first UI was deliberately dependency-
 
 \begin{figure}[H]
 \centering
-\resultslot[5.5cm]{Screenshot slot A: Data view: upload, preview, EDA modules (missing values, distributions, correlations) and the cleaning report, in the deterministic (blue) folder.}
-\caption{Workspace UI: the deterministic Data view (screenshot pending).}
+\includegraphics[width=\textwidth]{figures/screenshots/slotA_data_view.png}
+\caption{Workspace UI: the deterministic Data view, with dataset preview, EDA modules (missing values, distributions, correlations) and the cleaning report.}
 \label{fig:ui-data}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\resultslot[5.5cm]{Screenshot slot B: Experiments view: live stage pipeline (Plan $\rightarrow$ Clean $\rightarrow$ Train $\rightarrow$ Evaluate, plus the agentic round stage), per-agent cards with LLM interpretations, per-model SSE progress, and History with feedback.}
-\caption{Workspace UI: the agentic Experiments view (screenshot pending).}
+\includegraphics[width=\textwidth]{figures/screenshots/slotB_completed_run.png}
+\caption{Workspace UI: the agentic Experiments view, with recorded stage pipeline (Plan, Clean, Train, Evaluate, Agent round), job timeline, best-run card, and the analyst findings brief.}
 \label{fig:ui-experiments}
 \end{figure}
 

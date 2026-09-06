@@ -72,6 +72,7 @@ The multi-agent round completes at least as often as the single-agent one. Every
 Note: RQ5 and RQ6 measure \emph{validity, safety, and competitiveness} not so much victory. Improvement over the deterministic baseline is a bonus, not the bar. However after the testing phase most of the agentic runs generated better results than the not agentic ones, cofirming the hypothesis.
 
 \section{The automated evaluator}
+\label{sec:evaluator}
 
 All six research questions are answered by one committed script,\texttt{scripts/evaluate\_thesis.py}, so any claim in this thesis can be re-checked with a single command. The script runs inside a fresh temporary workspace, prints a verdict table and a JSON summary, and exits with an error code on any failure. No developer state is touched, and the checks are chained, so later questions reuse the runs produced by earlier ones.
 
@@ -91,6 +92,25 @@ PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py
 #   RQ3: PASS   hits: 1   event_id: evt-repro
 \end{lstlisting}
 
+
+\begin{lstlisting}[language=bash, caption={Running the live agentic evaluation, churn dataset, three rounds, abridged.}, label={lst:evalive}, style=cli]
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py --live openrouter --model z-ai/glm-5.3-flash --datasets churn --rounds 3
+# ============================================================
+# thelab-mcp -- Thesis Evaluation Report, live mode
+# ============================================================
+# Deterministic baseline, RQ1-verified:
+#   Test accuracy: 0.808   Model: logistic_regression   Seed: 42
+#
+# Agentic checks RQ4-RQ6 running
+#   round 0:  mode agentic   15/15 entries   best 0.8630
+#   round 1:  mode agentic    9/9  entries   best 0.8645
+#   round 2:  mode agentic    6/6  entries   best 0.8625
+#
+# RQ4: PASS   grounded claims verified: 1.0
+# RQ5: PASS   validity_rate: 1.0
+# RQ6: PASS   multi: agentic / single: degraded_deterministic
+# Overall: PASS
+\end{lstlisting}
 
 
 
@@ -148,7 +168,24 @@ fields.
 
 \textbf{Results.} Section~\ref{sec:exp-agentic-results} reserves the result tables for the final recorded runs.
 
-\resultslot[3.5cm]{Experiment 3 result tables (RQ4 grounded-vs-ungrounded, RQ5 validity/competitiveness, RQ6 multi-vs-single; per provider) are inserted here after the recorded runs.}
+\begin{table}[H]
+\centering
+\caption{Experiment 3 recorded results (live providers; full tables in Section~\ref{sec:exp-agentic-results}).}
+\label{tab:exp3-summary}
+\small
+\begin{tabular}{p{4.6cm}p{3.4cm}p{2.4cm}p{3.6cm}}
+\toprule
+\textbf{Check} & \textbf{Arm} & \textbf{Result} & \textbf{Evidence} \\
+\midrule
+RQ4 grounded claims & grounded (EDA context) & 4--5/5 verified & raw S\&P ambiguous-schema ablation \\
+RQ4 ungrounded claims & zero context / domain prior & 0/5 verifiable & honest refusal; hallucinated columns \\
+RQ5 batch validity (iris) & GLM uniform, post-fix & 15/15 & live OpenRouter recording \\
+RQ5 batch validity (churn) & mixed team $\times$3 & 30/30 & recorded variance runs \\
+RQ5 batch validity (california) & pre-F4 & 0/9 & honest failure; fix recorded \\
+RQ6 multi vs single & role contracts vs shared prompt & multi agentic; single degraded & GLM shared-prompt control \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Experiment 4: multi-domain stress validation (the continuous loop)}
 \label{sec:exp-kaggle}

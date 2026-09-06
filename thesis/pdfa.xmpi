@@ -63,9 +63,9 @@
   <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/"> 
    <dc:format>application/pdf</dc:format> 
    <dc:title><rdf:Alt><rdf:li xml:lang="x-default">Context-Aware Multi-Agent Orchestration: A Standardized Architecture via MCP for Autonomous Agentic Systems</rdf:li></rdf:Alt></dc:title>
-   <dc:creator><rdf:Seq><rdf:li>Author's Full Name</rdf:li></rdf:Seq></dc:creator>
+   <dc:creator><rdf:Seq><rdf:li>Arturo Javier Kolster Borges</rdf:li></rdf:Seq></dc:creator>
    <dc:language><rdf:Bag><rdf:li>en-GB</rdf:li></rdf:Bag></dc:language>
-   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Bachelor Thesis — Universidad Carlos III de Madrid</rdf:li></rdf:Alt></dc:description>
+   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Bachelor Thesis --- Universidad Carlos III de Madrid</rdf:li></rdf:Alt></dc:description>
    <dc:subject><rdf:Bag><rdf:li>multi-agent systems</rdf:li>
      <rdf:li>Model Context Protocol</rdf:li>
      <rdf:li>reproducibility</rdf:li>
@@ -82,15 +82,15 @@
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"> 
    <xmp:CreatorTool>LaTeX with hyperref</xmp:CreatorTool> 
-   <xmp:ModifyDate>2026-09-06T17:04:17+02:00</xmp:ModifyDate> 
-   <xmp:CreateDate>2026-09-06T17:04:17+02:00</xmp:CreateDate> 
-   <xmp:MetadataDate>2026-09-06T17:04:17+02:00</xmp:MetadataDate> 
+   <xmp:ModifyDate>2026-09-06T22:11:36+02:00</xmp:ModifyDate> 
+   <xmp:CreateDate>2026-09-06T22:11:36+02:00</xmp:CreateDate> 
+   <xmp:MetadataDate>2026-09-06T22:11:36+02:00</xmp:MetadataDate> 
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmpRights = "http://ns.adobe.com/xap/1.0/rights/"> 
   </rdf:Description> 
   <rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"> 
    <xmpMM:DocumentID>uuid:DF005B57-2A06-8753-7167-92D8CE935460</xmpMM:DocumentID> 
-   <xmpMM:InstanceID>uuid:F623550B-FA6F-DDF0-A546-3A11B7542566</xmpMM:InstanceID> 
+   <xmpMM:InstanceID>uuid:028B57D9-424A-23D0-8897-3B2519660592</xmpMM:InstanceID> 
   </rdf:Description> 
  </rdf:RDF> 
 </x:xmpmeta> 

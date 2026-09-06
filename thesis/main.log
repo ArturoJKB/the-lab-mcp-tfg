@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.2)  6 SEP 2026 17:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.2)  6 SEP 2026 22:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1785,7 +1785,7 @@ File: t1txss.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 11.39996pt on input line 226.
-<imagenes/Portada_Logo.png, id=444, 456.2865pt x 45.99pt>
+<imagenes/Portada_Logo.png, id=448, 456.2865pt x 45.99pt>
 File: imagenes/Portada_Logo.png Graphic file (type png)
 <use imagenes/Portada_Logo.png>
 Package pdftex.def Info: imagenes/Portada_Logo.png  used on input line 230.
@@ -1798,15 +1798,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 23.63593pt on input line 241.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 19.70294pt on input line 245.
-LaTeX Font Info:    Font shape `T1/txss/b/n' in size <20.74> not available
-(Font)              Font shape `T1/txss/bx/n' tried instead on input line 245.
-LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
-(Font)              scaled to size 19.70294pt on input line 245.
-LaTeX Font Info:    Font shape `T1/txss/b/n' in size <17.28> not available
-(Font)              Font shape `T1/txss/bx/n' tried instead on input line 248.
-LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
-(Font)              scaled to size 16.41594pt on input line 248.
-<imagenes/creativecommons.png, id=446, 338.76563pt x 118.19156pt>
+<imagenes/creativecommons.png, id=450, 338.76563pt x 118.19156pt>
 File: imagenes/creativecommons.png Graphic file (type png)
 <use imagenes/creativecommons.png>
 Package pdftex.def Info: imagenes/creativecommons.png  used on input line 254.
@@ -1866,6 +1858,11 @@ Overfull \hbox (3.40796pt too wide) detected at line 2
 \openout7 = `main.toc'.
 
  [10] [11] (./main.lof
+Overfull \hbox (0.94876pt too wide) in paragraph at lines 8--8
+ [][] [][][]\T1/txr/m/n/12 Workspace UI: the agen-tic Ex-per-i-ments view, with recorded stage pipeline 
+ []
+
+
 Overfull \hbox (9.85275pt too wide) in paragraph at lines 16--16
  [][] [][][]\T1/txr/m/n/12 Per-dataset recorded agentic-round wall-clock (sum of round sec-onds across 
  []
@@ -1880,7 +1877,9 @@ Overfull \hbox (6.80472pt too wide) in paragraph at lines 19--19
  [][] [][][]\T1/txr/m/n/12 Prediction la-tency per sur-face over the 17 ab-sorbed cham-pi-ons (CLI, HTTP, 
  []
 
+[12
 
+]
 Overfull \hbox (6.72073pt too wide) in paragraph at lines 21--21
  [][] [][][]\T1/txr/m/n/12 Feature-engineering trans-form cost per driver: com-ple-tion to-kens per round 
  []
@@ -1889,12 +1888,10 @@ Overfull \hbox (6.72073pt too wide) in paragraph at lines 21--21
 \tf@lof=\write8
 \openout8 = `main.lof'.
 
- [12
-
-] [13] [14] (./main.lot [15
+ [13] [14] (./main.lot [15
 
 ]
-Overfull \hbox (9.69675pt too wide) in paragraph at lines 33--33
+Overfull \hbox (9.69675pt too wide) in paragraph at lines 35--35
  \T1/txr/m/n/12 generation-length-bound, so trivial-ping la-tency alone un-der-es-ti-mates round 
  []
 
@@ -2017,131 +2014,137 @@ LaTeX Font Info:    Font shape `T1/txr/b/it' in size <14.4> not available
 LaTeX Font Info:    Font shape `T1/txr/b/n' in size <8> not available
 (Font)              Font shape `T1/txr/bx/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `TS1/txr/b/n' in size <8> not available
-(Font)              Font shape `TS1/txr/bx/n' tried instead on input line 46.
+(Font)              Font shape `TS1/txr/bx/n' tried instead on input line 47.
 
-Overfull \hbox (6.92815pt too wide) in paragraph at lines 71--87
+Overfull \hbox (6.92815pt too wide) in paragraph at lines 76--92
  [][] 
  []
 
-[12]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 96.
- [13] [14]
-Overfull \hbox (80.94318pt too wide) in paragraph at lines 156--171
- [][] 
- []
-
-[15]
-Overfull \hbox (7.9309pt too wide) in paragraph at lines 191--192
+[12] [13]
+LaTeX Font Info:    Trying to load font information for TS1+txtt on input line 107.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/ts1txtt.fd
+File: ts1txtt.fd 2000/12/15 v3.1
+)
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 118.
+ [14] [15] [16]
+Overfull \hbox (7.9309pt too wide) in paragraph at lines 214--215
 []\T1/txr/bx/n/12 Privacy lev-els. \T1/txr/m/n/12 En-tries are clas-si-fied \T1/txtt/c/sc/12 pub-lic\T1/txr/m/n/12 /\T1/txtt/c/sc/12 internal\T1/txr/m/n/12 /\T1/txtt/c/sc/12 restricted\T1/txr/m/n/12 /\T1/txtt/c/sc/12 secret\T1/txr/m/n/12 ; read-
  []
 
-[16]
-Underfull \hbox (badness 10000) in paragraph at lines 228--228
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 251--251
 []|\T1/txtt/m/n/10.95 context \T1/txr/m/n/10.95 (read-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 230--231
+Underfull \hbox (badness 10000) in paragraph at lines 253--254
 []|\T1/txtt/m/n/10.95 missing_-profile\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 correlation_-hints\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 class_-balance\T1/txr/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 5681) in paragraph at lines 231--232
+Underfull \hbox (badness 5681) in paragraph at lines 254--255
 \T1/txtt/m/n/10.95 journey\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 get_-journey_-status\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 spawn_-subagent\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 run_-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 231--232
+Underfull \hbox (badness 10000) in paragraph at lines 254--255
 \T1/txtt/m/n/10.95 deterministic_-skill\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 run_-training_-job\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 get_-job_-
  []
 
-[17] [18]
-LaTeX Font Info:    Trying to load font information for TS1+txtt on input line 263.
- (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/ts1txtt.fd
-File: ts1txtt.fd 2000/12/15 v3.1
-)
-Overfull \hbox (11.39917pt too wide) in paragraph at lines 264--265
+[18] [19] [20]
+Overfull \hbox (11.39917pt too wide) in paragraph at lines 287--288
 \T1/txr/m/n/12 man-date. The de-ter-min-is-tic stages are ap-proved au-to-mat-i-cally as \T1/txtt/c/sc/12 auto:experiment:
  []
 
 
-Overfull \hbox (5.80858pt too wide) in paragraph at lines 270--271
+Overfull \hbox (5.80858pt too wide) in paragraph at lines 293--294
 \T1/txr/m/n/12 tic-i-pate in an or-ches-trated ex-per-i-ment, each with a \T1/txr/m/it/12 dis-tinct system-prompt con-tract \T1/txr/m/n/12 (\T1/txtt/c/sc/12 ROLE_-
  []
 
-[19]
-Overfull \hbox (15.70865pt too wide) in paragraph at lines 275--276
-\T1/txr/m/n/12 The agen-tic round is the sys-tem's \T1/txr/m/it/12 grounded au-ton-omy \T1/txr/m/n/12 mech-a-nism and the multi-orquestration
+
+Overfull \hbox (29.33746pt too wide) in paragraph at lines 300--301
+[]\T1/txr/m/n/12 The agen-tic round is the sys-tem's \T1/txr/m/it/12 grounded au-ton-omy \T1/txr/m/n/12 mech-a-nism and its multi-orchestration
  []
 
-[20]
-Overfull \hbox (29.60385pt too wide) in paragraph at lines 287--288
+[21]
+Overfull \hbox (29.60385pt too wide) in paragraph at lines 312--313
 \T1/txtt/c/sc/12 search_-con-text\T1/txr/m/n/12 , \T1/txtt/c/sc/12 list_-re-cent_-runs\T1/txr/m/n/12 , \T1/txtt/c/sc/12 get_-run_-sum-mary\T1/txr/m/n/12 , \T1/txtt/c/sc/12 dataset_-eda\T1/txr/m/n/12 , \T1/txtt/c/sc/12 get_-dataset_-
  []
 
 
-Overfull \hbox (50.19618pt too wide) in paragraph at lines 287--288
+Overfull \hbox (50.19618pt too wide) in paragraph at lines 312--313
 \T1/txtt/c/sc/12 con-text\T1/txr/m/n/12 , \T1/txtt/c/sc/12 clean_-dataset\T1/txr/m/n/12 , \T1/txtt/c/sc/12 run_-python \T1/txr/m/n/12 (sand-boxed; dataset ex-posed read-only as \T1/txtt/c/sc/12 dataset.csv\T1/txr/m/n/12 ),
  []
 
-[21] [22]
-Underfull \hbox (badness 10000) in paragraph at lines 366--366
+[22] [23]
+<figures/screenshots/slotA_data_view.png, id=1181, 1445.4pt x 903.375pt>
+File: figures/screenshots/slotA_data_view.png Graphic file (type png)
+<use figures/screenshots/slotA_data_view.png>
+Package pdftex.def Info: figures/screenshots/slotA_data_view.png  used on input line 365.
+(pdftex.def)             Requested size: 426.79135pt x 266.74144pt.
+<figures/screenshots/slotB_completed_run.png, id=1182, 1445.4pt x 903.375pt>
+File: figures/screenshots/slotB_completed_run.png Graphic file (type png)
+<use figures/screenshots/slotB_completed_run.png>
+Package pdftex.def Info: figures/screenshots/slotB_completed_run.png  used on input line 372.
+(pdftex.def)             Requested size: 426.79135pt x 266.74144pt.
+ [24 <./figures/screenshots/slotA_data_view.png (PNG copy)>]
+Underfull \hbox (badness 10000) in paragraph at lines 391--391
 []|\T1/txr/m/n/10.95 Workspace-relative paths only;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 366--366
+Underfull \hbox (badness 10000) in paragraph at lines 391--391
 \T1/txtt/m/n/10.95 resolve()+relative_-to \T1/txr/m/n/10.95 blocks
  []
 
 
-Underfull \hbox (badness 2460) in paragraph at lines 366--367
+Underfull \hbox (badness 2460) in paragraph at lines 391--392
 \T1/txr/m/n/10.95 li-brary er-ror strings (MAJ-01,
  []
 
 
-Underfull \hbox (badness 7081) in paragraph at lines 367--367
+Underfull \hbox (badness 7081) in paragraph at lines 392--392
 []|\T1/txr/m/n/10.95 Import whitelist (22 mod-ules), 14
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--368
+Underfull \hbox (badness 10000) in paragraph at lines 392--393
 []|\T1/txr/m/n/10.95 Compute iso-la-tion only; no
  []
 
 
-Underfull \hbox (badness 1924) in paragraph at lines 367--368
+Underfull \hbox (badness 1924) in paragraph at lines 392--393
 \T1/txr/m/n/10.95 (BLK-01, open). The trade-
  []
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 367--368
+Underfull \hbox (badness 1117) in paragraph at lines 392--393
 \T1/txr/m/n/10.95 off is de-lib-er-ate: a local-first,
  []
 
 
-Underfull \hbox (badness 2717) in paragraph at lines 367--368
+Underfull \hbox (badness 2717) in paragraph at lines 392--393
 \T1/txr/m/n/10.95 and ev-ery sand-box ar-ti-fact is
  []
 
 
-Underfull \hbox (badness 6559) in paragraph at lines 367--368
+Underfull \hbox (badness 6559) in paragraph at lines 392--393
 \T1/txr/m/n/10.95 treated as un-trusted and re-
  []
 
 
-Underfull \hbox (badness 6641) in paragraph at lines 368--369
+Underfull \hbox (badness 6641) in paragraph at lines 393--394
 \T1/txr/m/n/10.95 prin-ci-pal is recorded (\T1/txtt/m/n/10.95 auto:
  []
 
 
-Overfull \hbox (18.92857pt too wide) in paragraph at lines 362--371
+Overfull \hbox (18.92857pt too wide) in paragraph at lines 387--396
  [][] 
  []
 
-[23] [24]) (./chapters/ch4_implementation.tex [25]
+[25 <./figures/screenshots/slotB_completed_run.png (PNG copy)>] [26]) (./chapters/ch4_implementation.tex [27]
 Chapter 4.
-[26
+[28
 
 ]
 Overfull \hbox (7.58336pt too wide) in paragraph at lines 60--61
@@ -2152,111 +2155,99 @@ Overfull \hbox (7.58336pt too wide) in paragraph at lines 60--61
 File: lstlang1.sty 2025/11/14 1.11b listings language file
 ) (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) [27]
+) [29]
 LaTeX Font Info:    Font shape `T1/txtt/b/n' in size <10> not available
 (Font)              Font shape `T1/txtt/bx/n' tried instead on input line 82.
  (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) [28] [29] [30]
+) [30] [31] [32]
 Overfull \hbox (2.1196pt too wide) in paragraph at lines 183--184
 []\T1/txr/m/n/12 The de-ter-min-is-tic core was the first thing built.
  []
 
-[31]) (./chapters/ch5_methodology.tex [32]
+[33]) (./chapters/ch5_methodology.tex [34]
 Chapter 5.
+LaTeX Font Info:    Font shape `T1/txr/b/n' in size <10> not available
+(Font)              Font shape `T1/txr/bx/n' tried instead on input line 32.
 
-Overfull \hbox (12.54068pt too wide) in paragraph at lines 9--10
-\T1/txr/m/it/12 ducible by con-struc-tion\T1/txr/m/n/12 : checks that run au-to-mat-i-cally, in a dis-pos-able tem-po-rary workspace,
- []
-
-
-Overfull \hbox (2.68738pt too wide) in paragraph at lines 14--15
-[]\T1/txr/bx/n/12 Grounded-autonomy ex-per-i-ment (Ex-per-i-ment 3, RQ4--RQ6). \T1/txr/m/n/12 An ablation-based
- []
-
-
-Underfull \hbox (badness 7777) in paragraph at lines 34--35
-[]|\T1/txr/m/n/10.95 Both com-plete; \T1/txtt/m/n/10.95 test_-accuracy \T1/txr/m/n/10.95 and
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 34--35
-\T1/txtt/m/n/10.95 test_-f1_-macro \T1/txr/m/n/10.95 match within $\OT1/txr/m/n/10.95 10[]$\T1/txr/m/n/10.95 ;
- []
-
-
-Underfull \hbox (badness 4981) in paragraph at lines 34--35
-\T1/txr/m/n/10.95 man-i-fest records seed and non-empty
- []
-
-
-Underfull \hbox (badness 4279) in paragraph at lines 35--35
-[]|\T1/txr/m/n/10.95 Independent stdio MCP client against
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 35--35
-\T1/txtt/m/n/10.95 model_-registry_-mcp\T1/txr/m/n/10.95 ; \T1/txtt/m/n/10.95 list_-tools\T1/txr/m/n/10.95 ,
- []
-
-
-Underfull \hbox (badness 4416) in paragraph at lines 40--40
-[]|\T1/txr/m/n/10.95 Agentic round: agent-written feature-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 40--40
-\T1/txr/m/n/10.95 engineering and train-ing code in
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 40--40
-\T1/txtt/m/n/10.95 thelab/sandbox\T1/txr/m/n/10.95 ; val-ida-tor re-com-
- []
-
-
-Underfull \hbox (badness 4805) in paragraph at lines 41--41
-[]|\T1/txr/m/n/10.95 Ablation: multi-agent round vs. sin-
- []
-
-
-Underfull \hbox (badness 3271) in paragraph at lines 41--41
-\T1/txr/m/n/10.95 gle shared-prompt agent; de-ter-min-is-tic
- []
-
-
-Overfull \hbox (18.92859pt too wide) in paragraph at lines 29--44
+Overfull \hbox (1.85631pt too wide) in paragraph at lines 30--47
  [][] 
  []
 
-[33
+[35
 
-] [34]
-Overfull \hbox (14.79485pt too wide) in paragraph at lines 60--61
-\T1/txtt/c/sc/12 sis/evidence/raw/\T1/txr/m/n/12 ; a com-mit-ted gen-er-a-tor script (\T1/txtt/c/sc/12 scripts/thesis/generate_-
+]
+Overfull \hbox (1.85631pt too wide) in paragraph at lines 54--71
+ [][] 
  []
 
-[35] [36]
-Overfull \hbox (13.00737pt too wide) in paragraph at lines 107--108
+[36] [37] [38] [39]
+Overfull \hbox (13.00737pt too wide) in paragraph at lines 165--166
 \T1/txr/m/n/12 shape/schema/target/leakage, and met-rics are re-com-puted out-side the sand-box. Record
  []
 
-[37]
-Overfull \hbox (16.116pt too wide) in paragraph at lines 123--124
-\T1/txr/m/n/12 de-ter-min-is-tic base-lines (churn, Cal-i-for-nia hous-ing, IBM HR, e-commerce, Ti-tanic, S&P 500).
+
+LaTeX Warning: Reference `SEC:EXP-AGENTIC-RESULTS' on page 40 undefined on input line 173.
+
+
+LaTeX Warning: Reference `SEC:EXP-AGENTIC-RESULTS' on page 40 undefined on input line 173.
+
+
+Underfull \hbox (badness 1616) in paragraph at lines 180--181
+[]|\T1/txr/m/n/10.95 raw S&P ambiguous-
  []
 
-[38] [39]) (./chapters/ch6_results.tex [40]
+
+Underfull \hbox (badness 10000) in paragraph at lines 182--183
+[]|\T1/txr/m/n/10.95 live Open-Router
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+[]|\T1/txr/m/n/10.95 honest fail-ure; fix
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--185
+[]|\T1/txr/m/n/10.95 role con-tracts vs
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--185
+[]|\T1/txr/m/n/10.95 multi agen-tic;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--185
+\T1/txr/m/n/10.95 sin-gle de-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--186
+[]|\T1/txr/m/n/10.95 GLM shared-prompt
+ []
+
+
+Overfull \hbox (19.5472pt too wide) in paragraph at lines 176--188
+ [][] 
+ []
+
+[40] [41]
+Overfull \hbox (18.75351pt too wide) in paragraph at lines 230--231
+[]\T1/txr/m/n/12 The agent-level met-rics com-plete the set. They are re-quired by the reg-is-tered performance-
+ []
+
+) (./chapters/ch6_results.tex [42]
 Chapter 6.
 Package pgfplots info on input line 45: Overriding colorspace to rgb due to xcolor configuration.
 Package pgfplots info on input line 45: Using 'lua backend=false' for axis: x coord trafo unsupported.
-[41
+[43
 
 ]
 Package pgfplots info on input line 67: Overriding colorspace to rgb due to xcolor configuration.
 Package pgfplots info on input line 67: Using 'lua backend=false' for axis: x coord trafo unsupported.
 Package pgfplots info on input line 88: Overriding colorspace to rgb due to xcolor configuration.
- [42] [43]
+ [44] [45]
 Overfull \hbox (2.24147pt too wide) in paragraph at lines 142--143
 []\T1/txr/bx/n/12 Provider di-men-sion (recorded). \T1/txr/m/n/12 The same ex-per-i-ment ex-e-cuted on the Ti-tanic dataset
  []
@@ -2281,7 +2272,7 @@ Overfull \hbox (18.92813pt too wide) in paragraph at lines 170--181
  [][] 
  []
 
-[44]
+[46]
 Underfull \hbox (badness 10000) in paragraph at lines 199--199
 []|\T1/txtt/m/n/10.95 shrutimechlearn/
  []
@@ -2316,7 +2307,7 @@ Overfull \hbox (30.92899pt too wide) in paragraph at lines 195--204
  [][] 
  []
 
-[45]
+[47]
 Underfull \hbox (badness 10000) in paragraph at lines 222--222
 []|\T1/txr/bx/n/10.95 Verified-claim
  []
@@ -2331,12 +2322,12 @@ Overfull \hbox (31.54716pt too wide) in paragraph at lines 220--232
  [][] 
  []
 
-<figures/validity_story.pdf, id=1448, 375.804pt x 173.448pt>
+<figures/validity_story.pdf, id=1495, 375.804pt x 173.448pt>
 File: figures/validity_story.pdf Graphic file (type pdf)
 <use figures/validity_story.pdf>
 Package pdftex.def Info: figures/validity_story.pdf  used on input line 238.
 (pdftex.def)             Requested size: 349.97203pt x 161.53258pt.
-[46]
+[48]
 Underfull \hbox (badness 1997) in paragraph at lines 253--254
 []|\T1/txr/m/n/10.95 +0.0000 (tie at
  []
@@ -2396,7 +2387,7 @@ Overfull \hbox (25.85672pt too wide) in paragraph at lines 267--279
  [][] 
  []
 
-[47 <./figures/validity_story.pdf>] [48]
+[49 <./figures/validity_story.pdf>] [50]
 Underfull \hbox (badness 2726) in paragraph at lines 304--304
 []|\T1/txr/bx/n/10.95 Best de-ter-min-
  []
@@ -2426,7 +2417,7 @@ Overfull \hbox (3.09485pt too wide) in paragraph at lines 302--314
  [][] 
  []
 
-
+[51]
 Underfull \hbox (badness 10000) in paragraph at lines 327--327
 []|\T1/txtt/m/n/10.95 kevinarvai/
  []
@@ -2606,19 +2597,18 @@ Overfull \hbox (17.32082pt too wide) in paragraph at lines 323--338
  [][] 
  []
 
-[49]
-<figures/exp4_wallclock.pdf, id=1513, 375.804pt x 187.902pt>
+<figures/exp4_wallclock.pdf, id=1560, 375.804pt x 187.902pt>
 File: figures/exp4_wallclock.pdf Graphic file (type pdf)
 <use figures/exp4_wallclock.pdf>
 Package pdftex.def Info: figures/exp4_wallclock.pdf  used on input line 342.
 (pdftex.def)             Requested size: 362.77525pt x 181.39597pt.
- [50]
-<figures/ratchet_uplift.pdf, id=1518, 375.804pt x 202.356pt>
+[52]
+<figures/ratchet_uplift.pdf, id=1565, 375.804pt x 202.356pt>
 File: figures/ratchet_uplift.pdf Graphic file (type pdf)
 <use figures/ratchet_uplift.pdf>
 Package pdftex.def Info: figures/ratchet_uplift.pdf  used on input line 349.
 (pdftex.def)             Requested size: 349.97203pt x 188.45467pt.
- [51 <./figures/exp4_wallclock.pdf> <./figures/ratchet_uplift.pdf>] (./evidence/ratchet_generations_ratchet_ledger_clinvar.tex) (./evidence/ratchet_generations_ratchet_ledger_kidney.tex) (./evidence/ratchet_generations_ratchet_ledger_crypto.tex) (./evidence/ratchet_generations_ratchet_ledger_energy.tex) [52]
+ [53 <./figures/exp4_wallclock.pdf> <./figures/ratchet_uplift.pdf>] (./evidence/ratchet_generations_ratchet_ledger_clinvar.tex) (./evidence/ratchet_generations_ratchet_ledger_kidney.tex) (./evidence/ratchet_generations_ratchet_ledger_crypto.tex) (./evidence/ratchet_generations_ratchet_ledger_energy.tex) [54]
 Underfull \hbox (badness 10000) in paragraph at lines 380--380
 []|\T1/txr/m/n/10.95 0.83
  []
@@ -2658,220 +2648,233 @@ Overfull \hbox (8.78491pt too wide) in paragraph at lines 376--391
  [][] 
  []
 
-[53]
-<figures/team_comparison.pdf, id=1635, 375.804pt x 187.902pt>
+[55]
+<figures/team_comparison.pdf, id=1683, 375.804pt x 187.902pt>
 File: figures/team_comparison.pdf Graphic file (type pdf)
 <use figures/team_comparison.pdf>
 Package pdftex.def Info: figures/team_comparison.pdf  used on input line 397.
 (pdftex.def)             Requested size: 349.97203pt x 174.99362pt.
- [54] [55 <./figures/team_comparison.pdf>]
-<figures/predict_latency.pdf, id=1692, 332.44202pt x 158.99399pt>
+ [56] [57 <./figures/team_comparison.pdf>]
+<figures/predict_latency.pdf, id=1739, 332.44202pt x 158.99399pt>
 File: figures/predict_latency.pdf Graphic file (type pdf)
 <use figures/predict_latency.pdf>
-Package pdftex.def Info: figures/predict_latency.pdf  used on input line 420.
+Package pdftex.def Info: figures/predict_latency.pdf  used on input line 418.
 (pdftex.def)             Requested size: 307.29028pt x 146.96523pt.
- (./evidence/predictions_prediction_sweep_full.tex) [56 <./figures/predict_latency.pdf>] [57]
-LaTeX Font Info:    Font shape `T1/txtt/m/it' in size <10.95> not available
-(Font)              Font shape `T1/txtt/m/sl' tried instead on input line 444.
- [58]
-Underfull \hbox (badness 1259) in paragraph at lines 475--475
+ (./evidence/predictions_prediction_sweep_full.tex) [58 <./figures/predict_latency.pdf>]
+<figures/screenshots/slotC_chat_drawer.png, id=1784, 1445.4pt x 903.375pt>
+File: figures/screenshots/slotC_chat_drawer.png Graphic file (type png)
+<use figures/screenshots/slotC_chat_drawer.png>
+Package pdftex.def Info: figures/screenshots/slotC_chat_drawer.png  used on input line 442.
+(pdftex.def)             Requested size: 256.07741pt x 160.05037pt.
+ [59]
+Overfull \hbox (0.15459pt too wide) in paragraph at lines 454--455
+\T1/txtt/c/sc/12 FAILED\T1/txr/m/n/12 ) while both clas-si-fi-ca-tion legs suc-ceeded, con-crete ev-i-dence of small-model
+ []
+
+
+Underfull \hbox (badness 1259) in paragraph at lines 473--473
 []|\T1/txr/m/n/10.95 B1 agent legs, Open-Router
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 476--476
+Underfull \hbox (badness 10000) in paragraph at lines 474--474
 []|\T1/txr/m/n/10.95 B1 agent legs, Ol-lama
  []
 
 
-Underfull \hbox (badness 7221) in paragraph at lines 477--477
+Underfull \hbox (badness 7221) in paragraph at lines 475--475
 []|\T1/txr/m/n/10.95 Titanic or-ches-tra-tion, both
  []
 
 
-Underfull \hbox (badness 1810) in paragraph at lines 477--478
+Underfull \hbox (badness 1810) in paragraph at lines 475--476
 []|\T1/txr/m/n/10.95 Ollama Fea-tureEngi-neer in-
  []
 
 
-Underfull \hbox (badness 1048) in paragraph at lines 478--478
+Underfull \hbox (badness 1048) in paragraph at lines 476--476
 []|\T1/txr/m/n/10.95 Case study (IBM HR, chat
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 479--479
+Underfull \hbox (badness 10000) in paragraph at lines 477--477
 []|\T1/txr/m/n/10.95 Live agen-tic rounds, iris
  []
 
 
-Underfull \hbox (badness 2521) in paragraph at lines 479--480
+Underfull \hbox (badness 2521) in paragraph at lines 477--478
 []|\T1/txr/m/n/10.95 15/15 batch en-tries trained
  []
 
 
-Underfull \hbox (badness 1242) in paragraph at lines 480--481
+Underfull \hbox (badness 1242) in paragraph at lines 478--479
 []|\T1/txr/m/n/10.95 30/30 batch en-tries trained;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 482--482
+Underfull \hbox (badness 10000) in paragraph at lines 480--480
 []|\T1/txr/m/n/10.95 Live agen-tic round,
  []
 
 
-Overfull \hbox (8.16626pt too wide) in paragraph at lines 471--485
+Overfull \hbox (8.16626pt too wide) in paragraph at lines 469--483
  [][] 
  []
 
-[59] [60]
-Overfull \hbox (7.54721pt too wide) in paragraph at lines 496--507
+[60 <./figures/screenshots/slotC_chat_drawer.png (PNG copy)>] [61]
+Overfull \hbox (7.54721pt too wide) in paragraph at lines 494--505
  [][] 
  []
 
-<figures/fe_cost.pdf, id=1760, 332.44202pt x 158.99399pt>
+<figures/fe_cost.pdf, id=1803, 332.44202pt x 158.99399pt>
 File: figures/fe_cost.pdf Graphic file (type pdf)
 <use figures/fe_cost.pdf>
-Package pdftex.def Info: figures/fe_cost.pdf  used on input line 511.
+Package pdftex.def Info: figures/fe_cost.pdf  used on input line 509.
 (pdftex.def)             Requested size: 349.97203pt x 167.378pt.
-(./evidence/model_latency_latency_probe_openrouter_realistic.tex) [61 <./figures/fe_cost.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 534--534
+(./evidence/model_latency_latency_probe_openrouter_realistic.tex) [62 <./figures/fe_cost.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 532--532
 []|\T1/txtt/m/n/10.95 LinearRegression \T1/txr/m/n/10.95 got un-ex-
  []
 
 
-Underfull \hbox (badness 4096) in paragraph at lines 534--534
+Underfull \hbox (badness 4096) in paragraph at lines 532--532
 \T1/txr/m/n/10.95 pected \T1/txtt/m/n/10.95 alpha\T1/txr/m/n/10.95 : shared hy-per-pa-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 534--534
+Underfull \hbox (badness 10000) in paragraph at lines 532--532
 \T1/txr/m/n/10.95 ram-e-ter grids con-tained for-eign
  []
 
 
-Underfull \hbox (badness 3058) in paragraph at lines 535--535
+Underfull \hbox (badness 3058) in paragraph at lines 533--533
 []|\T1/txr/m/n/10.95 Experiments re-ported \T1/txtt/m/n/10.95 completed
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 536--536
+Underfull \hbox (badness 10000) in paragraph at lines 534--534
 []|\T1/txr/m/n/10.95 Fixture datasets re-jected mid-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 536--536
+Underfull \hbox (badness 10000) in paragraph at lines 534--534
 \T1/txr/m/n/10.95 orchestration ("only up-loaded
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 537--537
+Underfull \hbox (badness 10000) in paragraph at lines 535--535
 []|\T1/txr/m/n/10.95 EDA crashed on array-valued
  []
 
 
-Underfull \hbox (badness 4647) in paragraph at lines 537--537
+Underfull \hbox (badness 4647) in paragraph at lines 535--535
 []|\T1/txr/m/n/10.95 Non-scalar col-umn guard (pro-
  []
 
 
-Underfull \hbox (badness 1975) in paragraph at lines 538--538
+Underfull \hbox (badness 1975) in paragraph at lines 536--536
 []|\T1/txr/m/n/10.95 Re-running an ex-per-i-ment on an
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--540
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
 []|\T1/txr/m/n/10.95 BLK-010--
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 540--540
+Underfull \hbox (badness 1953) in paragraph at lines 538--538
 []|\T1/txr/m/n/10.95 Constant columns re-jected; scale
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--540
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
 \T1/txr/m/n/10.95 non-numeric fea-tures re-jected;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--540
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
 \T1/txr/m/n/10.95 missing-target re-jec-tion; un-safe
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--540
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
 \T1/txr/m/n/10.95 dataset-id re-jec-tion; wrong-task
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--541
+Underfull \hbox (badness 10000) in paragraph at lines 538--539
 []|\T1/txr/m/n/10.95 applied
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 540--541
+Underfull \hbox (badness 10000) in paragraph at lines 538--539
 \T1/txr/m/n/10.95 (by de-
  []
 
 
-Overfull \hbox (30.92857pt too wide) in paragraph at lines 530--543
+Overfull \hbox (30.92857pt too wide) in paragraph at lines 528--541
  [][] 
  []
 
-[62]) (./chapters/ch7_discussion.tex [63]
+[63]) (./chapters/ch7_discussion.tex [64]
 Chapter 7.
+[65
 
-Overfull \hbox (1.72867pt too wide) in paragraph at lines 15--16
-\T1/txr/m/n/12 GLM-5.3-flash was the only model that ini-tially pro-duced factory-safe feature-engineering
- []
-
-[64
-
-] [65]
+] [66]
 Overfull \hbox (1.87135pt too wide) in paragraph at lines 28--29
 []\T1/txr/bx/n/12 The sand-box is com-pute iso-la-tion, not con-fine-ment. \T1/txr/m/n/12 The ad-ver-sar-ial au-dit demon-
  []
 
-[66] [67] [68] [69]
-Overfull \hbox (1.19934pt too wide) in paragraph at lines 96--97
+[67] [68]
+Overfull \hbox (11.1354pt too wide) in paragraph at lines 66--67
+\T1/txr/m/n/12 ported ac-cu-ra-cies (74.9% base-line, 84.2% naive, 60.3% at-decision-time) are pipeline-
+ []
+
+[69] [70]
+Overfull \hbox (1.19934pt too wide) in paragraph at lines 98--99
 []\T1/txr/bx/n/12 Originality. \T1/txr/m/n/12 The sys-tem is orig-i-nal work; third-party stan-dards it im-ple-ments (MCP,
  []
 
-[70]
-Underfull \hbox (badness 2460) in paragraph at lines 119--120
+[71]
+Underfull \hbox (badness 2460) in paragraph at lines 121--122
 []|\T1/txr/m/n/10.95 No GPU; all ex-per-i-ments
  []
 
 
-Underfull \hbox (badness 2173) in paragraph at lines 120--121
+Underfull \hbox (badness 2173) in paragraph at lines 122--123
 []|\T1/txr/m/n/10.95 Credit-metered; one week
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 122--123
+Underfull \hbox (badness 10000) in paragraph at lines 124--125
 \T1/txr/m/n/10.95 pro-cess re-designed (Sec-
  []
 
 
-Underfull \hbox (badness 1533) in paragraph at lines 123--124
+Underfull \hbox (badness 1533) in paragraph at lines 125--126
 []|\T1/txr/m/n/10.95 qwen3:4b / qwen2.5-coder
  []
 
 
-Overfull \hbox (7.54677pt too wide) in paragraph at lines 115--128
+Overfull \hbox (7.54677pt too wide) in paragraph at lines 117--130
  [][] 
  []
 
-[71]) (./chapters/ch8_conclusions.tex [72]
+[72]) (./chapters/ch8_conclusions.tex [73]
 Chapter 8.
-[73
+[74
 
 ]
-Overfull \hbox (27.0713pt too wide) in paragraph at lines 29--30
+Overfull \hbox (3.92264pt too wide) in paragraph at lines 28--29
+[]\T1/txr/bx/n/12 Grammar-constrained sam-pling. \T1/txr/m/n/12 Re-place the post-hoc JSON re-pair with provider-
+ []
+
+[75]
+Overfull \hbox (27.0713pt too wide) in paragraph at lines 32--33
 []\T1/txr/bx/n/12 Live-provider au-to-mated eval-u-a-tion. \T1/txr/m/n/12 Ex-tend the eval-u-a-tor with a provider-configurable
  []
 
-[74]) [75]
+) [76]
 Overfull \hbox (16.00613pt too wide) in paragraph at lines 345--345
 \T1/txr/m/n/12 els,^^Q in \T1/txr/m/it/12 Ad-vances in Neu-ral In-for-ma-tion Pro-cess-ing Sys-tems\T1/txr/m/n/12 , vol. 35, 2022, pp. 24 824^^U
  []
@@ -2896,7 +2899,7 @@ Overfull \hbox (17.18626pt too wide) in paragraph at lines 345--345
 \T1/txr/m/it/12 mem-ory, eval-u-a-tion)\T1/txr/m/n/12 , [][]$\T1/txtt/c/sc/12 https : / / github . com / bonigarcia / context -[] engineering$[][]
  []
 
-[76
+[77
 
 
 ]
@@ -2904,7 +2907,7 @@ Overfull \hbox (7.60641pt too wide) in paragraph at lines 345--345
 []\T1/txr/m/n/12 Iterative, Inc., \T1/txr/m/it/12 DVC: Data ver-sion con-trol ^^V git for data sci-ence mod-els and datasets\T1/txr/m/n/12 ,
  []
 
-[77]
+[78]
 Overfull \hbox (3.39072pt too wide) in paragraph at lines 345--345
 []\T1/txr/m/n/12 OWASP Foun-da-tion, \T1/txr/m/it/12 OWASP top 10 for large lan-guage model ap-pli-ca-tions\T1/txr/m/n/12 , [][]$\T1/txtt/c/sc/12 https :
  []
@@ -2924,19 +2927,19 @@ Overfull \hbox (6.2087pt too wide) in paragraph at lines 345--345
 []\T1/txr/m/n/12 European Par-lia-ment and Coun-cil of the Eu-ro-pean Union, \T1/txr/m/it/12 Reg-u-la-tion (eu) 2024/1689
  []
 
-[78]
+[79]
 Overfull \hbox (8.48029pt too wide) in paragraph at lines 345--345
 []\T1/txr/m/n/12 mempalace con-trib-u-tors, \T1/txr/m/it/12 Mem-ory palace: Struc-tured mem-ory ac-cess for LLM agents\T1/txr/m/n/12 ,
  []
 
-[79] (./chapters/annexes.tex
+[80] (./chapters/annexes.tex
 Appendix A.
 
 Overfull \hbox (0.70526pt too wide) in paragraph at lines 26--27
 []\T1/txr/m/n/12 Re-running the com-mand yields a new \T1/txtt/c/sc/12 run_-id \T1/txr/m/n/12 with equiv-a-lent met-rics; \T1/txtt/c/sc/12 runs/<run_-
  []
 
-[80
+[81
 
 
 ]
@@ -2969,13 +2972,13 @@ Overfull \hbox (18.92813pt too wide) in paragraph at lines 80--94
  [][] 
  []
 
-[81] [82]
+[82] [83]
 Appendix B.
-[83
+[84
 
-] [84]
+] [85]
 Appendix C.
-[85
+[86
 
 ]
 Appendix D.
@@ -3084,9 +3087,9 @@ Overfull \hbox (2.47537pt too wide) in paragraph at lines 175--198
  [][] 
  []
 
-) [86
+) [87
 
-] [87] (./main.aux)
+] [88] (./main.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-08-10>
@@ -3095,24 +3098,27 @@ L3 programming layer <2026-08-10>
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: There were undefined references.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 26247977AF9AC7672045F33FEF7C2933;20981.
+(rerunfilecheck)             Checksum: 27E603846F3E72A2BBAB0E1C1E16EDA4;21161.
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 52294 strings out of 469046
- 1121917 string characters out of 5457988
- 2271139 words of memory out of 5000000
- 79925 multiletter control sequences out of 15000+600000
- 721281 words of font info for 191 fonts, out of 8000000 for 9000
+ 52376 strings out of 469046
+ 1123910 string characters out of 5457988
+ 2273142 words of memory out of 5000000
+ 79985 multiletter control sequences out of 15000+600000
+ 720685 words of font info for 191 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  92i,12n,103p,2456b,3932s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxmi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xbtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/tcxtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/txsy.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (106 pages, 745940 bytes).
+</home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxmi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xbtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/tcxtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/txsy.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (107 pages, 1147175 bytes).
 PDF statistics:
- 2289 PDF objects out of 2487 (max. 8388607)
- 583 named destinations out of 1000 (max. 500000)
- 937 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2334 PDF objects out of 2487 (max. 8388607)
+ 603 named destinations out of 1000 (max. 500000)
+ 960 words of extra memory for PDF output out of 10000 (max. 10000000)
 

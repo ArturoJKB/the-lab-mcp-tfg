@@ -22,90 +22,91 @@
 \contentsline {chapter}{\numberline {3}System Design: \emph {thelab-mcp}}{11}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Design principles}{11}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Architecture overview}{12}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Typed contracts}{13}{section.3.3}%
-\contentsline {section}{\numberline {3.4}The deterministic pipeline}{14}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Validation as a gate}{15}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Task-type inference and the model registry}{15}{subsection.3.4.2}%
-\contentsline {subsection}{\numberline {3.4.3}The cleaning policy}{15}{subsection.3.4.3}%
-\contentsline {subsection}{\numberline {3.4.4}Run artifacts}{16}{subsection.3.4.4}%
-\contentsline {section}{\numberline {3.5}The context store}{16}{section.3.5}%
-\contentsline {section}{\numberline {3.6}The MCP surface}{17}{section.3.6}%
-\contentsline {section}{\numberline {3.7}The agent layer}{18}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Provider abstraction}{18}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}The harness and grounding}{18}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {3.7.3}Worker agent and proposals}{19}{subsection.3.7.3}%
-\contentsline {subsection}{\numberline {3.7.4}The approval gate}{19}{subsection.3.7.4}%
-\contentsline {subsection}{\numberline {3.7.5}Role agents and the orchestrator}{19}{subsection.3.7.5}%
-\contentsline {subsection}{\numberline {3.7.6}The agentic round}{20}{subsection.3.7.6}%
-\contentsline {subsection}{\numberline {3.7.7}The chat agent}{21}{subsection.3.7.7}%
-\contentsline {subsection}{\numberline {3.7.8}Global agents}{21}{subsection.3.7.8}%
-\contentsline {section}{\numberline {3.8}Experiment lifecycle}{21}{section.3.8}%
-\contentsline {section}{\numberline {3.9}The workspace UI}{22}{section.3.9}%
-\contentsline {section}{\numberline {3.10}Safety and security model}{23}{section.3.10}%
-\contentsline {subsection}{\numberline {3.10.1}Alternatives considered}{25}{subsection.3.10.1}%
-\contentsline {chapter}{\numberline {4}Implementation}{26}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Technology stack and repository layout}{26}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Reproducibility engineering}{27}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Three ways in: CLI, Python API, HTTP}{28}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Kaggle ingestion and context packs}{30}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Testing and quality assurance}{30}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Development process}{31}{section.4.6}%
-\contentsline {chapter}{\numberline {5}Evaluation Methodology}{33}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Evaluation objectives}{33}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Research questions and pass criteria}{33}{section.5.2}%
-\contentsline {section}{\numberline {5.3}The automated evaluator}{34}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Experiment 1: three ways in}{36}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Experiment 2: real-dataset validation}{36}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Experiment 3: grounded autonomy (the agentic round)}{37}{section.5.6}%
-\contentsline {section}{\numberline {5.7}Experiment 4: multi-domain stress validation (the continuous loop)}{38}{section.5.7}%
-\contentsline {section}{\numberline {5.8}Metrics}{39}{section.5.8}%
-\contentsline {chapter}{\numberline {6}Results}{41}{chapter.6}%
-\contentsline {section}{\numberline {6.1}The recorded evidence base}{41}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Automated evaluation: RQ1--RQ3}{43}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Experiment 1: three ways in}{43}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Experiment 2: real-dataset validation (S\&P 500)}{44}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Kaggle pipeline proof (P3.7)}{45}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Experiment 3: grounded autonomy (agentic round)}{46}{section.6.6}%
-\contentsline {subsection}{\numberline {6.6.1}RQ5 spike: first recorded validity numbers}{48}{subsection.6.6.1}%
-\contentsline {section}{\numberline {6.7}Experiment 4: multi-domain stress validation}{49}{section.6.7}%
-\contentsline {subsection}{\numberline {6.7.1}Per-stage model assignment: the mixed-team experiment}{53}{subsection.6.7.1}%
-\contentsline {subsection}{\numberline {6.7.2}GLM-uniform ablation: validator as capability enabler}{55}{subsection.6.7.2}%
-\contentsline {subsection}{\numberline {6.7.3}Local-first proof: offline execution}{55}{subsection.6.7.3}%
-\contentsline {subsection}{\numberline {6.7.4}Three-ways-in prediction sweep}{56}{subsection.6.7.4}%
-\contentsline {section}{\numberline {6.8}Agent case study: IBM HR attrition}{56}{section.6.8}%
-\contentsline {section}{\numberline {6.9}Cross-cutting observations from the benchmark suite}{59}{section.6.9}%
-\contentsline {section}{\numberline {6.10}Agent efficiency and reliability metrics}{59}{section.6.10}%
-\contentsline {section}{\numberline {6.11}P6 findings harvest: the loop debugging its own factory}{62}{section.6.11}%
-\contentsline {chapter}{\numberline {7}Discussion}{64}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Answering the research questions}{64}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Design lessons}{65}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Agent reliability in practice}{66}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Limitations and threats to validity}{67}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}System limitations}{67}{subsection.7.4.1}%
-\contentsline {subsection}{\numberline {7.4.2}Evaluation threats}{68}{subsection.7.4.2}%
-\contentsline {section}{\numberline {7.5}Regulatory framework}{69}{section.7.5}%
-\contentsline {subsection}{\numberline {7.5.1}Data protection}{69}{subsection.7.5.1}%
-\contentsline {subsection}{\numberline {7.5.2}AI regulation and risk management}{69}{subsection.7.5.2}%
-\contentsline {subsection}{\numberline {7.5.3}Licenses and intellectual property}{70}{subsection.7.5.3}%
-\contentsline {subsection}{\numberline {7.5.4}Technical standards}{70}{subsection.7.5.4}%
-\contentsline {section}{\numberline {7.6}Socio-economic environment}{70}{section.7.6}%
-\contentsline {subsection}{\numberline {7.6.1}Budget}{70}{subsection.7.6.1}%
-\contentsline {subsection}{\numberline {7.6.2}Socio-economic impact analysis}{71}{subsection.7.6.2}%
-\contentsline {chapter}{\numberline {8}Conclusions and Future Work}{73}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Conclusions}{73}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Future work}{74}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Closing remark}{75}{section.8.3}%
-\contentsline {chapter}{Bibliography}{76}{section.8.3}%
-\contentsline {chapter}{\numberline {A}Reproduction Guide}{80}{appendix.1.A}%
-\contentsline {section}{\numberline {A.1}Environment setup}{80}{section.1.A.1}%
-\contentsline {section}{\numberline {A.2}Reproducible training (RQ1 surface)}{80}{section.1.A.2}%
-\contentsline {section}{\numberline {A.3}The three ways in (Experiment 1)}{80}{section.1.A.3}%
-\contentsline {section}{\numberline {A.4}Context store (RQ3 surface)}{81}{section.1.A.4}%
-\contentsline {section}{\numberline {A.5}Automated evaluation}{81}{section.1.A.5}%
-\contentsline {section}{\numberline {A.6}Quality gates}{81}{section.1.A.6}%
-\contentsline {section}{\numberline {A.7}Real-data and Kaggle paths}{81}{section.1.A.7}%
-\contentsline {section}{\numberline {A.8}Troubleshooting}{81}{section.1.A.8}%
-\contentsline {chapter}{\numberline {B}Run Manifest Example}{83}{appendix.1.B}%
-\contentsline {chapter}{\numberline {C}Generated Notebook Excerpt}{85}{appendix.1.C}%
-\contentsline {chapter}{\numberline {D}Experiment 4 Dataset Table}{86}{appendix.1.D}%
+\contentsline {subsection}{\numberline {3.2.1}The life of a dataset}{13}{subsection.3.2.1}%
+\contentsline {section}{\numberline {3.3}Typed contracts}{14}{section.3.3}%
+\contentsline {section}{\numberline {3.4}The deterministic pipeline}{16}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Validation as a gate}{16}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Task-type inference and the model registry}{16}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}The cleaning policy}{17}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Run artifacts}{17}{subsection.3.4.4}%
+\contentsline {section}{\numberline {3.5}The context store}{17}{section.3.5}%
+\contentsline {section}{\numberline {3.6}The MCP surface}{18}{section.3.6}%
+\contentsline {section}{\numberline {3.7}The agent layer}{19}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Provider abstraction}{19}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}The harness and grounding}{20}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Worker agent and proposals}{20}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.7.4}The approval gate}{20}{subsection.3.7.4}%
+\contentsline {subsection}{\numberline {3.7.5}Role agents and the orchestrator}{21}{subsection.3.7.5}%
+\contentsline {subsection}{\numberline {3.7.6}The agentic round}{21}{subsection.3.7.6}%
+\contentsline {subsection}{\numberline {3.7.7}The chat agent}{22}{subsection.3.7.7}%
+\contentsline {subsection}{\numberline {3.7.8}Global agents}{23}{subsection.3.7.8}%
+\contentsline {section}{\numberline {3.8}Experiment lifecycle}{23}{section.3.8}%
+\contentsline {section}{\numberline {3.9}The workspace UI}{23}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Safety and security model}{25}{section.3.10}%
+\contentsline {subsection}{\numberline {3.10.1}Alternatives considered}{27}{subsection.3.10.1}%
+\contentsline {chapter}{\numberline {4}Implementation}{28}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Technology stack and repository layout}{28}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Reproducibility engineering}{29}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Three ways in: CLI, Python API, HTTP}{30}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Kaggle ingestion and context packs}{32}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Testing and quality assurance}{32}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Development process}{33}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Evaluation Methodology}{35}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Evaluation objectives}{35}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Research questions and pass criteria}{35}{section.5.2}%
+\contentsline {section}{\numberline {5.3}The automated evaluator}{37}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Experiment 1: three ways in}{38}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Experiment 2: real-dataset validation}{38}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Experiment 3: grounded autonomy (the agentic round)}{39}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Experiment 4: multi-domain stress validation (the continuous loop)}{40}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Metrics}{41}{section.5.8}%
+\contentsline {chapter}{\numberline {6}Results}{43}{chapter.6}%
+\contentsline {section}{\numberline {6.1}The recorded evidence base}{43}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Automated evaluation: RQ1--RQ3}{45}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Experiment 1: three ways in}{45}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Experiment 2: real-dataset validation (S\&P 500)}{46}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Kaggle pipeline proof (P3.7)}{47}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Experiment 3: grounded autonomy (agentic round)}{48}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}RQ5 spike: first recorded validity numbers}{51}{subsection.6.6.1}%
+\contentsline {section}{\numberline {6.7}Experiment 4: multi-domain stress validation}{51}{section.6.7}%
+\contentsline {subsection}{\numberline {6.7.1}Per-stage model assignment: the mixed-team experiment}{55}{subsection.6.7.1}%
+\contentsline {subsection}{\numberline {6.7.2}GLM-uniform ablation: validator as capability enabler}{57}{subsection.6.7.2}%
+\contentsline {subsection}{\numberline {6.7.3}Local-first proof: offline execution}{57}{subsection.6.7.3}%
+\contentsline {subsection}{\numberline {6.7.4}Three-ways-in prediction sweep}{57}{subsection.6.7.4}%
+\contentsline {section}{\numberline {6.8}Agent case study: IBM HR attrition}{59}{section.6.8}%
+\contentsline {section}{\numberline {6.9}Cross-cutting observations from the benchmark suite}{60}{section.6.9}%
+\contentsline {section}{\numberline {6.10}Agent efficiency and reliability metrics}{60}{section.6.10}%
+\contentsline {section}{\numberline {6.11}P6 findings harvest: the loop debugging its own factory}{63}{section.6.11}%
+\contentsline {chapter}{\numberline {7}Discussion}{65}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Answering the research questions}{65}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Design lessons}{66}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Agent reliability in practice}{67}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Limitations and threats to validity}{68}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}System limitations}{68}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Evaluation threats}{70}{subsection.7.4.2}%
+\contentsline {section}{\numberline {7.5}Regulatory framework}{70}{section.7.5}%
+\contentsline {subsection}{\numberline {7.5.1}Data protection}{70}{subsection.7.5.1}%
+\contentsline {subsection}{\numberline {7.5.2}AI regulation and risk management}{71}{subsection.7.5.2}%
+\contentsline {subsection}{\numberline {7.5.3}Licenses and intellectual property}{71}{subsection.7.5.3}%
+\contentsline {subsection}{\numberline {7.5.4}Technical standards}{72}{subsection.7.5.4}%
+\contentsline {section}{\numberline {7.6}Socio-economic environment}{72}{section.7.6}%
+\contentsline {subsection}{\numberline {7.6.1}Budget}{72}{subsection.7.6.1}%
+\contentsline {subsection}{\numberline {7.6.2}Socio-economic impact analysis}{73}{subsection.7.6.2}%
+\contentsline {chapter}{\numberline {8}Conclusions and Future Work}{74}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Conclusions}{74}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Future work}{75}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Closing remark}{76}{section.8.3}%
+\contentsline {chapter}{Bibliography}{77}{section.8.3}%
+\contentsline {chapter}{\numberline {A}Reproduction Guide}{81}{appendix.1.A}%
+\contentsline {section}{\numberline {A.1}Environment setup}{81}{section.1.A.1}%
+\contentsline {section}{\numberline {A.2}Reproducible training (RQ1 surface)}{81}{section.1.A.2}%
+\contentsline {section}{\numberline {A.3}The three ways in (Experiment 1)}{81}{section.1.A.3}%
+\contentsline {section}{\numberline {A.4}Context store (RQ3 surface)}{82}{section.1.A.4}%
+\contentsline {section}{\numberline {A.5}Automated evaluation}{82}{section.1.A.5}%
+\contentsline {section}{\numberline {A.6}Quality gates}{82}{section.1.A.6}%
+\contentsline {section}{\numberline {A.7}Real-data and Kaggle paths}{82}{section.1.A.7}%
+\contentsline {section}{\numberline {A.8}Troubleshooting}{82}{section.1.A.8}%
+\contentsline {chapter}{\numberline {B}Run Manifest Example}{84}{appendix.1.B}%
+\contentsline {chapter}{\numberline {C}Generated Notebook Excerpt}{86}{appendix.1.C}%
+\contentsline {chapter}{\numberline {D}Experiment 4 Dataset Table}{87}{appendix.1.D}%
 \contentsfinish 
