@@ -40,7 +40,7 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
 	ybar, bar width=14pt,
 	ymin=0, ylabel={completed runs},
 	xtick={1,...,7},
-	xticklabels={{[0,0.4)},{[0.4, 0.6)},{[0.6, 0.7)},{[0.7, 0.8)},{[0.8, 0.9)},{[0.9,00.99)},{$\geq$.99}},
+	xticklabels={{[0,0.4)},{[0.4, 0.6)},{[0.6, 0.7)},{[0.7, 0.8)},{[0.8, 0.9)},{[0.9,0.99)},{$\geq$.99}},
 	x tick label style={font=\scriptsize},
 	xlabel={test accuracy bucket (864 classification runs)},
 	tick label style={font=\scriptsize},
@@ -74,7 +74,7 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
 \label{fig:runacc}
 \end{figure}
 
-Two inventory facts carry argumentative weight. First, the rejection rate: 314 of 1{,}591 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable-refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread: the factory guarantees the evidence, not the winner. The automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology} gate every claim of system completeness that follows.
+From the completed run distribution we can infere two interesting facts. First, the rejection rate: 314 of 1{,}591 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread.
 
 \section{Experiment 1: three ways in}
 \label{sec:exp1-results}
@@ -117,6 +117,7 @@ OpenRouter experiment & z-ai/glm-5.3-flash & 0.8045 & 0.7893 \\
 \end{tabular}
 \end{table}
 
+
 \section{Experiment 2: real-dataset validation (S\&P 500)}
 \label{sec:exp2-results}
 
@@ -140,32 +141,35 @@ Leakage study & naive features \textbf{84.2\%} $\rightarrow$ at-decision-time fe
 \end{tabular}
 \end{table}
 
-Two results deserve interpretation. First, the \emph{before/after of the cleaning policy}. A first run with naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV. the second run with the cardinality-aware policy produces 16--21~MB for the same data, a three-order-of-magnitude difference that turns an infeasible run into a 6-second one, with every decision auditable in the report.
+Two results deserve interpretation. First, the \emph{before/after of the cleaning policy}. A first run with naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV. the second run with the cardinality-aware policy produces 16--21~MB for the same data, a huge difference that turns a non working run into a 6-second one, with every decision auditable in the report.Second, the leakage study. The naive feature set scored 84.2\% accuracy, but that number does not hold up in the real world. When the features are limited to those available at decision time, the score drops to 60.3\%, which is realistic for analyst ratings. Both runs are kept as inspectable evidence, and that is exactly the value of recording every rejection and every provenance detail.
 
-Second, the \emph{leakage study}: the naive feature set's 84.2\% accuracy is exactly the kind of number that does not survive contact with reality; constraining features to those available at decision time yields 60.3\% (domain-plausible for analyst ratings) and both runs remain inspectable evidence, which is the practical payoff of rejection-and-provenance discipline.
-
-\section{Kaggle pipeline proof (P3.7)}
+\section{Kaggle pipeline proof}
 \label{sec:kaggle-results}
 
-Before Experiment 4 (ten-dataset benchmark), a three-dataset proof recorded the full journey end-to-end with live Kaggle download and page context (Table~\ref{tab:kaggleproof}).
+Before Experiment 4, a three-dataset proof recorded the full journey end-to-end with live Kaggle download and page context (Table~\ref{tab:kaggleproof}).
 
 \begin{table}[H]
-\centering
-\caption{Kaggle proof (P3.7): three public datasets, end-to-end.}
+\centering\footnotesize
+\caption{Kaggle proof: three public datasets, end-to-end. Run identifiers refer to directories under \texttt{runs/}.}
 \label{tab:kaggleproof}
-\small
-\begin{tabular}{p{4.6cm}p{2.6cm}p{4.6cm}p{2.6cm}}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{4.9cm}p{2.3cm}p{4.6cm}p{2.4cm}}
 \toprule
 \textbf{Dataset (Kaggle slug)} & \textbf{Shape} & \textbf{Best result} & \textbf{Task} \\
 \midrule
-\texttt{shrutimechlearn/\allowbreak{}churn-modelling} & 10{,}000 $\times$ 14 & \texttt{random\_forest}: acc 0.862, F1 0.742 & classification \\
-\texttt{camnugent/\allowbreak{}california-housing-prices} & 20{,}640 $\times$ 10 & \texttt{random\_forest\_regressor}: $R^2$ 0.817 & regression \\
-\texttt{pavansubhasht/\allowbreak{}ibm-hr-analytics-attrition-dataset} & 1{,}470 $\times$ 35 & \texttt{logistic\_regression}: acc 0.861, F1 0.679 & classification \\
+\texttt{shrutimechlearn/\allowbreak{}churn-modelling}\footnotemark[1] & 10{,}000 $\times$ 14 & \texttt{random\_forest}: acc 0.862, F1 0.742 & classification \\
+\texttt{camnugent/\allowbreak{}california-housing-prices}\footnotemark[2] & 20{,}640 $\times$ 10 & \texttt{random\_forest\_regressor}: $R^2$ 0.817 & regression \\
+\texttt{pavansubhasht/\allowbreak{}ibm-hr-analytics-attrition-dataset}\footnotemark[3] & 1{,}470 $\times$ 35 & \texttt{logistic\_regression}: acc 0.861, F1 0.679 & classification \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
+\footnotetext[1]{Run IDs: \texttt{run-20260831-001740-df421901} (random\_forest, acc 0.8615) and \texttt{run-20260831-001740-388f3f8d} (logistic\_regression, 0.808).}
+\footnotetext[2]{Run IDs: \texttt{run-20260831-001753-8c88ce63} (random\_forest\_regressor, $R^2$ 0.8172) and \texttt{run-20260831-001753-02d2899d} (ridge, 0.6255).}
+\footnotetext[3]{Run IDs: \texttt{run-20260831-001835-12bc076e} (logistic\_regression, acc 0.8605) and \texttt{run-20260831-001835-2a5b0631} (random\_forest, 0.8401). The raw-data validation rejections behind the constant-column finding: \texttt{run-20260831-001814-cedd5a3b} and \texttt{run-20260831-001814-e2a43afb}.}
 \end{table}
 
 The sytem worked correctly, but there was a genuine engineering finding: on the HR dataset, constant columns (\texttt{EmployeeCount}, \texttt{StandardHours}, and the one-hot \texttt{Over18\_Y}) were rejected by validation, correctly refusing to train on zero-information features, and the cleaning policy was extended (constant-column drop) so that the \emph{system} handles the case, not the operator. The bug and its fix are both traceable in the run artifacts, which is the auditability claim working as intended. All three runs produced valid generated notebooks (six cells, nbformat~4) through \texttt{GET /runs/\{id\}/notebook}.
+
 
 \section{Experiment 3: grounded autonomy (agentic round)}
 \label{sec:exp-agentic-results}
