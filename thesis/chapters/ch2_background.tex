@@ -1,0 +1,94 @@
+\chapter{Background and State of the Art}
+\label{ch:background}
+
+This chapter reviews the concepts on which \emph{thelab-mcp} is built and the prior work it relates to. Sections~\ref{sec:bg-llm}--\ref{sec:bg-mcp} cover large language models, tool-using agents, and the Model Context Protocol. Section~\ref{sec:bg-context} discusses context engineering and why a local, verifiable context store is used. Section~\ref{sec:bg-mlops} reviews reproducibility and experiment tracking in MLOps. Section~\ref{sec:bg-frameworks} compares multi-agent frameworks, and Section~\ref{sec:bg-gap} states the gap this thesis addresses.
+
+\section{Large language models and agents}
+\label{sec:bg-llm}
+
+\subsection{From transformers to instruction-following assistants}
+
+The story of modern large language models begins in 2017, when the Transformer architecture \cite{vaswani2017attention} replaced the older recurrent designs with a mechanism based on attention. It turned out to work and scale surprisingly well, setting the base architecture for future work in the artificial intelligence field. The next chapter was size: GPT-3 \cite{brown2020gpt3} showed that training even larger Transformers on more text produced few-shot learning, meaning the model could attempt tasks it was never explicitly trained for. But a big model that only completes text is not an assistant, so the following step was behaviour: instruction tuning \cite{ouyang2022instructgpt} aligned raw models to follow user instructions, producing the assistant-style systems that agentic applications are built on. The last piece was reasoning. Chain-of-thought prompting \cite{wei2022cot} showed that asking the model to write out intermediate steps highly improved multi-step tasks, and multi-step reasoning is exactly what an agent does when it plans an experiment.
+
+\subsection{Tool use and the agent loop}
+
+Talking was only the first capability, and on its own it was not very useful: a model that writes perfect instructions cannot read your data or run your code. The fix was giving the models access to tools. ReAct \cite{yao2023react} showed in 2022 that the strongest pattern interleaved reasoning with action: the model thinks, calls a tool, reads the result, and thinks again. Toolformer \cite{schick2023toolformer} went one step earlier in the pipeline and showed that models could even learn \emph{when} a tool call is needed, from self-supervised data. From these results the standard agent design was created. So from it, we can define an agent as a system composed of an LLM, a harness that mediates its execution, and the set of tools it may call \cite{sutton2019bitter}. The model receives a conversation history and a list of tool specifications, it either writes text or emits structured tool calls, the harness executes them and appends the results, and the cycle repeats until a final answer or a step budget is reached. Reflexion \cite{shinn2023reflexion} closed the loop by showing that failures fed back to the models as context improved the next attempts. For this thesis the takeaway of the whole line of work is simple: what an agent \emph{knows} is decided by what its harness supplies, the set of tools and the specific context.
+
+\subsection{Multi-agent systems}
+
+Once single agents worked, the natural next idea was to give them roles. MetaGPT \cite{hong2023metagpt} assigned software-company positions to agents and reported more coherent output, and generative-agent simulations \cite{park2023generative} showed that memory and reflection produce believable behaviour with fewer errors. With role specialization each agent narrows its prompt, tools, and grounding to one responsibility. The problem with more agents working together is the coordination complexity it adds to the equation as well as a larger surface through which errors can spread out. \emph{thelab-mcp} takes a middle position: each agent has a role, a distinct prompt and an allowed tool list, generated code runs only in the sandbox and is validated deterministically, and training itself always stays in the deterministic factory (Section~\ref{sec:bg-frameworks} compares this with heavier frameworks).
+
+\section{The Model Context Protocol}
+\label{sec:bg-mcp}
+
+By 2024 agents were multiplying, and so was a practical problem: every integration between an application and a model was custom work. In November 2024 Anthropic published the Model Context Protocol (MCP) \cite{mcp2024spec,mcp2024announce}, an open protocol that standardized the way applications communicate with LLMs and provide context and tools. It follows a client--server model: a host application (an agent, an IDE extension, a CLI) embeds an MCP client that connects to one or more MCP \emph{servers}, each exposing three primitives: \emph{tools} (model-invoked functions with JSON schemas), \emph{resources} (application-driven data), and \emph{prompts} (user-selected templates). Messages are JSON-RPC 2.0, and the reference transports are \texttt{stdio} (local servers spawned as subprocesses) and HTTP with server-sent events (remote servers).
+
+MCP matters for this thesis for three reasons. The first is interoperability, which is actually the base of the protocol: "Any client that speaks MCP can use an MCP server", without sharing code with it and without knowing how it works inside. A model registry exposed over MCP can therefore be consumed by an agent that knows nothing else about the system. The second is typed tools. Every tool declares an input schema, so the requests of the model become validated as structured calls. In \emph{thelab-mcp} the schemas also set the boundaries and reject unknown fields, via the typed-contract philosophy of Chapter~\ref{ch:design}. The third is local deployment. The \texttt{stdio} transport runs each server as a small program on the user's machine, so the shared context stays local.
+
+
+\section{Context engineering and local memory}
+\label{sec:bg-context}
+
+Once agents started doing more and more real work, people realized that one of the main issues was deciding what information goes into the model's context window. This practice
+was named context engineering \cite{horthy2025twelvefactor,bonigarcia2025context}, and its central question is memory: what happened before, and how can an agent recover it?
+
+The mainstream answer is retrieval-augmented generation (RAG): embed documents into a vector database, retrieve by semantic similarity, and inject the results into the prompt. RAG is a powerful solution that works really well with LLM-based agents, but for this project it brought costs that did not fit the scope. As it usually adds a cloud or heavyweight local dependency, its retrieval quality is hard to verify, and its results are not easy for a human to audit by inspecting the store.
+
+So the decision was to use a simpler solution: a local, structured, full-text context store. Evidence (run manifests, decisions, errors, agent session summaries) is written to SQLite with an FTS5 full-text index \cite{sqlite2024fts5}, redacted at write time, fingerprinted with SHA-256 so the same event is never duplicated or overwritten, and retrieved read-only. Search is keyword-based with structured filters (run id, tags, event type, time range). Every stored entry is inspectable, every search is reproducible, and the store's bytes are unchanged by reads, a property that RQ3 asserts. Semantic hybrid search is part of future work (Section~\ref{sec:futurework}).
+
+\section{MLOps, reproducibility, and provenance}
+\label{sec:bg-mlops}
+
+In Machine Learning reproducibility is a foundational requirement of experimental work, and is a well-documented field. For example, the JMLR reproducibility program \cite{pineau2021jmlr} turned the problems that appear in practice into concrete checks for published papers. The industry answer was experiment tracking: platforms such as MLflow \cite{zaharia2018mlflow} and DVC \cite{dvc2024} persist parameters, metrics, and artifacts per run.
+
+These three practices were part of the inspiration of the project. The run is the unit of record: every training execution produces a run directory with a manifest (inputs hash, configuration, seed, dependency versions, statuses), metrics, and artifact references, the same mental model as MLflow's runs but implemented with local files and JSON instead of a server. The seed is the mandatory, recorded argument of every run. It is injected into every estimator, and the evaluator verifies that two identical seeded runs reproduce identical metrics. Finally, validation works as a gate: a model is only registered and servable after its run is validated and approved.
+
+Additionally, real-world tabular data adds one more problem: \emph{leakage}, features that encode information not available at prediction time, which inflate metrics and degrade production performance \cite{kaufman2012leakage}. The cleaning policy of Chapter~\ref{ch:design} and the leakage study in Chapter~\ref{ch:results} deal with this problem concretely.
+
+\section{Multi-agent and agent frameworks}
+\label{sec:bg-frameworks}
+
+The frameworks in Table~\ref{tab:frameworks} arrived from the orchestration side of the story, and they solve real problems: AutoGen \cite{wu2023autogen} made LLM-to-LLM conversation programmable, LangGraph \cite{langgraph2024} turned agent flows into stateful graphs, CrewAI \cite{crewai2024} packaged role-based crews, PydanticAI \cite{pydanticai2024} added typed tool layers, and Semantic Kernel \cite{semantickernel2024} connected the Microsoft plugin ecosystem.
+
+\begin{table}[H]
+\centering
+\caption{Multi-agent frameworks compared with \emph{thelab-mcp}'s approach.}
+\label{tab:frameworks}
+\small
+\begin{tabular}{p{2.6cm}p{3.3cm}p{2.6cm}p{2.6cm}p{2.6cm}}
+\toprule
+\textbf{System} & \textbf{Model} & \textbf{Local-first} & \textbf{Provider} & \textbf{Auditability} \\
+\midrule
+AutoGen \cite{wu2023autogen} & Conversable agents; LLM-to-LLM chat & Partial (cloud LLMs typical) & OpenAI-style & Conversation logs \\
+LangGraph \cite{langgraph2024} & Stateful graphs of agent nodes & Partial & Agnostic via LangChain & Graph state/checkpoints \\
+CrewAI \cite{crewai2024} & Role-based crews & Partial & Agnostic & Task outputs \\
+PydanticAI \cite{pydanticai2024} & Typed agent + tool layer & Partial & Agnostic & Typed results \\
+Semantic Kernel \cite{semantickernel2024} & Planners + plugins & Partial & Microsoft-centric & Plugin traces \\
+\midrule
+\textbf{\emph{thelab-mcp}} & Contracts + deterministic factory; bounded agent round & Context and evidence local & Agnostic (4 adapters) & Manifests + redacted store \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Most frameworks orchestrate \emph{LLM calls} and assume cloud LLM access as the default deployment. However, \emph{thelab-mcp} orchestrates \emph{work}, of which LLM calls are one part of it, alongside the deterministic pipeline, context store, and MCP servers. It also allows local LLM wiring and even works without any LLM provider. The deterministic pipeline can run without agents: agents are a layer on top of the pipeline, not the whole pipeline.
+
+
+\subsection{Benchmarks for ML and data-science agents}
+\label{sec:bg-benchmarks}
+
+Another line of work tests agents as \emph{machine-learning practitioners}. MLE-bench puts them on Kaggle-style ML engineering tasks \cite{chan2024mlebench}, DS-1000
+tests data-science code generation \cite{lai2023ds1000}, DSBench and TML-Bench measure end-to-end data-science and tabular-ML work \cite{jing2024dsbench,zhao2026tmlbench}, and AstaBench covers the scientific workflow \cite{matthews2025astabench}. With this project the aim was slightly different. The question was not so much whether the agent can win the task, but whether it can win and the system can prove what happened. Do runs reproduce, can an independent client consume the results, and does the evidence survive retrieval intact? The two approaches complement each other, and a capability benchmark is the natural next evaluation move (Section~\ref{sec:futurework}). Additionally, the Kaggle-style task formats directly inspired the Experiment 4 design.
+
+\section{Gap analysis}
+\label{sec:bg-gap}
+
+The reviewed landscape exhibits a clear gap. Experiment trackers (MLflow, DVC) provide provenance but no agentic participation. Agent frameworks provide orchestration but treat the ML workflow as conversation, with weak provenance and cloud-first defaults. Commercial agentic-ML products combine both but restrict the user to external infrastructure and opaque execution. What is missing, and what this thesis tries to contribute, is a system that is simultaneously:
+
+\begin{itemize}
+	\item \textbf{complete} end-to-end (dataset $\rightarrow$ validated model $\rightarrow$ served inference), not a component library;
+	\item \textbf{evidence-local} (datasets, run evidence, and context stay on the user's machine; every LLM provider is optional and swappable);
+	\item \textbf{auditable by construction} (typed contracts, manifests, redaction, approval records, rejection-as-evidence); and
+	\item \textbf{interoperable} through a standard protocol (MCP), so independent agents can consume the factory safely.
+\end{itemize}
+
+\emph{thelab-mcp} is designed to occupy exactly this intersection, and its behavior has been empirically validated during development across recorded runs on real data --- including failed rounds and honest refusals.

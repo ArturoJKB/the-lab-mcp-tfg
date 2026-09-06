@@ -1,0 +1,384 @@
+\chapter{System Design: \emph{thelab-mcp}}
+\label{ch:design}
+
+This chapter presents the design of \emph{thelab-mcp}. Section~\ref{sec:principles} states the design principles; Section~\ref{sec:arch} gives the architecture overview; Sections~\ref{sec:contracts}--\ref{sec:mcp} describe the typed contracts, the deterministic pipeline, the context store, and the MCP surface; Section~\ref{sec:agents} details the agent layer; Section~\ref{sec:lifecycle} covers the experiment lifecycle; Section~\ref{sec:ui} describes the workspace UI; and Section~\ref{sec:safety} consolidates the safety model.
+
+\section{Design principles}
+\label{sec:principles}
+
+Five principles were established at the start of the project before any code was written and have been preserved throughout the development:
+
+\begin{enumerate}
+	\item \textbf{Deterministic core first.} ``The first usable milestone must work without a UI, an LLM, or network access.'' The factory must be complete and useful before any intelligence is layered on; agents amplify the factory but do not substitute it.
+	\item \textbf{LLMs decide; deterministic code executes.} Language models propose experiments, interpret results, and answer questions. The training pipeline, cleaning, and inference are preserved to run through the same deterministic Python path. This is the invariant that makes RQ1 possible at all: an LLM that trains models itself would inject non-determinism into the very thing being measured.
+	\item \textbf{Agents autonomy.} Agent-initiated execution requires explicit human approval through a single gate and generated code always passes the sandbox and a deterministic validator. Nothing an agent writes is ever executed directly, and a rejected proposal can never be executed at all.
+	\item \textbf{Rejection as a first-class outcome.} A run that fails validation is a valid, traceable result (complete with manifest, validation report, and reason) not an error to swallow or a crash to retry. The system converts its own refusals into queryable evidence.
+	\item \textbf{Local-first and provider-agnostic.} All execution, data, and evidence stay on the local machine; every LLM provider (Ollama, OpenAI-compatible endpoints, OpenRouter, or a deterministic mock) is an optional adapter behind one typed protocol, never a structural dependency.
+\end{enumerate}
+
+
+\section{Architecture overview}
+\label{sec:arch}
+
+\emph{thelab-mcp} offers three ways to interact with it: a command-line interface (CLI) for scripting, an HTTP service with a browser workspace for interactive use, and seven MCP servers for independent agents. All three surfaces resolve to the same deterministic pipeline and produce identical artifacts for identical inputs (verified experimentally in Chapter~\ref{ch:results}). The reason for three interfaces is the audience: humans exploring data, scripts automating it, and external agents consuming it, all reading the same evidence, so no single surface can drift from the truth. Figure~\ref{fig:architecture} shows the architecture.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+	font=\scriptsize,
+	box/.style={draw=black, rounded corners=2pt, align=center, inner sep=4pt, text width=3.1cm, minimum height=9mm},
+	iface/.style={box, fill=gray97},
+	core/.style={box, fill=azulUC3M!12},
+	store/.style={box, fill=gray75!40},
+	arr/.style={-{Stealth[length=2mm]}, thick, draw=gray45}
+]
+% Interfaces (row 1)
+\node[iface] (cli)    at (0,4.4)    {\textbf{CLI}\\\texttt{thelab} \texttt{thelab-agent}};
+\node[iface] (http)   at (4.3,4.4)  {\textbf{HTTP + UI}\\\texttt{thelab-model-service}};
+\node[iface] (mcp)    at (8.6,4.4)  {\textbf{MCP clients}\\(independent agents)};
+% Core (row 2)
+\node[core] (pipe)    at (0,2.2)    {\textbf{Deterministic pipeline}\\validate $\rightarrow$ train $\rightarrow$ register};
+\node[core] (agents)  at (4.3,2.2)  {\textbf{Agent layer}\\harness, worker, chat, sub-agents};
+\node[core] (mcpsrv)  at (8.6,2.2)  {\textbf{7 MCP servers}\\stdio, JSON-RPC};
+% Sandbox (row 3, col 2-3 gap)
+\node[core] (sandbox) at (6.45,0)   {\textbf{Code sandbox}\\AST-restricted};
+% Stores (row 4)
+\node[store] (runs)   at (0,-2.2)   {\textbf{runs/\textlangle id\textrangle/}\\manifest, metrics, model};
+\node[store] (ctx)    at (4.3,-2.2) {\textbf{.thelab/ context}\\SQLite + FTS5 (redacted)};
+\node[store] (data)   at (8.6,-2.2) {\textbf{data/ uploads}\\datasets, context packs};
+% Arrows
+\draw[arr] (cli.south) -- (pipe.north);
+\draw[arr] (http.south west) -- (pipe.north east);
+\draw[arr] (http.south) -- (agents.north);
+\draw[arr] (mcp.south) -- (mcpsrv.north);
+\draw[arr] (mcpsrv.west) -- (agents.east);
+\draw[arr] (mcpsrv.south) -- (data.north);
+\draw[arr] (pipe.south) -- (runs.north);
+\draw[arr] (agents.south) -- (ctx.north);
+\draw[arr] (agents.south east) -- (sandbox.north west);
+\end{tikzpicture}
+\caption{\emph{thelab-mcp} architecture: three ways in (CLI, HTTP/UI, MCP) over one deterministic core; agents and the sandbox mediate non-deterministic decisions; all state lands in local, inspectable stores.}
+\label{fig:architecture}
+\end{figure}
+
+The implementation is organized into ten Python packages, summarized in Table~\ref{tab:modules}; approximately 16{,}900 lines of code in total, excluding the workspace front end.
+
+\begin{table}[H]
+\centering
+\caption{Module map of the \texttt{thelab} package.}
+\label{tab:modules}
+\small
+\begin{tabular}{p{3.2cm}p{11.2cm}}
+\toprule
+\textbf{Package} & \textbf{Responsibility} \\
+\midrule
+\texttt{contracts} & Six canonical Pydantic typed contracts imported by every other package \\
+\texttt{run} & Deterministic factory: validation, profiling, training, artifacts, batch, comparison, notebooks \\
+\texttt{context} & SQLite + FTS5 evidence store: repository, redaction, read-only reader, indexer \\
+\texttt{agents} & Provider protocol and adapters, harness, worker agent, global agents, chat agent \\
+\texttt{ide} & Agentic ML IDE backend: jobs (SSE), orchestrator, datasets, cleaning, experiments, Kaggle \\
+\texttt{mcp} & Seven stdio MCP servers, shared path-safety helpers, demo client \\
+\texttt{sandbox} & AST-restricted subprocess for LLM-generated code \\
+\texttt{model\_service} & FastAPI service and dashboard serving the three API surfaces \\
+\texttt{eda} & Deterministic exploratory data analysis skill pack (six pure functions) \\
+\texttt{workspace} & Path containment and SHA-256 hashing utilities \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Typed contracts}
+\label{sec:contracts}
+
+All information exchanged between components (human, deterministic, or agentic) travels in six canonical contracts built with Pydantic \cite{pydantic2024} in strict mode (\texttt{strict=True, extra="forbid"}), so that unknown fields and automatic type conversions are rejected rather than silently accepted. This choice is the whole motive of the architecture: agents can only communicate through types the whole system already understands, which removes an entire class of integration errors.
+
+The central contract is the run manifest, shown in Code~\ref{lst:manifest}. It records the input hash, the complete training configuration, the random seed, and the resolved dependency versions: the minimum provenance needed to reproduce and to audit a run.
+
+\begin{lstlisting}[language=json, caption={The \texttt{RunManifest} contract (\texttt{thelab/contracts/run\_manifest.py}).}, label={lst:manifest}, style=estilo]
+class RunManifest(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    run_id: str
+    input_hash: str                      # SHA-256 of the dataset
+    training_config: dict[str, Any]
+    random_seed: int
+    dependency_versions: dict[str, str]
+    started_at: datetime
+    finished_at: datetime | None
+    final_status: RunStatus              # pending|running|completed|failed|rejected
+    validation_status: ValidationStatus  # pending|approved|rejected
+    artifact_refs: list[ArtifactRef]
+    error_summary: str | None
+    task_type: Literal["classification", "regression"] | None
+\end{lstlisting}
+
+Artifact references deserve special mention. Every artifact is addressed by a \emph{relative} path and a content hash; a validator rejects absolute paths and any path containing \texttt{..} parts (Code~\ref{lst:artifactref}), making traversal attacks unrepresentable in the type system rather than just forbidden by a convention.
+
+\begin{lstlisting}[language=json, caption={The \texttt{ArtifactRef} contract: relative paths enforced by validation.}, label={lst:artifactref}, style=estilo]
+class ArtifactRef(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    artifact_id: str
+    artifact_type: str
+    relative_path: Path    # validator rejects absolute paths and ".."
+    content_hash: str      # SHA-256
+    origin: str
+    parent_run_id: str
+\end{lstlisting}
+
+The remaining contracts complete the vocabulary:
+
+\begin{itemize}
+	\item \texttt{TaskSpec} (an orchestrator's unit of work, with \texttt{objective}, \texttt{input\_refs}, \texttt{constraints}, and \texttt{task\_state}),
+	\item \texttt{DatasetSpec} (source, expected schema, target, quality rules, privacy classification),
+	\item \texttt{ModelSpec} (algorithm, hyperparameters, target metric, seed, version), and \texttt{LogEntry} (event type, tags, redacted summary, artifact references, privacy level).
+	\item \texttt{ExperimentProposal} (the shape an agent's suggestion must take) extends this vocabulary with a goal, a model grid validated against the model registry, seeds, and a rationale grounded in EDA and prior runs.
+\end{itemize}
+
+\section{The deterministic pipeline}
+\label{sec:pipeline}
+
+The pipeline converts a local CSV into a registered model through a fixed sequence: \emph{validate $\rightarrow$ profile $\rightarrow$ contract $\rightarrow$ train $\rightarrow$ re-validate $\rightarrow$ register}. Each stage is a pure, testable transformation and the composition is deterministic given (dataset, model, seed). The order matters: profiling runs before training so that a dataset with silent problems (wrong types, a missing target, constant columns) fails early with a reason, instead of failing mid-training without one.
+
+\subsection{Validation as a gate}
+
+Input validation is needed for the pipeline to work seamlessly without errors. It checks schema conformance, data types, missing values, duplicates, target validity, and split feasibility. It is also useful when the pipeline fails, when a run is rejected (\texttt{final\_status=rejected}), all the evidence is stored in the same format as successful runs, letting agents have context about failed runs to avoid similar mistakes in the future.
+
+\subsection{Task-type inference and the model registry}
+
+The task type (classification or regression) is inferred from the target column (at most 20 distinct values $\Rightarrow$ classification) or can be forced explicitly. Nine model families are registered (Table~\ref{tab:models}); each entry carries its estimator class, default parameters, probability support, task type, and an optional \emph{scale guard} \texttt{max\_train\_rows}. When a configuration violates a guard (for example, \texttt{svc} on 113{,}769 rows), the run is rejected \emph{in milliseconds} instead of running for hours and exhausting memory.
+
+
+\begin{table}[H]
+\centering
+\caption{Registered model families and their guards.}
+\label{tab:models}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Name} & \textbf{Task} & \textbf{Estimator} & \textbf{Guard} \\
+\midrule
+\texttt{logistic\_regression} & classification & \texttt{LogisticRegression} & \\
+\texttt{random\_forest} & classification & \texttt{RandomForestClassifier} & \\
+\texttt{svc} & classification & \texttt{SVC} & $\leq$ 50{,}000 train rows \\
+\texttt{sgd\_classifier} & classification & \texttt{SGDClassifier} & \\
+\texttt{hist\_gradient\_boosting} & classification & \texttt{HistGradientBoosting...} & \\
+\texttt{linear\_regression} & regression & \texttt{LinearRegression} & \\
+\texttt{ridge} & regression & \texttt{Ridge} & \\
+\texttt{random\_forest\_regressor} & regression & \texttt{RandomForestRegressor} & \\
+\texttt{hist\_gradient\_boosting\_regressor} & regression & \texttt{HistGradientBoosting...} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The seed is injected into every estimator (\texttt{random\_state=seed}) and into the train/test split. Preprocessing is a fixed \texttt{StandardScaler} pipeline and metrics are computed consistently throughout runs: accuracy and macro-F1 for classification, RMSE, MAE, and $R^2$ for regression, on both train and test partitions.
+
+\subsection{The cleaning policy}
+
+One of the first problems was that real datasets almost never arrive clean. To make it work, the deterministic cleaning policy turns raw uploads into trainable tables while remaining fully auditable: rows with a missing target are dropped; datetime columns are parsed into numeric calendar features; categorical columns with at most 20 distinct values are one-hot encoded, while high-cardinality categoricals (e.g., 500 ticker symbols) are frequency-encoded; missing numeric values are imputed and constant columns are dropped. Every action is recorded per column in a \texttt{cleaning\_report}. The importance of the cardinality rule is quantified in Chapter~\ref{ch:results}: for example on a real 164{,}231-row financial dataset, naive one-hot encoding produced a 22~GB intermediate file, while the final cleaning policy produced 16--21~MB with the same raw data.
+
+\subsection{Run artifacts}
+
+Each completed (or rejected) run generates eleven artifacts in \texttt{runs/<run\_id>/}: \texttt{manifest.json}, \texttt{task\_spec.json}, \texttt{events.jsonl}, \texttt{inputs.json}, \texttt{data\_profile.json}, \texttt{dataset\_contract.json}, \texttt{training\_config.json}, \texttt{metrics.json}, \texttt{validation\_report.json}, \texttt{model.joblib}, and \texttt{model\_card.md}. This directory is the unit of evidence for the whole system: MCP servers, the registry, the UI, and the context indexer all read from it, and Annex~B reproduces a real manifest.
+
+\section{The context store}
+\label{sec:contextstore}
+
+The context store is \emph{thelab-mcp}'s memory: a local SQLite database with an FTS5 full-text index, designed around four properties.
+
+\begin{enumerate}
+	\item \textbf{Redaction at write time.} To avoid possible sensitive information leakage, twelve ordered regular-expression families strip private key blocks, bearer tokens, GitHub personal access tokens, Google/AWS/Slack API keys, \texttt{sk-} keys, passwords, and secret-valued environment variables, replacing matches with \texttt{[REDACTED]} before anything is persisted.
+	\item \textbf{Content-addressed idempotence.} Every entry carries a SHA-256 \texttt{content\_hash} over its canonical JSON content; re-indexing the same event has no effect, and a mismatched hash on the same event id raises an error rather than corrupting the store.
+	\item \textbf{Privacy levels.} Entries are classified \texttt{public}/\texttt{internal}/\texttt{restricted}/\texttt{secret}; readers default to the first two, and the restricted tiers require explicit override.
+	\item \textbf{Read-only retrieval.} The reader opens the database with \texttt{mode=ro} and \texttt{PRAGMA query\_only=ON}, so retrieval cannot mutate evidence, a property RQ3 asserts byte-for-byte.
+\end{enumerate}
+
+Search is keyword-based (SQLite FTS5, results ranked by relevance) over the redacted summaries, with structured filters for run id, tags, event type, and time range. Entries arrive from three sources: the JSONL event log of runs, agent session summaries sent through the \texttt{context\_write} MCP server (redacted on arrival), and the Kaggle ingestion, which adds one context pack
+per dataset.
+
+
+\section{The MCP surface}
+\label{sec:mcp}
+
+Seven MCP servers expose the factory to independent clients over \emph{stdio} --- chosen deliberately for a local-first system: servers run as plain child processes with no network surface, no ports, and no authentication layer to configure, and the single-job split lets a client connect only to what it needs:
+
+\begin{itemize}
+	\item \texttt{data\_catalog}: what datasets exist, with their profiles and contracts.
+	\item \texttt{model\_registry}: the approved models, and inference with them. This is the RQ2 surface.
+	\item \texttt{workspace}: the runs, their manifests, and their artifacts.
+	\item \texttt{context}: search over the evidence store (read-only).
+	\item \texttt{context\_write}: one tool to append agent session summaries, redacted on arrival.
+	\item \texttt{eda}: the six deterministic EDA skills (missing values, correlations, class balance, outliers, leakage suspects, feature types).
+	\item \texttt{agent}: orchestration, spawning sub-agents, and training jobs, always behind the approval gate.
+\end{itemize}
+
+Table~\ref{tab:mcpservers} lists the complete tool set (32 tools). All seven servers share the same safety basics: run ids are checked against traversal and dot-entries, every answer uses the same \texttt{\{ok, data\}} / \texttt{\{ok, error\}} format, and every tool declares a bounded schema (for example, queries of at most 200 characters) that rejects malformed calls before they run.
+
+\begin{table}[H]
+\centering
+\caption{The seven MCP servers and their tools.}
+\label{tab:mcpservers}
+\small
+\begin{tabular}{p{3.2cm}p{10.3cm}}
+\toprule
+\textbf{Server} & \textbf{Tools} \\
+\midrule
+\texttt{data\_catalog} & \texttt{list\_datasets}, \texttt{get\_data\_profile}, \texttt{get\_dataset\_contract} \\
+\texttt{model\_registry} & \texttt{list\_models}, \texttt{get\_model\_manifest}, \texttt{get\_model\_card}, \texttt{get\_model\_metrics}, \texttt{predict} \\
+\texttt{workspace} & \texttt{list\_runs}, \texttt{get\_run\_manifest}, \texttt{list\_run\_artifacts}, \texttt{get\_artifact}, \texttt{read\_model\_card} \\
+\texttt{context} (read-only) & \texttt{get\_context\_status}, \texttt{get\_context\_entry}, \texttt{search\_context} \\
+\texttt{context\_write} & \texttt{append\_session\_summary} (server-side redaction) \\
+\texttt{eda} & \texttt{missing\_profile}, \texttt{correlation\_hints}, \texttt{class\_balance}, \texttt{outlier\_scan}, \texttt{leakage\_suspects}, \texttt{feature\_types} \\
+\texttt{agent} & \texttt{orchestrate\_experiment}, \texttt{run\_full\_journey}, \texttt{continue\_journey}, \texttt{get\_journey\_status}, \texttt{spawn\_subagent}, \texttt{run\_deterministic\_skill}, \texttt{run\_training\_job}, \texttt{get\_job\_status}, \texttt{log\_agent\_activity} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The main separation of powers is carried out by three of the servers. The idea behind it is simple: the ability to read evidence is separated from the
+ability to change it, and the ability to use a model is separated from the ability to train one. An external agent can therefore look at everything the system recorded, but it can only modify the record through guarded doors.
+
+The read-only \texttt{context} server is the first half. It gives any client search over the evidence, with no write path at all: whatever an agent learns from it, it cannot rewrite or delete. The \texttt{context\_write} server is the guarded door in the other direction. It accepts session summaries only after the same redaction pipeline the store itself uses, so an agent can add to the record but cannot bypass the redaction. Finally, the \texttt{model\_registry} server is the RQ2 surface: \texttt{list\_models} and \texttt{predict} expose approved models with no reference to the training code that produced them, so inference can be done by an agent that has no idea how the model was built. And because serving is gated by validated state, a model that never passed validation simply does not exist for this server.
+
+\section{The agent layer}
+\label{sec:agents}
+
+\subsection{Provider abstraction}
+
+Every LLM interaction goes through one small interface. The system asks a provider to complete a conversation, and the provider answers with either text or a tool call. Four providers implement this interface: a scriptable \texttt{MockProvider} (used by the entire test suite, so the system is fully testable with zero network access), \texttt{OllamaProvider} for local models \cite{ollama2024}, \texttt{OpenAICompatProvider} for the de-facto \texttt{/v1/chat/completions} standard, and \texttt{OpenRouterProvider}. Switching providers is configuration, not code, so the abstraction layer follows the industry-standard protocol itself. This abstraction is what makes the provider experiments of Chapter~\ref{ch:results} possible: the same pipeline runs against a reasoning cloud model, a non-reasoning cloud model, or a fully offline local one, without a single code change.
+
+\subsection{The harness and grounding}
+
+The \texttt{AgentHarness} runs a bounded tool loop (8 steps by default) over the MCP server connections. It discovers the tools, pins a read-only
+allowlist, and \emph{grounds} every answer, checking each statement against the saved run files before accepting it. Grounding lives in one shared module (\texttt{thelab/agents/grounding.py}), so the rules are the same for the harness, the chat agent, and the global agents. A claim counts as grounded only when the run ids it cites really exist and the metrics it quotes match the recorded \texttt{metrics.json} values (within a tolerance of $10^{-3}$, across ten metric keys). If a check fails, the harness returns a structured refusal (\texttt{grounding\_failure}) instead of a plausible-looking answer. Without this check, a confident answer citing a metric that does not exist would be indistinguishable from a correct one. With it, overconfidence becomes a refusal the record shows.
+
+\subsection{Worker agent and proposals}
+
+The \texttt{WorkerAgent} turns goals into \texttt{ExperimentProposal} objects: it feeds the provider a prompt seeded with deterministic EDA results (missing values, class balance, feature types, inferred task type) and the metrics of the last three completed runs on the same dataset and target, so that proposals are grounded in evidence by construction. To make things work and avoid problems at runtime, the LLM provider's output passes through a conservative JSON-repair ladder (markdown-fence stripping, Python triple-quoted-string conversion, trailing-comma and single-quote fixes, unquoted-key quoting) that maintains the required format. If it fails, a deterministic fallback proposal is carried out instead. The worker \emph{never} executes. Proposals are persisted by a \texttt{ProposalStore}, and every path that turns a proposal into training must pass the approval gate (Section~\ref{sec:approvalgate}).
+
+\subsection{The approval gate}
+\label{sec:approvalgate}
+
+Approval is enforced and carried out in exactly one place, the module \texttt{approval.py} in \texttt{thelab/agents/}. No other piece of agentic code can approve anything, so there is only one door to check.
+
+\begin{itemize}
+	\item \textbf{Agent-initiated flows} (an MCP client asking for orchestration) return \texttt{awaiting\_approval} by default. An agent cannot silently execute training. Auto-approval exists only behind an explicit environment flag, and even then it is recorded as \texttt{auto:\textlangle principal\textrangle}, so the record shows it was not a human decision.
+	\item \textbf{User-initiated flows} (a CLI or UI experiment run) carry the initiator's recorded mandate. The deterministic stages are approved automatically as \texttt{auto:}\allowbreak{}\texttt{experiment:}\allowbreak{}\texttt{\textlangle id\textrangle}, so the audit trail shows who started the experiment and that no human reviewed that specific proposal.
+	\item \textbf{Rejection is final.} A rejected proposal can never be executed. The gate refuses it outright, closing a loophole in which an approval action could overwrite a rejection.
+\end{itemize}
+
+\subsection{Role agents and the orchestrator}
+
+Three role-specialized agents (\texttt{EDAAnalyst}, \texttt{FeatureEngineer}, \texttt{ModelSelector}) participate in an orchestrated experiment, each with a \emph{distinct system-prompt contract} (\texttt{ROLE\_SYSTEM\_PROMPTS}) that fixes its identity, scope, and output format for the stage. The \texttt{ExperimentOrchestrator} sequences the stages (EDA $\rightarrow$ feature engineering $\rightarrow$ model selection $\rightarrow$ approved batch training). Aditionally it applies user feedback to all three stage interpretations and to the proposal goal, emits stage events, and when a real provider is configured, it adds LLM interpretations per stage over its deterministic output. The interpretations are persisted alongside the results as searchable context, that can be used by the \emph{sub-agents} spawned by the \texttt{ExperimentOrchestrator} . If the provider fails, the pipeline continues deterministically, so interpretation never blocks execution.  (Section~\ref{sec:agentmetrics}).
+
+\subsection{The agentic round}
+\label{sec:agenticround}
+
+The agentic round is the system's \emph{grounded autonomy} mechanism and the multi-orquestration claims. It is an additional exploration stage that runs \emph{after} the deterministic batch, starts from the artifacts that batch produced, and validates everything deterministically before it can affect training. A context pack (EDA brief, baseline metrics, prior-run evidence, and user feedback, assembled without any LLM) grounds three sequential roles: Each role can be assigned its own LLM provider (per-stage model assignment): the round's configuration accepts a role-to-provider mapping, so a mixed team --- for example, a fast analyst, a reasoning feature-engineer, and a cheap selector --- runs through the same gated pipeline. Every stage records its assigned model and, where the provider reports them, per-stage token counts and cost, making the role-to-model assignment a measured rather than assumed choice. The loop that wraps these rounds is recorded as a typed evidence artifact: a per-dataset generation ledger storing the deterministic baseline, every round (validity, mode, entries, the exact prompts sent to each stage, and per-stage token counts and cost), the absorption decision with its replay proof, and the champion configuration (model, seed, hyperparameters). The ledger is what makes the loop auditable after the fact: every claim about an absorption resolves to a recorded entry.
+
+\begin{enumerate}
+	\item \textbf{Analyst}: reads the context store and EDA evidence through read-only MCP tools to explain \emph{why} the baseline performs as it does and what to try next; output is a typed findings brief (findings, opportunities, risks) with deterministic fallback.
+	\item \textbf{FeatureEngineer}: generates one pandas transform that executes \emph{only} inside the sandbox; the transformed artifact is then checked by a deterministic post-validator (shape and schema, target intactness, constant-feature rejection, the at-decision-time leakage policy) before it may reach training, and metrics are always recomputed by the deterministic factory: sandbox output is never trusted.
+	\item \textbf{ModelSelector}: proposes training configurations beyond the fixed deterministic grid, validated against the model registry and persisted through the proposal store behind the human-default approval gate.
+\end{enumerate}
+
+Execution of an approved round runs as a tracked background job (stage events surfaced in the UI, cooperative cancellation), and the round ends with a comparison record (best agentic versus best deterministic, with signed metric deltas, validity rates, and rejections) persisted alongside the run artifacts and indexed into the context store. The round is the instrument of RQ4--RQ6 (Section~\ref{sec:exp-agentic}).
+
+\subsection{The chat agent}
+
+The grounded chat agent (\texttt{POST /agent/chat}, and the UI chat drawer) is the user-facing intelligence of the workspace. It runs a bounded loop (12 steps) over eight tools: \texttt{search\_context}, \texttt{list\_recent\_runs}, \texttt{get\_run\_summary}, \texttt{dataset\_eda}, \texttt{get\_dataset\_context}, \texttt{clean\_dataset}, \texttt{run\_python} (sandboxed; dataset exposed read-only as \texttt{dataset.csv}), and \texttt{propose\_experiment}. Every turn is persisted to the context store as a redacted session summary. The agent's self-description is worth quoting because it states the design in first person: it reads context packs, runs deterministic EDA, explores data hands-on in the sandbox, \emph{proposes} experiments (``I never train models myself''), and searches memory: the human approves and the factory executes.
+
+\subsection{Global agents}
+
+Two additional agents complete the layer: a \texttt{Researcher} that answers questions strictly from allowlisted artifacts with claim-id citations, and a \texttt{DiagnosisAgent} that triages failed runs into approved or rejected follow-ups. Both run over the same harness and provider abstraction.
+
+\section{Experiment lifecycle}
+\label{sec:lifecycle}
+
+Orchestrated experiments are first-class state machines, persisted as JSON by an \texttt{ExperimentStore}. Persistence is what makes the machine trustworthy: a crash or restart does not lose the experiment, any state can be inspected later like any other evidence, and the JSON file itself is stored in the same evidence format as everything else. Figure~\ref{fig:lifecycle} shows the states. Two transitions deserve note: \texttt{completed} may cycle back through \texttt{iterating} when the user sends feedback (``focus on tree models''), producing a new planning phase informed by the previous results; and \texttt{cancelled} is reachable from \texttt{training} through cooperative cancellation: jobs check a flag between stages and between models, so a cancel request takes effect promptly without orphaning partial runs.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+	font=\scriptsize,
+	state/.style={draw=black, rounded corners=8pt, align=center, inner sep=3pt, minimum height=6.5mm, minimum width=15.5mm, fill=gray97},
+	terminal/.style={state, fill=gray75!50},
+	arr/.style={-{Stealth[length=2mm]}, thick}
+]
+\node[state] (pending) at (0,0) {pending};
+\node[state] (planning) at (2.3,0) {planning};
+\node[state] (cleaning) at (4.6,0) {cleaning};
+\node[state] (training) at (6.9,0) {training};
+\node[state] (evaluating) at (9.2,0) {evaluating};
+\node[terminal] (completed) at (11.5,0) {completed};
+\node[terminal] (cancelled) at (6.9,-1.6) {cancelled};
+\node[terminal] (failed) at (9.2,-1.6) {failed};
+\node[state] (iterating) at (11.5,-1.6) {iterating};
+\draw[arr] (pending) -- (planning);
+\draw[arr] (planning) -- (cleaning);
+\draw[arr] (cleaning) -- (training);
+\draw[arr] (training) -- (evaluating);
+\draw[arr] (evaluating) -- (completed);
+\draw[arr] (training) -- (cancelled);
+\draw[arr] (evaluating) -- (failed);
+\draw[arr] (completed.south) -- (iterating.north);
+\draw[arr] (iterating.west) -- ++(-2mm,0) |- (planning.south);
+\end{tikzpicture}
+\caption{Experiment lifecycle state machine (persisted per experiment).}
+\label{fig:lifecycle}
+\end{figure}
+
+Execution runs through a background \texttt{JobManager} with server-sent events (SSE) streaming per-stage and per-model progress to the UI; every event is also appended to the run's \texttt{events.jsonl}, so the live view and the post-hoc evidence are the same data. Approved agentic rounds (Section~\ref{sec:agenticround}) execute as a further tracked job stage after the deterministic batch, streaming per-agent events through the same channel.
+
+\section{The workspace UI}
+\label{sec:ui}
+
+The web workspace (React 18 + TypeScript + Vite, hand-rolled CSS token set, Recharts for charts) is organized as a five-view experiment-centric layout with a deliberate visual grammar: blue for the deterministic side, purple for the agentic side. Two folders structure the sidebar. \emph{Deterministic} holds the Data view (upload of CSV and parquet files, Kaggle import with automatic context-pack build, sortable preview with horizontal scroll, EDA card grid, cleaning with audit report) and Model Lab (deterministic try-all job with per-model SSE and comparison bars). \emph{Agentic} holds the Experiments view (plan, run with live sub-agent stage pipeline, history with feedback; proposals live inside the Experiments flow, where approving one launches a first-class tracked experiment with the full stage pipeline and best-run summary). A mini-dock hosts the Global Agent chat drawer and the Admin views (model registry with metrics/artifacts/predict/evidence tabs, context search with sessions, sandbox playground, an MCP server inventory panel, and the generated-notebook viewer). The chat drawer streams per-tool progress, renders markdown, exposes usage/token/time telemetry per exchange, accepts style and role directives, supports inline proposal approval, and persists the conversation across open/close, with every exchange indexed into the context store. Dataset context is shared across views, so the dataset being explored in Data is the one proposed upon in Experiments. The design goal is stated as one sentence in the project notes: \emph{a workspace a human actually wants to use}, with the pipeline visible rather than hidden, a glass box and not a black box.
+
+A note on provenance of this decision: the first UI was deliberately dependency-free vanilla JavaScript; the rework to React+Vite was an explicit, documented break of that constraint in exchange for maintainability and charting ergonomics: recorded here as an example of the project's willingness to revise its own rules when evidence favored it.
+
+\begin{figure}[H]
+\centering
+\resultslot[5.5cm]{Screenshot slot A: Data view: upload, preview, EDA modules (missing values, distributions, correlations) and the cleaning report, in the deterministic (blue) folder.}
+\caption{Workspace UI: the deterministic Data view (screenshot pending).}
+\label{fig:ui-data}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resultslot[5.5cm]{Screenshot slot B: Experiments view: live stage pipeline (Plan $\rightarrow$ Clean $\rightarrow$ Train $\rightarrow$ Evaluate, plus the agentic round stage), per-agent cards with LLM interpretations, per-model SSE progress, and History with feedback.}
+\caption{Workspace UI: the agentic Experiments view (screenshot pending).}
+\label{fig:ui-experiments}
+\end{figure}
+
+\section{Safety and security model}
+\label{sec:safety}
+
+Three mechanisms define the safety model; Table~\ref{tab:safety} summarizes their guarantees and their honest limits.
+
+\begin{table}[H]
+\centering
+\caption{Safety mechanisms: guarantees and limits.}
+\label{tab:safety}
+\small
+\begin{tabular}{p{3.1cm}p{6.2cm}p{5.1cm}}
+\toprule
+\textbf{Mechanism} & \textbf{Guarantee} & \textbf{Documented limit} \\
+\midrule
+Path containment & Workspace-relative paths only; \texttt{resolve()+relative\_to} blocks traversal and symlinks; \texttt{ArtifactRef} validates relativity & Absolute paths may leak in some library error strings (MAJ-01, open) \\
+Code sandbox & Import whitelist (22 modules), 14 blocked builtins, 13 blocked AST node types (lambdas deliberately allowed for pandas idioms), dunder guard, 2~GB RLIMIT, 30~s timeout, output caps & Compute isolation only; no OS-level filesystem confinement (BLK-01, open). The trade-off is deliberate: a local-first, single-user tool avoids requiring container runtimes on the host, and every sandbox artifact is treated as untrusted and re-validated in the parent process \\
+Approval gate & Every path from proposal to training passes one chokepoint; agent-initiated flows default to \texttt{awaiting\_approval}; rejected proposals are unexecutable & Social, not cryptographic: the principal is recorded (\texttt{auto:} mandates included), not authenticated \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sandbox deserves elaboration because it executes LLM-generated code. It spawns a fresh interpreter for every execution, speaking a JSON protocol over stdin/stdout, forcing a non-interactive matplotlib backend, and enforcing its policy in three layers. The first layer is a static AST check that rejects forbidden constructs before execution: class definitions, async constructs, dynamic \texttt{type()} calls, and others. Lambdas are deliberately \emph{allowed}. The RQ5 spike proved that blocking \texttt{ast.Lambda} is incompatible with pandas-idiomatic code such as \texttt{groupby().transform(lambda s: ...)}, and a lambda cannot import, access blocked builtins, or escape scope, because \texttt{global} and \texttt{nonlocal} remain blocked. The second layer is an import hook that re-enforces the whitelist at runtime; the \texttt{inspect} module is deliberately excluded, after an audit finding showed it could recover unfiltered builtins. The third layer is compute limits: memory (2~GB, raised from 512~MB after measuring the address space pandas~3 needs for its shared libraries), wall-clock time, and output size. The hardening approach follows secure-development guidance on supply-chain and capability scoping \cite{openssf2024}, and it is aligned with the emerging MCP security literature: the OWASP MCP Security Cheat Sheet \cite{owasp2025mcp}, the NSA's security guidance for MCP deployments \cite{nsa2025mcp}, the OWASP LLM risk taxonomy (which treats unrestricted code execution and excessive agency as first-class threat classes) \cite{owasp2024llm}, and the academic analyses of MCP's attack surface \cite{zhang2026breakingprotocol,hou2026mcplandscape}. An adversarial security audit (revisited in Section~\ref{sec:lessons}) found and fixed two escape chains and documented the remaining filesystem-confinement gap with a proof of concept. That is why this thesis describes the sandbox as providing \emph{compute isolation}, not confinement.
+
+\subsection{Alternatives considered}
+\label{sec:alternatives}
+
+Three architectural alternatives were explicitly evaluated and set aside, a record kept here because it delimits the novelty claim:
+
+\begin{itemize}
+	\item \textbf{Orchestration frameworks (Airflow, LangGraph, AutoGen) as the core.} Rejected: an external orchestrator competes with the hand-rolled orchestration layer that is itself the thesis's object of study, diluting the claim. Frameworks remain the comparison baseline of Table~\ref{tab:frameworks}.
+	\item \textbf{A workflow/data-transformation engine (dbt) and a warehouse (Snowflake/\allowbreak{}BigQuery) as the data layer.} Considered and deferred: the fit is genuine (a transformation module wrapped as an MCP tool is exactly the ``capability = MCP module'' pattern), but migrating the evidence layer from local SQLite/files to a warehouse conflicts with the local-first constraint that defines the system; recorded as future work for organizational deployments.
+	\item \textbf{A vector-database memory layer (RAG) over the context store.} Deferred by explicit descope decision (Section~\ref{sec:process}): the keyword FTS5 store preserves verifiability; semantic retrieval is future work (Section~\ref{sec:futurework}).
+\end{itemize}

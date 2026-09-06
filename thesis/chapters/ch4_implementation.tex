@@ -6,7 +6,7 @@ This chapter describes how the design of Chapter~\ref{ch:design} is realized: th
 \section{Technology stack and repository layout}
 \label{sec:stack}
 
-The stack was selected for typedness, determinism, and local operation. Python 3.11+ is the implementation language; Pydantic~v2 enforces the contracts; pandas and scikit-learn \cite{pedregosa2011sklearn} provide the data and model layers; the official MCP SDK \cite{mcp2024spec} serves the seven stdio servers; FastAPI and Uvicorn serve the HTTP surface \cite{fastapi2024}; kagglehub ingests public datasets \cite{kagglehub2024}; and SQLite/FTS5 \cite{sqlite2024fts5} backs the context store. The workspace front end is React 18 + TypeScript built with Vite and served as static files by the same FastAPI process, so the entire system runs as a single local service. Table~\ref{tab:stack} lists the pinned core dependencies.
+The stack was chosen for strong typing, determinism, and local operation. Python 3.11+ is the implementation language; Pydantic~v2 enforces the contracts; pandas and scikit-learn \cite{pedregosa2011sklearn} provide the data and model layers; the official MCP SDK \cite{mcp2024spec} serves the seven stdio servers; FastAPI and Uvicorn serve the HTTP surface \cite{fastapi2024}; kagglehub ingests public datasets \cite{kagglehub2024}; and SQLite/FTS5 \cite{sqlite2024fts5} backs the context store. The workspace front end is React 18 + TypeScript built with Vite and served as static files by the same FastAPI process, so the entire system runs as a single local service. Table~\ref{tab:stack} lists the pinned core dependencies.
 
 \begin{table}[H]
 \centering
@@ -17,11 +17,11 @@ The stack was selected for typedness, determinism, and local operation. Python 3
 \toprule
 \textbf{Dependency} & \textbf{Role} & \textbf{Why this one} \\
 \midrule
-pydantic ($\geq$2) & Contracts & Strict typed models with validation; the contract backbone \\
-pandas ($\geq$2) & Dataframes & Standard tabular layer \cite{mckinney2010pandas}; profiling and cleaning \\
-scikit-learn ($\geq$1.4) & Models & Nine deterministic estimators; \texttt{random\_state} discipline \\
+pydantic ($\geq$2) & Contracts & Strictly typed models with validation and the contracts backbone. \\
+pandas ($\geq$2) & Dataframes & Standard tabular layer \cite{mckinney2010pandas}, profiling and cleaning. \\
+scikit-learn ($\geq$1.4) & Models & Nine deterministic estimators and the \texttt{random\_state} discipline \\
 mcp ($\geq$1.6) & Protocol & Official SDK for stdio servers and clients \\
-fastapi / uvicorn & HTTP & Async service, SSE streaming for job events \\
+fastapi / uvicorn & HTTP & Async service and SSE streaming for job events \\
 kagglehub & Ingestion & First-party Kaggle adapter for public datasets \\
 pyarrow & Parquet & Future-proof columnar I/O support \\
 matplotlib & Figures & Thesis evidence generation (validity charts, comparison plots) \\
@@ -29,7 +29,7 @@ matplotlib & Figures & Thesis evidence generation (validity charts, comparison p
 \end{tabular}
 \end{table}
 
-The repository follows a conventional Python layout. The package tree maps one-to-one onto the responsibilities of Table~\ref{tab:modules}; the workspace front end lives in \texttt{web/}; and every runtime output lands under the user's workspace (\texttt{runs/}, \texttt{data/}, \texttt{proposals/}, \texttt{.thelab/}) with persisted references kept relative.
+The repository follows a conventional Python layout. The package tree maps one-to-one onto the responsibilities of Table~\ref{tab:modules} (packages). The workspace front end lives in \texttt{web/}. Every runtime output lands under the user's workspace (\texttt{runs/}, \texttt{data/}, \texttt{proposals/}, \texttt{.thelab/}) with persisted references for context searching.
 
 \begin{lstlisting}[language={}, caption={Repository layout (top level, abridged).}, label={lst:layout}, style=cli]
 thelab/                  # implementation (10 packages, ~16k LOC)
@@ -37,9 +37,9 @@ thelab/                  # implementation (10 packages, ~16k LOC)
   model_service/ eda/ workspace/
   agents/approval.py    # single approval chokepoint
   agents/grounding.py   # shared claim verification
-  ide/agentic_round.py  # grounded-autonomy role loop
+  ide/agentic_round.py  # grounded-autonomy role loop; per-stage provider assignment (stage_providers) + token/cost telemetry
 web/                     # React + TS workspace (Vite build)
-tests/                   # 57 test files, 561 test functions
+tests/                   # 58 test files, 546 test functions
 scripts/                 # evaluate_thesis.py, demo_defense.sh, harvest_findings.py,
                          #   probe_model_latency.py, generate_evidence.py, build_ui.sh
 examples/                # fixtures, batch configs, Kaggle experiment
@@ -51,19 +51,19 @@ thesis/evidence/         # thesis evidence pack (tables, figures, snapshots)
 \section{Reproducibility engineering}
 \label{sec:reprowork}
 
-Reproducibility is engineered, not hoped for. Four mechanisms cooperate:
+Reproducibility was one of the main goals and is engineered into the pipeline. The four mechanisms that cooperate to make it true are:
 
 \begin{enumerate}
-	\item \textbf{Seed injection.} The seed is a mandatory argument of every run, injected into the estimator (\texttt{random\_state}) and the split; \texttt{build\_estimator} refuses to construct an estimator without it.
-	\item \textbf{Manifest provenance.} The manifest records the input dataset hash, the full training configuration, the seed, and the resolved dependency versions (Python, pydantic, pandas, scikit-learn, numpy, joblib) --- captured automatically at run time, not maintained by hand.
-	\item \textbf{Lockfile.} \texttt{requirements.lock} pins the environment; the documented install path builds the virtual environment from the lock, making the recorded dependency versions reproducible in practice (with the documented caveat that the lock is not hash-verified; Section~\ref{sec:limitations}).
-	\item \textbf{Generated notebooks.} Every completed run can produce a reproducible research notebook artifact (\texttt{report.ipynb}, generated on demand over \texttt{GET /runs/\{id\}/notebook}): title and manifest summary, dataset load cell, a reproduce cell invoking the pipeline with the exact recorded parameters, metrics and validation display, artifact index, and findings from sub-agent interpretations when present. The notebook is built as standards-compliant nbformat JSON without new dependencies, and is viewable read-only in the UI.
+	\item \textbf{Seed injection.} The seed is a mandatory argument of every run, injected into the estimator (\texttt{random\_state}) and \texttt{build\_estimator} refuses to construct an estimator without it.
+	\item \textbf{Manifest provenance.} The manifest records the input dataset hash, the full training configuration, the seed, and the resolved dependency versions (Python, pydantic, pandas, scikit-learn, numpy, joblib), captured automatically at run time and not maintained by hand.
+	\item \textbf{Lockfile.} \texttt{requirements.lock} pins the environment. The documented install path builds the virtual environment from this file, so the recorded dependency versions can be reproduced in practice (Section~\ref{sec:limitations}).
+	\item \textbf{Generated notebooks.} Every completed run can produce a reproducible research notebook artifact (\texttt{report.}\allowbreak{}\texttt{ipynb}, generated on demand over \texttt{GET /runs/}\allowbreak{}\texttt{\{id\}/}\allowbreak{}\texttt{notebook}). The notebook opens with a title and manifest summary, loads the dataset, and includes a reproduce cell that invokes the pipeline with the exact recorded parameters. It also shows the metrics and validation results, indexes the artifacts, and adds the sub-agent findings when present. It is built as standards-compliant nbformat JSON without new dependencies, and is viewable read-only in the UI.
 \end{enumerate}
 
 \section{Three ways in: CLI, Python API, HTTP}
 \label{sec:surfaces}
 
-The same pipeline is reachable three ways. The CLI (Listing~\ref{lst:cli}) is the primary surface for scripting and the reference for documentation.
+The same pipeline is reachable in three different ways. The CLI (Code~\ref{lst:cli}) is the primary surface for scripting and the reference for documentation.
 
 \begin{lstlisting}[language=bash, caption={Reproducible training and prediction from the CLI.}, label={lst:cli}, style=cli]
 # Train one model deterministically
@@ -88,7 +88,7 @@ thelab-agent --mode worker --dataset examples/iris.csv --target species \
   --provider openrouter
 \end{lstlisting}
 
-The Python API offers the same capabilities to notebooks and scripts (Listing~\ref{lst:python}): a low-level \texttt{run\_model} and \texttt{try\_all\_models}, and a high-level \texttt{thelab.quick} facade.
+The Python API offers the same capabilities to notebooks and scripts (Code~\ref{lst:python}): a low-level \texttt{run\_model} and \texttt{try\_all\_models}, and a high-level \texttt{thelab.quick}.
 
 \begin{lstlisting}[language=python, caption={Python API: deterministic run, try-all comparison, and a proposal from a notebook.}, label={lst:python}, style=estilo]
 from thelab.quick import experiment, compare
@@ -116,7 +116,8 @@ p = asyncio.run(worker.propose(goal="Predict species",
 outcome = approve_and_run_proposal(p.proposal_id, principal="notebook")
 \end{lstlisting}
 
-The HTTP surface serves the UI and a JSON API with a uniform \texttt{\{ok, data\}} envelope (Listing~\ref{lst:http}); long operations run as background jobs with SSE progress and cooperative cancellation.
+The HTTP surface serves the UI and a JSON API. Every answer uses the same \texttt{\{ok, data\}} format, so all clients read responses the same way (Code~\ref{lst:http}). Long operations run as background jobs, not inside the request. Training jobs stream their progress live, and experiment jobs move from stage to stage, so a cancel request is cooperative and takes effect at the next safe boundary instead of interrupting a model mid-training. One limitation is documented here: a long synchronous model fit can briefly hold other service traffic (Section~\ref{sec:limitations}).
+
 
 \begin{lstlisting}[language=bash, caption={HTTP surface: training and inference via the local service.}, label={lst:http}, style=cli]
 thelab-model-service --host 127.0.0.1 --port 8000
@@ -131,7 +132,7 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" \
          "petal_length": 1.4, "petal_width": 0.2}]}'
 \end{lstlisting}
 
-Independently of these three, an MCP client consumes the factory through the servers of Table~\ref{tab:mcpservers}; the bundled demo client smoke-tests the round trip without any MCP SDK knowledge beyond the protocol itself:
+Alongside these three, an external agent can use the whole factory through the MCP servers of Table~\ref{tab:mcpservers}. It can search the stored context and use the provided tools via the MCP contracts. To prove it works, the repository includes a small demo client that connects to the servers, discovers their tools, and calls them, knowing nothing about the system beyond the protocol itself:
 
 \begin{lstlisting}[language=bash, caption={MCP smoke tests over stdio.}, label={lst:mcpdemo}, style=cli]
 thelab-mcp-demo model_registry --run-id <run_id>  # list_models, card, predict
@@ -144,7 +145,7 @@ The positioning rule of thumb documented in the user guide: \emph{use the UI to 
 \section{Kaggle ingestion and context packs}
 \label{sec:kaggle}
 
-Public data is a first-class input. From a Kaggle slug, the ingestion path (Listing~\ref{lst:kagglecli}) downloads the dataset into \texttt{data/uploads/} through kagglehub (the only networked step, always explicit user action), fetches the dataset's public page context (description, tags, file metadata --- parsed from the page's embedded state, failing soft), merges it with a local profile (shape, dtypes, head), and persists the merged \emph{context pack} alongside the CSV (\texttt{<name>.kaggle.json}). The pack is indexed into the context store as a searchable event and exposed to the chat agent through the \texttt{get\_dataset\_context} tool, so proposals are grounded in the dataset's own documentation --- for example, ordinal encodings documented on the Kaggle page become part of the agent's evidence.
+Public data is a first-class input. From a Kaggle slug, the ingestion path (Code~\ref{lst:kagglecli}) downloads the dataset into \texttt{data/uploads/} through kagglehub (the only networked step and always an explicit user action). It then fetches the dataset's public page context (description, tags, and file metadata, parsed from the page's embedded state), merges it with the local profile (shape, dtypes, head), and saves the merged \emph{context pack} next to the CSV (\texttt{<name>.kaggle.json}). The pack is indexed into the context store as a searchable event and exposed to the chat agent through the \texttt{get\_dataset\_context} tool, so proposals are grounded in the dataset's own documentation: for example, ordinal encodings documented on the Kaggle page become part of the agent's evidence, providing useful additional context alongside the raw dataset, so agents can perform a better job.
 
 \begin{lstlisting}[language=bash, caption={Kaggle ingestion via CLI.}, label={lst:kagglecli}, style=cli]
 thelab ingest kaggle pavansubhasht/ibm-hr-analytics-attrition-dataset
@@ -154,30 +155,38 @@ thelab ingest kaggle pavansubhasht/ibm-hr-analytics-attrition-dataset
 \section{Testing and quality assurance}
 \label{sec:quality}
 
-Quality gates are enforced by four automated layers, run before any change is considered complete:
+Quality is enforced by four automated layers that run before any change is considered complete to avoid breaking the application code:
 
 \begin{lstlisting}[language=bash, caption={The four quality gates.}, label={lst:gates}, style=cli]
 .venv/bin/ruff check thelab tests scripts        # lint (E,F,I,UP,W,B)
 .venv/bin/mypy thelab                            # static types
-.venv/bin/python -m pytest tests/ -q             # 495 tests
-PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py   # RQ1-RQ3
+.venv/bin/python -m pytest tests/ -q             # 546 tests
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py   # RQ1-RQ6 (mock provider)
 \end{lstlisting}
 
-The test suite covers every package at unit level and exercises the full stack end-to-end against the mock provider --- including a dedicated real-data-hardening suite that replays the S\&P-scale scenarios, and a suite that tests the thesis evaluator itself. Notable integration tests verify the approval boundary end-to-end (proposal $\rightarrow$ approve $\rightarrow$ batch $\rightarrow$ runs), the sandbox policy against adversarial inputs, the context store's immutability under reads, and the MCP contract of all seven servers.
+The test suite covers every package at unit level and exercises the full stack end-to-end against the mock provider, so the whole system is testable
+with zero network access and zero token cost. It includes a real-data hardening suite that replays the S\&P-scale scenarios, the largest recorded
+dataset, to make sure the cleaning policy and scale guards keep working at that size. It also includes a suite that tests the thesis evaluator itself as well as different tests that verify the approval boundary end to end (proposal, approve, batch, runs), the sandbox policy against adversarial inputs, the context store's immutability under reads, and the MCP contract of all seven servers. Every named suite can be found in \texttt{tests/}:
+\texttt{test\_real\_data\_hardening.py} (S\&P-scale hardening), \texttt{test\_thesis\_eval.py} (evaluator), \texttt{test\_agents\_approval.py} (approval boundary), \texttt{test\_sandbox.py} (adversarial sandbox inputs), and \texttt{test\_context\_reader.py} (byte-identical reads), with the MCP contract of each server covered in its own file, such as \texttt{test\_mcp.py}.
 
 \section{Development process}
 \label{sec:process}
 
-The Lab was developed with heavy AI assistance under a process designed to keep the author in control --- a decision with its own history. An initial attempt to generate the first implementation in one automated pass (a code agent plus an audit agent, at a cost of approximately EUR~30) produced code the author could not read or confidently own. The process was redesigned around a rule the author summarized as \emph{slice implemented -- slice read}: every implemented slice must be read and understood before the next begins. The project's subsequent working mode --- small, focused slices; contracts before features; four quality gates before done --- is the direct descendant of that lesson, and the development log records its effect on cost structure as well: audit-style agent runs cost \$0.34--\$4 per run, while large-context coding-agent runs reached $\sim$\$10 each, an asymmetry that motivated the review-heavy, generation-light workflow.
+The project development was carried out in seven stages, P0 to P6 (see the README.md and ROADMAP.md). Each stage was subdivided into implementation
+slices, tested before acceptance, so the application code did not break and the development process did not slow down. Additionally, each stage, when
+finished, was audited with the help of a custom coding audit agent, which stored the findings into a markdown file to harden the application code,
+adding patches and fixing bugs.
 
-The agentic tooling itself was part of the stack under test: coding agents implemented slices against the typed contracts, audit agents (a role rotated across models after one frontier model repeatedly stalled) reviewed diffs adversarially, and a read-only external assistant served as a second opinion. This thesis therefore reports not only a system built for agentic ML, but evidence gathered from building a system \emph{with} agentic tooling under reproducible process constraints.
+The seven stages, in order, were the following.
 
-Three decisions from the pre-implementation planning phase survive, unchanged, in the delivered system --- recorded here as provenance of the design:
+\begin{description}
+	\item[P0, the local-first data-to-model factory.] The deterministic core was the first thing built. It included the typed contracts, the training pipeline, four read-only MCP servers, the context store, and the automated RQ1--RQ3 evaluator. The motivation was that the first usable milestone had to work without a UI, an LLM, or network access.
+	\item[P1, the agentic layer.] Intelligence was added on top of that core. This stage brought the provider protocol with its first adapters, the agent harness, the worker agent with experiment proposals, the EDA skill pack, and a cross-domain benchmark, all following one idea, agents propose and the pipeline executes.
+	\item[P2, the agentic ML IDE.] In this stage the factory became usable on real data. Dataset upload with EDA and cleaning, background jobs with live progress, the code sandbox, and agent orchestration, as well as a hardening phase that added the cleaning policy, scale guards, and cooperative cancellation.
+	\item[P3, multiagentic features.] The multi-agent claim became real and tangible in this stage. The grounded chat agent could run sandboxed code, ingest Kaggle data with context packs, and generate notebooks. The first multi-Kaggle proof experiment on three public datasets was also carried out on this stage, landing the first results that surpassed the deterministic model baseline.
+	\item[P4, the workspace rework.] The five-view React user interface (UI) was done on this stage, the idea behind was to have a user friendly environment that a human would actually want to use besides from the CLI and scripts. In this stage an experiment was also carried out that compared local vs cloud LLM models over the created architecture.
+	\item[P5, grounded autonomy.] In this stage the goal was to expand the multi-agentic features and to generate better and more efficient agent responses overall. Grounded context, per-role agent prompts, the approval gate and the RQ4--RQ6 instrumentation were built and measured in this stage.
+	\item[P6, the continuous working loop.] Finally, the loop was closed. A multi-domain ratchet loop was done over ten datasets. It compared the metrics achieved by the deterministic pipeline vs the agentic expanded pipeline. If the agent surpassed the baseline, a hole harvester script absorbed the run into fix tickets. So then the deterministic pipeline can be expanded to produce that result with minimal code changes. Turning the factory into its own first user, connecting data, models and software development.
+\end{description}
 
-\begin{itemize}
-	\item \textbf{The lab metaphor.} The project was framed from the first week as ``infrastructure is the lab; the custom apps are the experiments you run in it'' --- the direct origin of the system's name and of the decision to build the deterministic core as a reusable factory rather than a single-purpose application.
-	\item \textbf{The descope checkpoint.} The phased plan set an explicit trip-wire: if the core loop (MCP servers, pipeline, evaluator) was not stable by early August, the semantic-memory layer would be descoped to ``designed, partially implemented'' rather than risked --- a decision exercised exactly as planned, and the reason the context store is keyword-only (FTS5) today (Section~\ref{sec:bg-context}).
-	\item \textbf{The deterministic judge.} Planning-phase sketches of a ``deterministic judge'' for agent outputs --- validation with parameters, not LLM self-assessment --- crystallized into the dual design of the deterministic pipeline (which judges runs) and the grounding checks of the harness (which judge agent claims).
-\end{itemize}
 
-A first-review audit of the near-complete system (September 2026) extended this discipline inward. It found the engineering core solid but the agentic claims partially overstated: sub-agents shared one system prompt with an unused role argument, some orchestration paths self-approved their own proposals (bypassing the intended human boundary), and threaded user feedback was never read. Every finding was closed before any new capability was built: per-role prompt contracts replaced the shared prompt, a single approval chokepoint made agent-initiated execution impossible without explicit human approval (Section~\ref{sec:approvalgate}), feedback became a real consumer in all three stage interpretations, and the dead code was deleted. The episode is recorded here deliberately: in agentic systems, the gap between what the code does and what the documentation claims is itself a failure mode, and closing it --- 495 tests green, deterministic path untouched --- preceded every new agentic claim in this thesis.

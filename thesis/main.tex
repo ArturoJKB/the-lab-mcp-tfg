@@ -1,0 +1,354 @@
+%----------
+%	Context-Aware Multi-Agent Orchestration via MCP
+%	Bachelor Thesis — Universidad Carlos III de Madrid
+%	Based on the official UC3M TFG LaTeX template (Biblioteca UC3M, 2019)
+%----------
+
+%----------
+%	CONFIGURACIÓN DEL DOCUMENTO
+%----------
+
+\documentclass[12pt]{report}
+
+% MÁRGENES: 2,5 cm sup. e inf.; 3 cm izdo. y dcho.
+\usepackage[
+a4paper,
+vmargin=2.5cm,
+hmargin=3cm
+]{geometry}
+
+% INTERLINEADO
+\renewcommand{\baselinestretch}{1.15}
+\parskip=6pt
+
+% DEFINICIÓN DE COLORES
+\usepackage[table]{xcolor}
+\definecolor{azulUC3M}{RGB}{0,0,102}
+\definecolor{gray97}{gray}{.97}
+\definecolor{gray75}{gray}{.75}
+\definecolor{gray45}{gray}{.45}
+
+% PDF/A
+\usepackage[a-1b]{pdfx}
+
+% ENLACES
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,
+	linkcolor=black,
+	urlcolor=blue}
+
+% EXPRESIONES MATEMATICAS
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+
+\usepackage{txfonts}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[english]{babel}
+\usepackage[babel, english=american]{csquotes}
+\AtBeginEnvironment{quote}{\small}
+
+% PIE DE PÁGINA
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\thepage}
+\fancypagestyle{plain}{\pagestyle{fancy}}
+
+% TÍTULOS
+\usepackage{titlesec}
+\usepackage{titletoc}
+\titleformat{\chapter}[block]
+{\large\bfseries\filcenter}
+{\thechapter.}
+{5pt}
+{\MakeUppercase}
+{}
+\titlespacing{\chapter}{0pt}{0pt}{*3}
+\titlecontents{chapter}
+[0pt]
+{}
+{\contentsmargin{0pt}\thecontentslabel.\enspace\uppercase}
+{\contentsmargin{0pt}\uppercase}
+{\titlerule*[.7pc]{.}\contentspage}
+
+\titleformat{\section}
+{\bfseries}
+{\thesection.}
+{5pt}
+{}
+\titlecontents{section}
+[5pt]
+{}
+{\contentsmargin{0pt}\thecontentslabel.\enspace}
+{\contentsmargin{0pt}}
+{\titlerule*[.7pc]{.}\contentspage}
+
+\titleformat{\subsection}
+{\normalsize\bfseries}
+{\thesubsection.}
+{5pt}
+{}
+\titlecontents{subsection}
+[10pt]
+{}
+{\contentsmargin{0pt}
+	\thecontentslabel.\enspace}
+{\contentsmargin{0pt}}
+{\titlerule*[.7pc]{.}\contentspage}
+
+% TABLAS (estilo ingeniería)
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{floatrow}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\DeclareCaptionFormat{upper}{#1#2\uppercase{#3}\par}
+\usepackage{booktabs}
+\usepackage[htt]{hyphenat}
+\usepackage{makecell}
+
+\captionsetup[table]{
+	format=upper,
+	justification=centering,
+	labelsep=period,
+	width=.75\linewidth,
+	labelfont=small,
+	font=small,
+}
+
+% FIGURAS (estilo ingeniería)
+\usepackage{graphicx}
+\graphicspath{{imagenes/}{figures/}}
+
+\captionsetup[figure]{
+	format=hang,
+	name=Fig.,
+	singlelinecheck=off,
+	labelsep=period,
+	labelfont=small,
+	font=small
+}
+
+% NOTAS AL PIE
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+% LISTADOS DE CÓDIGO
+\usepackage{listings}
+
+\lstdefinestyle{estilo}{ frame=Ltb,
+	framerule=0pt,
+	aboveskip=0.5cm,
+	framextopmargin=3pt,
+	framexbottommargin=3pt,
+	framexleftmargin=0.4cm,
+	framesep=0pt,
+	rulesep=.4pt,
+	backgroundcolor=\color{gray97},
+	rulesepcolor=\color{black},
+	%
+	basicstyle=\ttfamily\footnotesize,
+	keywordstyle=\bfseries,
+	stringstyle=\ttfamily,
+	showstringspaces = false,
+	commentstyle=\color{gray45},
+	%
+	numbers=left,
+	numbersep=15pt,
+	numberstyle=\tiny,
+	numberfirstline = false,
+	breaklines=true,
+	xleftmargin=\parindent
+}
+
+% Style for shell/CLI sessions: no line numbers, keeps output readable
+\lstdefinestyle{cli}{
+	frame=Ltb,
+	framerule=0pt,
+	aboveskip=0.5cm,
+	framextopmargin=3pt,
+	framexbottommargin=3pt,
+	framexleftmargin=0.4cm,
+	framesep=0pt,
+	rulesep=.4pt,
+	backgroundcolor=\color{gray97},
+	rulesepcolor=\color{black},
+	basicstyle=\ttfamily\footnotesize,
+	numbers=none,
+	breaklines=true,
+	xleftmargin=0.4cm
+}
+
+% JSON language
+\lstdefinelanguage{json}{
+	morestring=[b]",
+	morecomment=[l]{//},
+	sensitive=true
+}
+
+\captionsetup[lstlisting]{font=small, labelsep=period}
+\lstset{style=estilo}
+\renewcommand{\lstlistingname}{\uppercase{Code}}
+
+% DIAGRAMAS
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% TODO markers and result placeholders
+\newcommand{\fillme}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\resultslot}[2][5.5cm]{%
+	\begin{center}
+	\fbox{\parbox[c][#1][c]{0.88\linewidth}{\centering\small\itshape --- Results slot pending ---\\[2pt]#2}}
+	\end{center}}
+
+% BIBLIOGRAFÍA (IEEE)
+\usepackage[backend=biber, style=ieee, isbn=false,sortcites, maxbibnames=5, minbibnames=1]{biblatex}
+\addbibresource{bibliografia/bibliografia.bib}
+
+% APÉNDICES
+\usepackage{appendix}
+
+%-------------
+%	DOCUMENTO
+%-------------
+
+\begin{document}
+\pagenumbering{roman}
+
+%----------
+%	PORTADA
+%----------
+\begin{titlepage}
+	\begin{sffamily}
+	\color{azulUC3M}
+	\begin{center}
+		\begin{figure}[H]
+			\makebox[\textwidth][c]{\includegraphics[width=16cm]{Portada_Logo.png}}
+		\end{figure}
+		\vspace{2.5cm}
+		\begin{Large}
+			Bachelor's Degree in Data Science and Engineering\\
+			Academic Year 2025--2026\\
+			\vspace{2cm}
+			\textsl{Bachelor Thesis}
+			\bigskip
+
+		\end{Large}
+		 	{\Huge ``Context-Aware Multi-Agent Orchestration: A Standardized Architecture via MCP for Autonomous Agentic Systems''}\\
+		 	\vspace*{0.5cm}
+	 		\rule{10.5cm}{0.1mm}\\
+			\vspace*{0.9cm}
+			{\LARGE \fillme{Author's full name}}\\
+			\vspace*{1cm}
+		\begin{Large}
+			\fillme{Tutor's full name}\\
+			Legan\'es, \fillme{defense date}\\
+		\end{Large}
+	\end{center}
+	\vfill
+	\color{black}
+	\includegraphics[width=4.2cm]{imagenes/creativecommons.png}\\
+	This work is licensed under Creative Commons \textbf{Attribution -- Non Commercial -- Non Derivatives}
+	\end{sffamily}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	RESUMEN
+%----------
+\renewcommand\abstractname{\large\uppercase{Summary}}
+\begin{abstract}
+\thispagestyle{plain}
+\setcounter{page}{3}
+
+\input{chapters/abstract}
+
+	\vfill
+\end{abstract}
+	\newpage
+	\thispagestyle{empty}
+	\mbox{}
+
+%----------
+%	DEDICATORIA
+%----------
+\chapter*{Dedication}
+
+\setcounter{page}{5}
+
+	\input{chapters/dedication}
+
+	\vfill
+
+	\newpage
+	\thispagestyle{empty}
+	\mbox{}
+
+%----------
+%	ÍNDICES
+%----------
+\tableofcontents
+\thispagestyle{fancy}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+\listoffigures
+\thispagestyle{fancy}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+\listoftables
+\thispagestyle{fancy}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	ABBREVIATIONS
+%----------
+\input{chapters/abbreviations}
+
+%----------
+%	TRABAJO
+%----------
+\clearpage
+\pagenumbering{arabic}
+
+\input{chapters/ch1_introduction}
+\input{chapters/ch2_background}
+\input{chapters/ch3_design}
+\input{chapters/ch4_implementation}
+\input{chapters/ch5_methodology}
+\input{chapters/ch6_results}
+\input{chapters/ch7_discussion}
+\input{chapters/ch8_conclusions}
+
+%----------
+%	BIBLIOGRAFÍA
+%----------
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\printbibliography
+
+%----------
+%	ANEXOS
+%----------
+\clearpage
+\begin{appendices}
+\input{chapters/annexes}
+\end{appendices}
+
+\end{document}

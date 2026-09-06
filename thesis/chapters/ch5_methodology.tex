@@ -1,0 +1,150 @@
+\chapter{Evaluation Methodology}
+\label{ch:methodology}
+
+This chapter defines how the system is evaluated. Section~\ref{sec:eval-objectives} frames the evaluation; Section~\ref{sec:rq-criteria} binds the six research questions to methods and pass criteria; Section~\ref{sec:evaluator} describes the automated evaluator; Sections~\ref{sec:exp1}--\ref{sec:exp-agentic} define Experiments 1--3 (deterministic baseline, real-data validation, and the grounded-autonomy round); Section~\ref{sec:exp-kaggle} defines Experiment 4, the multi-domain stress validation; and Section~\ref{sec:metrics} fixes the metrics.
+
+\section{Evaluation objectives}
+\label{sec:eval-objectives}
+
+The evaluation must answer the hypothesis of Section~\ref{sec:hypothesis} with evidence that is \emph{reproducible by construction}: checks that run automatically, in a disposable temporary workspace, and that produce machine-readable verdicts. It must also demonstrate the system at increasing scales (fixture, real, and public data) and be honest about what is not (yet) evaluated. Three layers are therefore distinguished:
+
+\begin{itemize}
+	\item \textbf{Automated baseline (RQ1--RQ3).} An isolated evaluator runs on every demand, on a small fixture, producing the pass/fail verdict that gates any claim of completeness.
+	\item \textbf{Recorded experiments (Experiments 1, 2, 4).} Three experiments exercise the system-property claims at realistic scale (three-ways-in, real-dataset validation, and the ten-dataset Kaggle post-validation) with results recorded as regular run artifacts, evidence in the same format the system itself produces.
+	\item \textbf{Grounded-autonomy experiment (Experiment 3, RQ4--RQ6).} An ablation-based protocol that measures what the agent layer adds over the deterministic baseline: proposal grounding, sandboxed generated code, and role-specialized orchestration: with results recorded separately per provider brain.
+\end{itemize}
+
+The ordering is deliberate: RQ4--RQ6 are asked \emph{only after} RQ1--RQ3 have established the grounding. Measuring what agents add over a baseline that does not reproduce would answer nothing.
+
+\section{Research questions and pass criteria}
+\label{sec:rq-criteria}
+
+Table~\ref{tab:rqcriteria} states, for each research question, the method and the exact pass bar.
+
+\begin{table}[H]
+\centering
+\caption{Research questions, methods, and pass bars (deterministic group RQ1--RQ3; agentic group RQ4--RQ6).}
+\label{tab:rqcriteria}
+\small
+\begin{tabular}{p{1.2cm}p{6.6cm}p{6.6cm}}
+\toprule
+\textbf{RQ} & \textbf{Method} & \textbf{Pass bar} \\
+\midrule
+\multicolumn{3}{l}{\emph{System group: automated, isolated workspace}} \\
+RQ1 & Two \texttt{run\_model} executions on an identical fixture, model, and seed & Both complete; \texttt{test\_accuracy} and \texttt{test\_f1\_macro} match within $10^{-12}$; manifest records seed and non-empty dependency versions \\
+RQ2 & Independent stdio MCP client against \texttt{model\_registry\_mcp}; \texttt{list\_tools}, \texttt{list\_models}, \texttt{predict} & Expected tools present; the RQ1 run appears in \texttt{list\_models}; \texttt{predict} returns typed, non-empty predictions \\
+RQ3 & Index a JSONL fixture into SQLite+FTS5; search via \texttt{ContextReader} & At least one relevant hit with stable fields; database bytes \emph{identical} before and after the search \\
+\midrule
+\multicolumn{3}{l}{\emph{Agentic group: Experiment 3, recorded per provider}} \\
+RQ4 & Ablation: same proposal task with full context vs.\ stripped context, $\geq$3 datasets & Grounded $\geq$ ungrounded on verified-claim rate; hallucinated claims reported; proposal validity $\geq$ 90\% \\
+RQ5 & Agentic round: agent-written feature-engineering and training code in \texttt{thelab/sandbox}; validator recomputes metrics outside the sandbox & $\geq$80\% script validity; 0 silent failures; best-agentic $\geq$ best-deterministic $-$ 1pt (deltas reported) \\
+RQ6 & Ablation: multi-agent round vs.\ single shared-prompt agent; deterministic pipeline as reference arm & Multi-agent completes $\geq$ single-agent; every handoff a typed artifact; intervention rate reported \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bar design note: RQ5 and RQ6 measure \emph{validity, safety, and competitiveness}: not victory. Improvement over the deterministic baseline is a bonus, not the bar; the saturated iris fixture is excluded from RQ5 (accuracy 1.0 leaves no headroom).
+
+\section{The automated evaluator}
+\label{sec:evaluator}
+
+\texttt{scripts/evaluate\_thesis.py} implements the system group of Table~\ref{tab:rqcriteria} mechanically:
+
+\begin{enumerate}
+	\item It creates a fresh temporary workspace (\texttt{tempfile.mkdtemp}), runs the checks, and tears the workspace down: no developer state is touched.
+	\item \textbf{RQ1} calls the Python API (not the CLI) twice with identical arguments and compares metrics at exact-float tolerance ($10^{-12}$); it then inspects the first run's \texttt{manifest.json} for the seed and dependency-version provenance.
+	\item \textbf{RQ2} spawns a genuinely independent MCP client (an MCP \texttt{ClientSession} over stdio) against the \texttt{model\_registry} server subprocess, pointed at RQ1's runs; it verifies the tool list, the presence of the approved run, and a live \texttt{predict} round trip.
+	\item \textbf{RQ3} writes one synthetic JSONL event, indexes it, asserts the database's bytes are unchanged by a read-only search, and verifies the hit's summary field.
+	\item It prints a human-readable verdict table and a JSON summary, exiting non-zero on any failure. The checks are chained: RQ2 and RQ3 consume RQ1's output.
+	\item \textbf{RQ4--RQ6 instrumentation} extends the same evaluator with the ablation runner (grounded/ungrounded and multi/single arms, mock provider for the suite) and a \texttt{--live} mode that records real-provider results: \texttt{--live openrouter --model <model>}, with \texttt{--datasets} and \texttt{--rounds} selectors for multi-round variance runs. Live recordings for both a cloud provider (OpenRouter, GLM 5.3 Flash) and a fully-offline local provider (Ollama, llama3.2:3b) are reported in Chapter~\ref{ch:results}.
+	\item \textbf{Evidence pipeline.} Recorded evaluator runs are snapshotted as JSON under \texttt{thesis/evidence/raw/}; a committed generator script (\texttt{scripts/thesis/generate\_evidence.py}) converts them into LaTeX tables and figures, byte-stable on re-run, with per-artifact provenance in a manifest. The results chapter consumes these tables directly, so every table in Chapter~\ref{ch:results} is reproducible from the recorded evidence by one script run.
+\end{enumerate}
+
+The evaluator's invocation and its output format are part of the thesis evidence:
+
+\begin{lstlisting}[language=bash, caption={Running the automated evaluation.}, label={lst:evalrun}, style=cli]
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py
+# ============================================================
+# \emph{thelab-mcp} -- Thesis Evaluation Report
+# ============================================================
+# Overall: PASS
+#   RQ1: PASS   metrics: {'test_accuracy': 1.0, 'test_f1_macro': 1.0}
+#   RQ2: PASS   predictions: ['setosa']
+#   RQ3: PASS   hits: 1   event_id: evt-repro
+\end{lstlisting}
+
+Three deliberate limitations of the evaluator are recorded here and revisited in Section~\ref{sec:limitations}: it runs on a small synthetic fixture (the real-scale claims come from the recorded experiments); RQ2 verifies that predictions are typed and non-empty, not that they are semantically correct; and RQ3 measures retrieval on a single crafted event (recall is not characterized).
+
+\section{Experiment 1: three ways in}
+\label{sec:exp1}
+
+\textbf{Claim under test.} All three surfaces (CLI, HTTP, MCP) execute the same deterministic pipeline and produce identical results for identical inputs: regardless of which LLM brain, if any, drives the agentic interpretation layer.
+
+\textbf{Protocol.} On the iris fixture with \texttt{logistic\_regression} and seed 42: (a) run the CLI command of Code~\ref{lst:cli}; (b) submit the same job through \texttt{POST /train} on the local service; (c) call \texttt{run\_training\_job} through the agent MCP server and poll \texttt{get\_job\_status}. Record test accuracy, wall-clock time, and the artifact set of each run; compare. \textbf{Provider dimension:} repeat the orchestrated experiment on the Titanic dataset (891 rows, target \texttt{Survived}) through three execution paths: deterministic-only (no LLM), Ollama (llama3.2:3b), and OpenRouter (GLM~5.3 Flash): and compare metrics bit-for-bit.
+
+\textbf{Expected outcome.} Identical metrics (1.0000 accuracy on iris) across the three surfaces; identical metrics across the three provider paths (measured 0.8045 accuracy on Titanic); comparable artifacts; HTTP and MCP significantly faster than the synchronous CLI (measured $\sim$2~s vs.\ $\sim$0.2~s, dominated by interpreter startup, not training). The provider dimension operationalizes the thesis's central design claim: \emph{changing the LLM changes the explanation, never the training outcome}.
+
+\section{Experiment 2: real-dataset validation}
+\label{sec:exp2}
+
+\textbf{Claim under test.} The factory behaves gracefully and traceably on real, messy data at scale.
+
+\textbf{Dataset.} S\&P~500 analyst ratings: 164{,}231 rows $\times$ 18 columns, downloaded from a public source; deliberately real in the ways that matter (mixed types, high-cardinality categoricals such as 501 tickers and 306 firms, datetime fields).
+
+\textbf{Protocol.} Five checks, each recorded as runs and artifacts: (1) the cleaning policy end-to-end, measuring row/column evolution, the \texttt{cleaning\_report}, and the size of the produced table against a naive one-hot baseline; (2) a feature-horizon leakage study: train on naive features vs.\ at-decision-time features and compare metrics; (3) the \texttt{svc} scale guard on 113{,}769 rows, measuring rejection time and the recorded reason; (4) a reproducible real-scale training run (logistic regression), measuring time and manifest provenance; (5) a full orchestrated experiment (3 models $\times$ 3 seeds) through the HTTP surface, measuring end-to-end time, per-model progress events, and best test accuracy. The S\&P dataset is also the primary target of Experiment 3: at 74.9\% baseline accuracy it offers the most headroom for agentic improvement.
+
+\section{Experiment 3: grounded autonomy (the agentic round)}
+\label{sec:exp-agentic}
+
+\textbf{Claim under test.} Agents grounded in the deterministic baseline's artifacts add measurable, safe, competitive value: their proposals are more verifiable when grounded (RQ4), their generated code is valid and competitive beyond the fixed grid (RQ5), and role-specialized coordination outperforms a single shared prompt (RQ6).
+
+\textbf{Protocol.} Over at least three datasets (including Titanic and the S\&P~500 validation set; iris excluded from RQ5), execute the full experiment twice per arm, with results recorded separately for Ollama (local) and OpenRouter (cloud); the mock provider drives the automated suite:
+
+\begin{enumerate}
+	\item \textbf{Deterministic reference arm (existing, untouched).} The standard orchestrated experiment produces the baseline runs, artifacts, and indexed evidence.
+	\item \textbf{Grounded arm (RQ4).} The agentic round runs with the full context pack (EDA brief + baseline metrics + prior-run evidence). \textbf{Ungrounded arm (RQ4 ablation).} The same round with the context pack stripped to the minimum schema (no EDA findings, no baseline metrics, no prior runs). Compare verified-claim rate (claims resolving to real run ids and recorded metrics), hallucinated-claim count, and proposal validity (contract acceptance without repair).
+	\item \textbf{Multi-agent arm (RQ6).} The three-role round of Section~\ref{sec:agenticround}. \textbf{Single-agent control (RQ6 ablation).} One agent with a shared prompt performing all three stages. Compare completion rate, handoff artifact type-conformance, and human intervention rate.
+	\item \textbf{Generated-code track (RQ5).} The FeatureEngineer transforms and any training scripts execute only in the sandbox; the deterministic post-validator checks shape/schema/target/leakage, and metrics are recomputed outside the sandbox. Record script validity rate, silent-failure count (must be zero), and best-agentic vs.\ best-deterministic deltas.
+\end{enumerate}
+
+Every arm runs behind the same approval gate (human approval by default; recorded \texttt{auto:} mandates for user-initiated stages), so the experiment also measures the intervention rate: how often a human had to act per completed round.
+
+\textbf{Results.} Section~\ref{sec:exp-agentic-results} reserves the result tables for the final recorded runs.
+
+\resultslot[3.5cm]{Experiment 3 result tables (RQ4 grounded-vs-ungrounded, RQ5 validity/competitiveness, RQ6 multi-vs-single; per provider) are inserted here after the recorded runs.}
+
+\section{Experiment 4: multi-domain stress validation (the continuous loop)}
+\label{sec:exp-kaggle}
+
+\textbf{Claim under test.} The complete stack (ingest from Kaggle, context pack, EDA, clean, agent proposal, approval, train, agentic round, generated notebook) generalizes across diverse public datasets without code changes, including domains where a trained model is genuinely useful (genomics, health, crypto, NLP, music signals, energy), after the P5 rework.
+
+\textbf{Protocol.} The experiment has two arms and one supplementary track, tiered by remaining time:
+
+\textbf{Arm A: agentic re-run over recorded baselines.} Six datasets already carry recorded deterministic baselines (churn, California housing, IBM HR, e-commerce, Titanic, S\&P~500). For each, execute the P5 agentic round seeded by the recorded artifacts and measure the \emph{delta} against the baseline: best-agentic vs.\ best-deterministic per dataset, with validity rates and rejections. This arm is cheap (baselines are persisted) and directly fills the agentic-vs-deterministic comparison.
+
+\textbf{Arm B (six new stress domains} (all slugs verified live; datasets chosen so that a model, even a modest one, is genuinely useful) the goal is the loop's evidence, not field state-of-the-art): (1) \emph{genomics}: ClinVar conflicting variant classifications (real-world variant classification, high-cardinality categorical structure); (2) \emph{health}: chronic-kidney-disease clinical records (54 clinical features); (3) \emph{crypto}: daily cryptocurrency prices (direction prediction across five assets); (4) \emph{NLP/AI}: real-vs-fake job postings: the deterministic pipeline rejects raw text columns with a recorded reason, and the RQ5 sandbox track featurizes them into a trainable table (the NLP-to-tabular bridge, honestly told); (5) \emph{music signals}: GTZAN extracted audio features (57 spectral/temporal columns per 3-second window $\rightarrow$ genre); (6) \emph{electrical usage}: 10+ years of hourly PJM consumption (datetime-heavy regression that exercises the cleaning policy's calendar features). A scale-stress stretch variant (1-minute Bitcoin history, $\sim$110~MB) tests the sandbox memory boundary: the full file cannot load under the sandbox RLIMIT, so the deterministic tool path aggregates to daily bars first: the aggregation itself is recorded as evidence. Two thesis-field datasets (the MCP server ecosystem graph; the HuggingFace model catalogue) complete the set on the \textbf{clustering/graph track}: unsupervised clustering via agent-generated sandbox code with deterministic post-validation of the cluster artifact, and the graph-view feature validated on the edge list: the loop requesting its own features from its own domain's data.
+
+\textbf{Storage policy.} Datasets are kept in the workspace as proof: the analysis CSV (each $\leq\sim$20~MB), its context pack, and the cleaning report. Heavy raw sources (compressed audio, the 110~MB Bitcoin archive) remain in the transient kagglehub cache and are purged after ingest; Bitcoin additionally gets a deterministic daily-aggregation subsample stored: the full file cannot fit the sandbox's memory limit, and recording that boundary is part of the result.
+
+Per dataset the loop records: shape, inferred task type, models attempted, best deterministic and best agentic metrics with deltas, wall-clock time, and any validation rejections with reasons. The per-dataset tiering (must: genomics, health, crypto, energy; strong: NLP, music; stretch: scale-stress, HF catalogue) keeps the experiment executable in the remaining schedule while every tier already demonstrates the loop.
+
+\textbf{The ratchet protocol.} The loop is a ratchet. Each generation starts from a fair deterministic baseline: all registered models, trained and persisted by the deterministic factory itself. Role-specialized agentic rounds then explore beyond it; every proposal passes the human approval gate. An agentic win is absorbed only if the deterministic factory can reproduce it: the winning configuration is replayed through \texttt{run\_model} with the same seed, and absorbed as the dataset's champion configuration only on exact metric equality. Champions are recorded in a per-dataset generation ledger (baseline, per-round validity/mode/entries, prompts and token costs, absorption decision with replay proof), and the next generation faces a strengthened baseline. Ties and below-baseline outcomes never ratchet: the loop cannot fabricate progress, only verify it. Reproducibility is not a property the loop hopes for --- it is the absorption criterion.
+
+\textbf{Results.} Section~\ref{sec:exp-kaggle-results} reserves the result tables and figures; they are produced by the benchmark run of the final system build.
+
+\section{Metrics}
+\label{sec:metrics}
+
+Supervised metrics are accuracy and macro-F1 for classification: macro-F1 because several benchmark datasets are imbalanced, where plain accuracy misleads (the IBM HR case in Section~\ref{sec:casestudy} has an 83.9\% majority-class baseline): and RMSE, MAE, and $R^2$ for regression. Reproducibility is measured as exact metric equality within the evaluator's tolerance ($10^{-12}$ for the automated check; the grounding tolerance $10^{-3}$ applies to agent claims, not to runs). Retrieval quality is verified functionally (relevant hit + immutability) rather than with an information-retrieval benchmark, a scope decision recorded in Section~\ref{sec:limitations}. Where applicable, wall-clock times are reported on the development machine (Intel laptop, 16~GB RAM, no GPU), making all results reproducible on commodity hardware.
+
+The agent-level metrics, required by the registered performance-evaluation objective and the agentic research questions, complete the set:
+
+\begin{itemize}
+	\item \textbf{Task success rate.} An agent task (an experiment proposal cycle) \emph{succeeds} if the proposal passes contract validation, is approved, executes through the deterministic pipeline to completion, and survives the grounding checks. Success is computed over the recorded agent legs of the benchmark suite and case study: never over informal impressions.
+	\item \textbf{Token efficiency.} Tokens consumed per completed agent task (prompt + completion, as reported by the provider's usage data) are recorded where the provider exposes them. Because the deterministic fallback and the mock provider consume zero tokens by construction, efficiency is reported per provider and interpreted against the cost asymmetry documented in Section~\ref{sec:process}: proposal-level LLM usage is bounded by design, while execution is free.
+	\item \textbf{Verified-claim rate and hallucinated-claim count (RQ4).} The fraction of an agent's factual claims that resolve to real run ids and recorded metrics within the grounding tolerance; its complement, claims that reference non-existent evidence, is reported explicitly.
+	\item \textbf{Script validity and silent-failure count (RQ5).} The fraction of agent-generated sandbox scripts that execute and pass the deterministic post-validator; a \emph{silent failure} (code that runs but produces an invalid artifact) is a distinct, separately counted outcome.
+	\item \textbf{Intervention rate (RQ6).} Human actions (approvals, rejections, feedback) per completed experiment round, from the approval-gate records.
+\end{itemize}
+
+All agent metrics inherit the evaluation's honesty constraints: they are computed over recorded, inspectable sessions (never reconstructed from memory), and the recorded counts for local providers (Ollama) come from the provider's own usage reports, where available.

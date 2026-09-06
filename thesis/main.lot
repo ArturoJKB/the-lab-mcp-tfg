@@ -1,0 +1,44 @@
+\babel@toc {english}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Multi-agent frameworks compared with \emph {thelab-mcp}'s approach.}}{9}{table.caption.8}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Module map of the \texttt {thelab} package.}}{13}{table.caption.10}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Registered model families and their guards.}}{15}{table.caption.11}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces The seven MCP servers and their tools.}}{17}{table.caption.12}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces Safety mechanisms: guarantees and limits.}}{24}{table.caption.16}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Core dependencies (versions pinned in \texttt {requirements.lock}).}}{26}{table.caption.17}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Research questions, methods, and pass bars (deterministic group RQ1--RQ3; agentic group RQ4--RQ6).}}{34}{table.caption.18}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Recorded run inventory by status and model family (1{,}591 runs, Aug 19 -- Sep 5, 2026, from \texttt {runs/} manifests).}}{41}{table.caption.19}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Experiment 1: identical run through three interfaces (iris, seed 42).}}{44}{table.caption.23}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Experiment 1, provider dimension: identical outcomes across LLM brains (Titanic, seed 42).}}{44}{table.caption.24}%
+\contentsline {table}{\numberline {6.4}{\ignorespaces Experiment 2 recorded results (S\&P 500 analyst ratings, 164{,}231 $\times $ 18).}}{45}{table.caption.25}%
+\contentsline {table}{\numberline {6.5}{\ignorespaces Kaggle proof (P3.7): three public datasets, end-to-end.}}{45}{table.caption.26}%
+\contentsline {table}{\numberline {6.6}{\ignorespaces Experiment 3 / RQ4: grounded vs.\ ungrounded proposals (live GLM 5.3 Flash; verified-claim rate computed against persisted metrics).}}{46}{table.caption.27}%
+\contentsline {table}{\numberline {6.7}{\ignorespaces Experiment 3 / RQ5: generated-code validity and competitiveness (agentic batch entries per dataset).}}{47}{table.caption.29}%
+\contentsline {table}{\numberline {6.8}{\ignorespaces Experiment 3 / RQ6: multi-agent round vs.\ single shared-prompt agent (live GLM 5.3 Flash).}}{47}{table.caption.30}%
+\contentsline {table}{\numberline {6.9}{\ignorespaces Experiment 4, Arm A: recorded deterministic baselines vs.\ agentic round.}}{49}{table.caption.31}%
+\contentsline {table}{\numberline {6.10}{\ignorespaces Experiment 4, Arm B: stress-domain loop results (mixed teams).}}{50}{table.caption.32}%
+\contentsline {table}{\numberline {6.11}{\ignorespaces Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}}{52}{table.caption.35}%
+\contentsline {table}{\numberline {6.12}{\ignorespaces Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}}{52}{table.caption.36}%
+\contentsline {table}{\numberline {6.13}{\ignorespaces Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}}{52}{table.caption.37}%
+\contentsline {table}{\numberline {6.14}{\ignorespaces Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}}{53}{table.caption.38}%
+\contentsline {table}{\numberline {6.15}{\ignorespaces Per-round capability matrix on titanic (provider/model per round, from \texttt {stage\_models} provenance).}}{54}{table.caption.39}%
+\contentsline {table}{\numberline {6.16}{\ignorespaces Three-ways-in prediction sweep on absorbed champions: every absorbed model is discoverable via MCP and predictable via CLI, HTTP, and MCP with identical results. Inference is LLM-token-free.}}{57}{table.caption.42}%
+\contentsline {table}{\numberline {6.17}{\ignorespaces Agent task success over recorded benchmark, case-study, and live agentic sessions.}}{60}{table.caption.44}%
+\contentsline {table}{\numberline {6.18}{\ignorespaces Recorded token usage per sub-agent interpretation (Titanic benchmark; from provider usage reports).}}{61}{table.caption.45}%
+\contentsline {table}{\numberline {6.19}{\ignorespaces Model latency probe (realistic generation, latency\textbackslash {}\_probe\textbackslash {}\_openrouter\textbackslash {}\_realistic). p50/p90 completion latency in seconds; round-stage calls are generation-length-bound, so trivial-ping latency alone underestimates round cost.}}{62}{table.caption.47}%
+\contentsline {table}{\numberline {6.20}{\ignorespaces P6 findings harvest: major findings and by-design rejections (full log in \texttt {docs/P6\_FINDINGS.md}; every ticket cites its run evidence).}}{63}{table.caption.48}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {7.1}{\ignorespaces Development budget (recorded costs, first three weeks of the project).}}{71}{table.caption.49}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {A.1}{\ignorespaces CLI troubleshooting (from \texttt {docs/CLI\_GUIDE.md}).}}{82}{table.caption.51}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {D.1}{\ignorespaces Experiment 4 datasets (Kaggle slugs, verified live; tiered).}}{86}{table.caption.52}%
+\contentsfinish 

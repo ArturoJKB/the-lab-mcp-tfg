@@ -1,0 +1,200 @@
+\chapter{Reproduction Guide}
+\label{anx:repro}
+
+This annex is a step-by-step guide to reproduce every result in this thesis from a fresh clone of the repository. All commands assume a Unix-like shell from the repository root.
+
+\section{Environment setup}
+
+\begin{lstlisting}[language=bash, caption={Install from the lockfile.}, label={lst:anxinstall}, style=cli]
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.lock
+pip install -e .
+\end{lstlisting}
+
+Supported Python is $\geq$3.11; the lockfile pins every runtime dependency.
+
+\section{Reproducible training (RQ1 surface)}
+
+\begin{lstlisting}[language=bash, caption={Direct deterministic run.}, label={lst:anxrun}, style=cli]
+thelab run model --dataset examples/iris.csv --target species \
+  --model logistic_regression --seed 42 --output runs
+# Run completed: run-<timestamp>-<id>
+#   Test accuracy: 1.000000   Test macro F1: 1.000000
+\end{lstlisting}
+
+Re-running the command yields a new \texttt{run\_id} with equivalent metrics; \texttt{runs/<run\_id>/}\allowbreak{}\texttt{manifest.json} carries seed, config, and dependency provenance (Annex~B).
+
+\section{The three ways in (Experiment 1)}
+
+\begin{lstlisting}[language=bash, caption={HTTP and MCP paths to the identical run.}, label={lst:anxthree}, style=cli]
+# HTTP
+thelab-model-service --port 8000
+curl -s -X POST localhost:8000/train -H 'Content-Type: application/json' \
+  -d '{"dataset_id": "fixtures/iris.csv", "target": "species",
+       "model": "logistic_regression", "seed": 42}'
+
+# MCP (independent client)
+thelab-mcp-demo model_registry --run-id <run_id>
+\end{lstlisting}
+
+\section{Context store (RQ3 surface)}
+
+\begin{lstlisting}[language=bash, caption={Index and search local evidence.}, label={lst:anxcontext}, style=cli]
+thelab context index --source .thelab/local-logs/agent-events.jsonl
+thelab context search "reproducibility" --limit 10
+thelab context show <event_id>
+\end{lstlisting}
+
+\section{Automated evaluation}
+
+\begin{lstlisting}[language=bash, caption={Run the thesis evaluator (disposable workspace; exit 0 on PASS).}, label={lst:anxeval}, style=cli]
+PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py
+\end{lstlisting}
+
+\section{Quality gates}
+
+\begin{lstlisting}[language=bash, caption={Full quality suite.}, label={lst:anxquality}, style=cli]
+.venv/bin/ruff check thelab tests scripts
+.venv/bin/mypy thelab
+.venv/bin/python -m pytest tests/ -q
+\end{lstlisting}
+
+\section{Real-data and Kaggle paths}
+
+\begin{lstlisting}[language=bash, caption={Real-data path: upload, EDA, clean, orchestrate (HTTP surface).}, label={lst:anxreal}, style=cli]
+# Upload the CSV in the UI (Data view), run EDA, click Clean dataset,
+# then start an experiment in the Experiments view and watch the
+# live stage pipeline; inspect best-run metrics in History.
+thelab ingest kaggle <owner>/<dataset-slug>   # Kaggle ingestion via CLI
+\end{lstlisting}
+
+\section{Troubleshooting}
+
+The documented CLI troubleshooting table, reproduced from the user guide:
+
+\begin{table}[H]
+\centering
+\caption{CLI troubleshooting (from \texttt{docs/CLI\_GUIDE.md}).}
+\small
+\begin{tabular}{p{5.4cm}p{4.6cm}p{4.4cm}}
+\toprule
+\textbf{Symptom} & \textbf{Cause} & \textbf{Fix} \\
+\midrule
+\texttt{dataset must be a relative path} & Absolute path passed & Run from the workspace root \\
+\texttt{unsupported model} & Name not in registry & See Table~\ref{tab:models} \\
+\texttt{model 'X' is limited to N training rows} & Scale guard & Scalable model or subsample \\
+\texttt{cannot stratify} & Too few samples per class & More rows or fewer classes \\
+\texttt{feature columns contain infinite values} & \texttt{Inf} in features & Clean the dataset first \\
+\texttt{constant feature columns found} & Single-valued feature & Fix data upstream (or use cleaning) \\
+Service returns 404 & Run not completed/approved & Check \texttt{manifest.json} statuses \\
+Job stuck \texttt{running} & Long stage & Watch pipeline; use Cancel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Run Manifest Example}
+\label{anx:manifest}
+
+A real manifest from \texttt{runs/} (abridged to the first artifact reference; hashes and identifiers are unmodified).
+
+\begin{lstlisting}[language=json, caption={Real \texttt{manifest.json} (abridged).}, label={lst:anxmanifest}, style=cli]
+{
+  "run_id": "run-20260829-145048-ee5f986e",
+  "input_hash": "925e672a920734ec9f203cf1b7fe18f218520e4cd...",
+  "training_config": {
+    "model": "logistic_regression",
+    "seed": 44,
+    "task_type": "classification",
+    "preprocessing": ["StandardScaler"],
+    "split": {"strategy": "train_test_split", "test_size": 0.2,
+              "random_state": 44, "stratify": true,
+              "train_count": 91015, "test_count": 22754},
+    "dependency_versions": {
+      "python": "3.14.6", "thelab": "0.1.0",
+      "pydantic": "2.13.4", "pandas": "3.0.5",
+      "scikit-learn": "1.9.0", "numpy": "2.5.2",
+      "joblib": "1.5.3"
+    },
+    "estimator": {"class": "LogisticRegression",
+                  "module": "sklearn.linear_model._logistic",
+                  "default_params": {"max_iter": 200,
+                                     "solver": "lbfgs"},
+                  "hyperparameters": null},
+    "supports_probability": true
+  },
+  "random_seed": 44,
+  "started_at": "2026-08-29T14:50:48.405884Z",
+  "finished_at": "2026-08-29T14:50:49.868901Z",
+  "final_status": "completed",
+  "validation_status": "approved",
+  "artifact_refs": [
+    {"artifact_id": "run-20260829-145048-ee5f986e-task_spec",
+     "artifact_type": "task_spec",
+     "relative_path": "task_spec.json",
+     "content_hash": "6690192e7a5ea40aa79ed907e982aac3d...",
+     "origin": "orchestrator",
+     "parent_run_id": "run-20260829-145048-ee5f986e"}
+    /* ... ten further artifact references ... */
+  ]
+}
+\end{lstlisting}
+
+The corresponding \texttt{metrics.json}: train accuracy 0.6081 / test accuracy 0.6000, train macro-F1 0.6032 / test macro-F1 0.5946 (113{,}769-row dataset): a modest, honest result whose value lies in its provenance.
+
+\chapter{Generated Notebook Excerpt}
+\label{anx:notebook}
+
+Every completed run can generate a reproducible research notebook artifact (\texttt{report.}\allowbreak{}\texttt{ipynb}) over \texttt{GET /runs/}\allowbreak{}\texttt{\{id\}/}\allowbreak{}\texttt{notebook}. The generated structure, with the exact cell purposes:
+
+\begin{lstlisting}[language={}, caption={Generated notebook structure (six cells, nbformat 4).}, label={lst:anxnotebook}, style=cli]
+Cell 1 (markdown)  Title + manifest summary
+                   run id, model, seed, dataset, status
+Cell 2 (code)      Dataset load
+                   loads the CSV recorded in inputs.json
+Cell 3 (code)      Reproduce
+                   run_model(...) with the exact recorded parameters
+Cell 4 (code)      Metrics + validation report display
+Cell 5 (code)      Artifacts index (model_card.md, contracts)
+Cell 6 (markdown)  Findings
+                   sub-agent interpretations / context notes
+\end{lstlisting}
+
+The notebook is standards-compliant (nbformat 4) so it opens in Jupyter unchanged; executing cells 2--3 reproduces the run's computation from the recorded parameters. All three P3.7 proof runs (Table~\ref{tab:kaggleproof}) produced valid notebooks through the endpoint, verified live.
+
+\chapter{Experiment 4 Dataset Table}
+\label{anx:exp4datasets}
+
+The Experiment~4 dataset set: Arm~A (agentic re-run over datasets with recorded deterministic baselines already stored in \texttt{uploads/}) and Arm~B (new stress domains where a trained model is genuinely useful), plus the clustering/graph track. All slugs verified live on Kaggle at submission time; targets confirmed at run time; sizes are the stored analysis CSVs per the storage policy of Section~\ref{sec:exp-kaggle}.
+
+\begin{table}[H]
+\centering
+\caption{Experiment 4 datasets (Kaggle slugs, verified live; tiered).}
+\label{tab:exp4datasets}
+\small
+\begin{tabular}{p{6.4cm}p{2.4cm}p{2.0cm}p{2.6cm}}
+\toprule
+\textbf{Kaggle slug} & \textbf{Domain} & \textbf{Task} & \textbf{Arm / tier} \\
+\midrule
+\texttt{shrutimechlearn/\allowbreak{}churn-\allowbreak{}modelling} & banking & classification & A (recorded) \\
+\texttt{camnugent/\allowbreak{}california-\allowbreak{}housing-\allowbreak{}prices} & housing & regression & A (recorded) \\
+\texttt{pavansubhasht/\allowbreak{}ibm-hr-analytics-attrition-dataset} & HR & classification & A (recorded) \\
+\texttt{erfan4524/\allowbreak{}e-\allowbreak{}commerce-\allowbreak{}sales-\allowbreak{}data-\allowbreak{}analysis-\allowbreak{}and-\allowbreak{}eda} & e-commerce & regression & A (recorded) \\
+\texttt{yasserh/\allowbreak{}titanic-\allowbreak{}dataset} & classic & classification & A (recorded) \\
+\texttt{sp\_500 analyst ratings (local)} & finance & classification & A (recorded) \\
+\midrule
+\texttt{kevinarvai/\allowbreak{}clinvar-\allowbreak{}conflicting} & genomics (DNA variants) & classification & B / must \\
+\texttt{rabieelkharoua/\allowbreak{}chronic-\allowbreak{}kidney-\allowbreak{}disease-\allowbreak{}dataset-\allowbreak{}analysis} & health & classification & B / must \\
+\texttt{sudalairajkumar/\allowbreak{}cryptocurrencypricehistory} & crypto & direction classif. & B / must \\
+\texttt{robikscube/\allowbreak{}hourly-\allowbreak{}energy-\allowbreak{}consumption} & electrical usage & regression & B / must \\
+\texttt{shivamb/\allowbreak{}real-\allowbreak{}or-\allowbreak{}fake-\allowbreak{}fake-\allowbreak{}jobposting-\allowbreak{}prediction} & NLP/AI & featurize + classif. & B / strong \\
+\texttt{andradaolteanu/\allowbreak{}gtzan-\allowbreak{}dataset-\allowbreak{}music-\allowbreak{}genre-\allowbreak{}classification} & music signals (feature CSV) & classification & B / strong \\
+\midrule
+\texttt{mczielinski/\allowbreak{}bitcoin-\allowbreak{}historical-\allowbreak{}data} & crypto (1-min bars) & scale-stress, regression & B / stretch \\
+\texttt{rahman4li/\allowbreak{}patch-\allowbreak{}bay-\allowbreak{}the-\allowbreak{}mcp-\allowbreak{}server-\allowbreak{}ecosystem-\allowbreak{}graph} & MCP ecosystem & graph + clustering & B / stretch \\
+\texttt{adarsh1077/\allowbreak{}huggingface-\allowbreak{}hub-\allowbreak{}50k-\allowbreak{}ai-\allowbreak{}models} & AI models & clustering & B / stretch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Notes: the Patch Bay dataset ships as two CSVs (\texttt{nodes.csv} with GitHub statistics and network-centrality features per MCP server; \texttt{edges.csv} as a weighted shared-category edge list) and enters the workspace as two ingests from one slug. GTZAN's heavy raw audio stays in the transient kagglehub cache; only the extracted-features CSV is stored. The S\&P~500 analyst dataset was downloaded from a public source outside Kaggle and is already recorded in \texttt{uploads/}.

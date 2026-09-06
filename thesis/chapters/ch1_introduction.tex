@@ -1,0 +1,109 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+\section{Motivation}
+\label{sec:motivation}
+
+Machine learning (ML) work has traditionally been organized around notebooks, scripts, and interactive experimentation. The arrival of large language models (LLMs) capable of using tools and reasoning over several steps opened a new possibility in this landscape: software in which LLM-based agents read data, propose experiments, run code, and interpret results with some degree of autonomy. Most common commercial platforms for this new wave of \emph{agentic} ML share three traits: they are mostly cloud-first, they keep context, prompts and data on external infrastructures, and reproducibility is a best-effort property rather than a guarantee. Familiar examples are OpenAI's ChatGPT data-analysis mode, Anthropic's Claude Code, and the agent tooling of cloud ML suites such as Google Vertex AI and Databricks.
+
+The Lab defends three design positions: produce local context that both humans and agents can use; execute through a deterministic pipeline instead of letting agents decide all the steps; and use the Model Context Protocol (MCP) as the standard way to share that context, so the base stays open to any provider. Cloud and local models are supported, making the architecture model agnostic.
+
+The concrete result is \href{https://github.com/ArturoJKB/the-lab-mcp-tfg/tree/main}{\emph{thelab-mcp}}: a multi-agent orchestration system built with the MCP protocol that ingests and converts data into versioned, validated and locally served ML models, recording every intermediate step as inspectable evidence. We can summarize the product with a metaphor that also names it: the infrastructure is \emph{the lab}, and the models, agents, and applications it produces are \emph{the experiments} run inside it.
+
+One design rule was present through the whole development of the project, from the first prototypes to the current version: \emph{LLMs decide what to run; deterministic code executes it}. The idea behind it was to create an agentic layer on top of a deterministic pipeline. In this case for machine learning model generation, providing LLM agents a set of predefined deterministic tools to choose from. These range from data ingestion, exploration and cleaning, to model training, evaluation, validation and hosting.
+
+Agents can propose experiments, interpret results, write sandboxed code, and answer questions. Training and metric computation are reserved for the deterministic Python pipeline, and everything an agent starts sits behind one human approval gate. This rule is what makes reproducibility and auditability possible.
+
+\section{Problem statement}
+\label{sec:problem}
+
+The problem addressed by this thesis can be stated as follows: \emph{design, implement, and evaluate an orchestration architecture that allows LLM-based agents to participate in a data-to-model ML workflow while keeping the workflow reproducible and auditable}.
+
+Three sub-problems can be decomposed from the statement:
+
+\begin{itemize}
+	\item \textbf{Reproducibility.} A model-training run must be exactly reproducible from its dataset, configuration, and random seed. The context needed to reproduce the run is then stored in machine-readable form.
+	\item \textbf{Interoperability.} An independent agent (one that does not share code with the system) must be able to discover and use the produced models through a standard protocol, without being granted access to the training pipeline internals.
+	\item \textbf{Useful context.} The system must record what has happened during sessions (runs, decisions, errors, agent sessions) without leaking any secrets and without corrupting records.
+\end{itemize}
+
+Agentic behaviour is non-deterministic by nature. The answer this thesis explores is not to make agents deterministic, but to bound them. Agents work on typed contracts. Agent-initiated execution needs human approval. Generated code runs only inside a restricted sandbox, and its output is validated deterministically before it can reach training. And every claim an agent makes is checked against recorded evidence.
+
+\section{Objectives}
+\label{sec:objectives}
+
+The four registered objectives are the following:
+
+\begin{itemize}
+	\item (1) a \emph{state-of-the-art analysis} of context engineering and standardized communication protocols for AI agents;
+	\item (2) an \emph{architectural framework}: a scalable, MCP-based architecture that splits agent logic from data sources;
+	\item (3) \emph{experimental validation} through a proof of concept in a real-world technical scenario;
+	\item (4) a \emph{performance evaluation} analyzing the impact of the orchestration on context optimization, token efficiency, success rates and costs.
+\end{itemize}
+
+The general objective of this thesis is to fulfill these objectives through an autonomous ML factory --- autonomous in its data-to-model execution, human-gated at every agentic boundary --- used as the architecture's demonstrator.
+
+More specific objectives can be derived from the ones above:
+
+\begin{enumerate}
+	\item \textbf{O1, Deterministic factory (reg.\ objective 2, 3).} Implementation of a deterministic, local data-to-model pipeline (validation, profiling, contract generation, training, re-validation, registration) that produces a complete, self-describing artifact set per run.
+	\item \textbf{O2, Typed contracts (reg.\ objective 2).} Defined typed contracts (\texttt{TaskSpec}, \texttt{RunManifest}, \texttt{ArtifactRef}, \texttt{DatasetSpec}, \texttt{ModelSpec}, \texttt{LogEntry}) that every component, human or agent, has to use to exchange information (decoupling agent logic from data sources).
+	\item \textbf{O3, MCP surface (reg.\ objective 2).} Expose the factory through Model Context Protocol servers so independent agents can discover and interact with datasets, models, artifacts, and context without importing pipeline code.
+	\item \textbf{O4, Context store (reg.\ objective 2, 4).} Implementation of a local, redacted, searchable evidence store (SQLite + FTS5) with read-only retrieval. Every entry is stored with a fingerprint, so the same event is never duplicated or overwritten. This store is the context-management layer of the architecture.
+	\item \textbf{O5, Agentic layer with human oversight (reg.\ objective 2, 3).} Implementation of a provider-agnostic agent layer (role-specialized analyst, feature-engineer, and model-selector agents coordinated by an orchestrator, plus a grounded chat agent) that proposes experiments, computes in a sandbox, and records its activity.
+	\item \textbf{O6, Evaluation (reg.\ objective 1, 3, 4).} Execute the state-of-the-art analysis (Chapter~\ref{ch:background}); formulate the six research questions; verify them with an automated evaluator; complement them with experiments on real and public datasets at increasing scale; and characterize agent reliability with task success rates and token-efficiency measurements (Section~\ref{sec:agentmetrics}).
+\end{enumerate}
+
+\section{Hypothesis and research questions}
+\label{sec:hypothesis}
+
+The working hypothesis of this thesis is:
+
+\begin{quote}
+	A local multi-agent orchestration architecture based on typed contracts and MCP capabilities that can execute reproducible data-to-model workflows and expose the resulting artifacts to independent agents without being coupled to a specific LLM provider.
+\end{quote}
+
+The hypothesis can be operationalized as six research questions in two groups. The \textbf{system group} verifies the properties any agentic layer depends on:
+
+\begin{description}
+	\item[RQ1 (Reproducible run).] Can a model-training run be reproduced using the same dataset version, configuration, dependency versions, and random seed?
+	\item[RQ2 (MCP interoperability).] Can an independent MCP client discover and use a registered model without knowing the internal training-pipeline implementation?
+	\item[RQ3 (Context retrieval).] Can local structured context retrieval recover useful information about previous runs, decisions, errors, snippets, and artifacts?
+\end{description}
+
+The \textbf{agentic group} measures the value the agent layer adds on top of that grounding:
+
+\begin{description}
+	\item[RQ4 (Grounding).] Do agents grounded in the local context store produce more verifiable proposals than ungrounded agents?
+	\item[RQ5 (Agentic capability).] Can sandboxed agent-generated code train valid, competitive models beyond the fixed deterministic grid?
+	\item[RQ6 (Orchestration value).] Do role-specialized agents coordinated via MCP outperform a single shared-prompt agent?
+\end{description}
+
+
+\section{Scope}
+\label{sec:scope}
+
+The system works on \emph{tabular} machine learning on a single machine: classification and regression over CSV datasets, with nine scikit-learn model families, ingestion of Kaggle datasets with automatic context packs, a local context store, and a web workspace. On top of that deterministic core sits the agentic layer (Chapter~\ref{ch:design}): agents explore data inside a code sandbox while training, metric computation and validation remain deterministic.
+
+Deep learning and GPU training, trading and order execution, multi-user deployments, public cloud hosting, and language-model fine-tuning are out of scope for this project. However, one boundary stays open on purpose: the sandbox limits the time, memory, and libraries of the generated code, but it does not isolate that code from the files of the machine. Real file isolation needs operating-system support, and it is documented as future work. The decision and its risks are documented in the limitations (Section~\ref{sec:limitations}).
+
+
+\section{Contributions}
+\label{sec:contributions}
+
+The contributions of this thesis are:
+
+\begin{enumerate}
+	\item \textbf{An architecture} for auditable agentic ML. LLMs make the decisions and a deterministic pipeline executes them, connected through typed contracts and a single human approval gate. On top of it, a grounded autonomy round lets role-specialized agents explore beyond the deterministic grid. The agents start from the pipeline's artifacts, and their output is validated deterministically.
+	\item \textbf{A working implementation} of approximately 16{,}900 lines of Python plus a React/TypeScript workspace. It includes the deterministic factory, seven MCP servers, a redacted context store, a provider-agnostic agent layer with per-role prompt contracts, and an AST-restricted code sandbox. It is verified by 546 automated tests.
+	\item \textbf{An automated evaluation protocol} (\texttt{evaluate\_thesis.py}). Every check runs inside a disposable temporary workspace. RQ1--RQ3 run on every demand, and the agentic questions (RQ4--RQ6) use comparison runs that measure what grounding, generated code, and role specialization each add. Four recorded experiments complement it on fixture, real and public (Kaggle) data, comparing different LLM providers.
+	\item \textbf{An honest record of limitations}. It includes an adversarial audit of the full system --- more than 500 checks across the CLI, HTTP service, MCP surface, and sandbox, plus an internal review of the project's agentic performance --- which found five defects (an SSE serialization crash, hyperparameter-grid misapplication, a fixtures-cleaning restriction, a phantom approval principal, and a feature-name mismatch), all fixed and regression-tested. The findings, both fixed and open, are documented as evidence.
+\end{enumerate}
+
+
+\section{Document structure}
+\label{sec:structure}
+
+The rest of this document follows the IMRAD convention.
+
+\textbf{Chapter~\ref{ch:background}} reviews the technical background (LLM agents, MCP, context engineering, MLOps) and related work (multi-agent frameworks, agent benchmarks, experiment-tracking platforms), closing with the gap this thesis addresses. \textbf{Chapter~\ref{ch:design}} presents the design of {\emph{thelab-mcp}}: principles, architecture, contracts, deterministic pipeline, context store, MCP surface, agent layer with its approval gate and agentic round, and safety model. \textbf{Chapter~\ref{ch:implementation}} describes the implementation: the three usage surfaces, reproducibility engineering, and the development process itself. \textbf{Chapter~\ref{ch:methodology}} defines the evaluation methodology: the six research questions, pass criteria, the automated evaluator, and the four experiments. \textbf{Chapter~\ref{ch:results}} reports the results, deterministic (RQ1--RQ3) and agentic (RQ4--RQ6). \textbf{Chapter~\ref{ch:discussion}} discusses the findings, the limitations and threats, the regulatory framework (Section~\ref{sec:regulatory}), and the socio-economic environment (Section~\ref{sec:socioeconomic}). \textbf{Chapter~\ref{ch:conclusions}} concludes and outlines future work. The annexes also contain a reproduction guide and a real run manifest.

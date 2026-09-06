@@ -1,25 +1,25 @@
 \begin{table}[htbp]
-\centering
+\centering\footnotesize
 \caption{Per-round capability matrix for the ratchet loop: which provider/model produced valid, factory-safe agentic rounds (per-stage capability discovery).}
 \label{tab:ratchet-rounds-ratchet-ledger-titanic}
-\begin{tabular}{lllllll}
+\resizebox{\textwidth}{!}{\begin{tabular}{lllllll}
 \toprule
 Gen/round & Provider & Model & Mode & Validity & Entries & Best \\
 \midrule
-g0 r0 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 0.8333 & 15/18 & random\_forest 0.8212 \\
-g0 r1 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 1.0000 & 15/15 & logistic\_regression 0.8045 \\
-g0 r2 & openrouter & meta-llama/llama-3.3-70b-instruct & agentic & 1.0000 & 15/15 & random\_forest 0.8156 \\
-g1 r0 & openrouter & mistralai/mistral-small-24b-instru & degraded\_deterministic & 1.0000 & 1/1 & logistic\_regression 0.8045 \\
-g1 r1 & openrouter & mistralai/mistral-small-24b-instru & degraded\_deterministic & 1.0000 & 1/1 & logistic\_regression 0.8045 \\
-g2 r0 & openrouter & mistralai/mistral-small-24b-instru & degraded\_deterministic & 1.0000 & 1/1 & logistic\_regression 0.8045 \\
-g2 r1 & openrouter & mistralai/mistral-small-24b-instru & agentic & 1.0000 & 9/9 & random\_forest 0.8547 \\
-g3 r0 & openrouter & z-ai/glm-5.3-flash & agentic & 0.0000 & 0/15 & -- \\
-g4 r0 & mixed & mixed & degraded\_deterministic & 1.0000 & 1/1 & logistic\_regression 0.8045 \\
-g5 r0 & mixed & mixed & agentic & 1.0000 & 21/21 & hist\_gradient\_boosting 0.8436 \\
-g6 r0 & mixed & mixed & agentic & 1.0000 & 21/21 & random\_forest 0.8212 \\
-g7 r0 & mixed & mixed & agentic & 1.0000 & 15/15 & random\_forest 0.8492 \\
-g8 r0 & mixed & mixed & agentic & 0.7143 & 15/21 & logistic\_regression 0.8436 \\
-g9 r0 & openrouter & z-ai/glm-5.3-flash & agentic & 1.0000 & 12/12 & hist\_gradient\_boosting 0.7374 \\
+g0 r0 & openrouter & llama-3.3-70b & agentic & 0.8333 & 15/18 & RF 0.8212 \\
+g0 r1 & openrouter & llama-3.3-70b & agentic & 1.0000 & 15/15 & LogReg 0.8045 \\
+g0 r2 & openrouter & llama-3.3-70b & agentic & 1.0000 & 15/15 & RF 0.8156 \\
+g1 r0 & openrouter & mistralai/mistral-small-24b-instru & degr.-det. & 1.0000 & 1/1 & LogReg 0.8045 \\
+g1 r1 & openrouter & mistralai/mistral-small-24b-instru & degr.-det. & 1.0000 & 1/1 & LogReg 0.8045 \\
+g2 r0 & openrouter & mistralai/mistral-small-24b-instru & degr.-det. & 1.0000 & 1/1 & LogReg 0.8045 \\
+g2 r1 & openrouter & mistralai/mistral-small-24b-instru & agentic & 1.0000 & 9/9 & RF 0.8547 \\
+g3 r0 & openrouter & GLM-5.3-flash & agentic & 0.0000 & 0/15 & -- \\
+g4 r0 & mixed & mixed & degr.-det. & 1.0000 & 1/1 & LogReg 0.8045 \\
+g5 r0 & mixed & mixed & agentic & 1.0000 & 21/21 & HGB 0.8436 \\
+g6 r0 & mixed & mixed & agentic & 1.0000 & 21/21 & RF 0.8212 \\
+g7 r0 & mixed & mixed & agentic & 1.0000 & 15/15 & RF 0.8492 \\
+g8 r0 & mixed & mixed & agentic & 0.7143 & 15/21 & LogReg 0.8436 \\
+g9 r0 & openrouter & GLM-5.3-flash & agentic & 1.0000 & 12/12 & HGB 0.7374 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

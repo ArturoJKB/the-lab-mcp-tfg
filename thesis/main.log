@@ -1,0 +1,3118 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.2)  6 SEP 2026 17:04
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-08-10>
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2025/01/22 v1.4n Standard LaTeX document class
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count276
+\c@chapter=\count277
+\c@section=\count278
+\c@subsection=\count279
+\c@subsubsection=\count280
+\c@paragraph=\count281
+\c@subparagraph=\count282
+\c@figure=\count283
+\c@table=\count284
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen150
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2026/03/07 v6.0 Page Geometry
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2026-05-17 v1.15 key=value parser (DPC)
+\KV@toks@=\toks17
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+))
+\Gm@cnth=\count285
+\Gm@cntv=\count286
+\c@Gm@tempcnt=\count287
+\Gm@bindingoffset=\dimen151
+\Gm@wd@mp=\dimen152
+\Gm@odd@mp=\dimen153
+\Gm@even@mp=\dimen154
+\Gm@layoutwidth=\dimen155
+\Gm@layoutheight=\dimen156
+\Gm@layouthoffset=\dimen157
+\Gm@layoutvoffset=\dimen158
+\Gm@dimlist=\toks18
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/colortbl/colortbl.sty
+Package: colortbl 2026/05/01 v1.0l Color table columns (DPC)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/tools/array.sty
+Package: array 2026/02/24 v2.7b Tabular extension package (FMi)
+\col@sep=\dimen159
+\ar@mcellbox=\box53
+\extrarowheight=\dimen160
+\NC@list=\toks19
+\extratabsurround=\skip51
+\backup@length=\skip52
+\ar@cellbox=\box54
+)
+new hooks used!!
+\minrowclearance=\skip53
+\rownum=\count288
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/pdfx.sty
+Package: pdfx 2024/06/24 v1.6.5f PDF/X and PDF/A support (CVR/HTH/RRM/PS)
+\pdfx@minorversion=\count289
+\pdfx@majorversion=\count290
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/iftex/ifluatex.sty
+Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/iftex/ifpdf.sty
+Package: ifpdf 2019/10/25 v3.4 ifpdf legacy package. Use iftex instead.
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/iftex/ifxetex.sty
+Package: ifxetex 2019/10/25 v0.7 ifxetex legacy package. Use iftex instead.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/everyshi/everyshi.sty
+Package: everyshi 2020/11/18 v4.00 EveryShipout Package
+){/home/admin/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map} (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks20
+\inpenc@posthook=\toks21
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/l8u-penc.def
+File: l8u-penc.def 2017/06/23 v0.8 Custom LaTeX file, for UTF8 encoded letters and symbols
+LaTeX Encoding Info:    Redeclaring text command \textdoubletilde (encoding L8U) on input line 210.
+LaTeX Encoding Info:    Redeclaring text command \texttipaG (encoding L8U) on input line 256.
+LaTeX Encoding Info:    Redeclaring text command \texttipam (encoding L8U) on input line 257.
+LaTeX Encoding Info:    Redeclaring text command \texttipaM (encoding L8U) on input line 258.
+LaTeX Encoding Info:    Redeclaring text command \b (encoding L8U) on input line 278.
+LaTeX Encoding Info:    Text composite with undeclared \b in encoding L8U on input line 278.
+LaTeX Encoding Info:    Redeclaring text command \textacutemacron (encoding L8U) on input line 323.
+LaTeX Encoding Info:    Redeclaring text command \textgravemacron (encoding L8U) on input line 334.
+LaTeX Encoding Info:    Redeclaring text command \textacutemacron (encoding L8U) on input line 336.
+LaTeX Encoding Info:    Redeclaring text command \textellipsis (encoding L8U) on input line 2514.
+LaTeX Encoding Info:    Redeclaring text command \textfractionsolidus (encoding L8U) on input line 2529.
+LaTeX Encoding Info:    Redeclaring text command \texthinferior (encoding L8U) on input line 2618.
+LaTeX Encoding Info:    Redeclaring text command \texthslash (encoding L8U) on input line 2678.
+LaTeX Encoding Info:    Redeclaring text command \texttrademark (encoding L8U) on input line 2687.
+LaTeX Encoding Info:    Redeclaring text command \textupstep (encoding L8U) on input line 3739.
+LaTeX Encoding Info:    Redeclaring text command \textdownstep (encoding L8U) on input line 3740.
+LaTeX Encoding Info:    Redeclaring text command \textcopyleft (encoding L8U) on input line 3810.
+)
+\pdfxsafeforxmp@toks=\toks22
+\pdfx@tmptoks=\toks23
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2026-06-17 v7.01r Hypertext links for LaTeX
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2026-01-29 v2.58 Cross-referencing by name of section
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count291
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count292
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
+)
+\@linkdim=\dimen161
+\Hy@linkcounter=\count293
+\Hy@pagecounter=\count294
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2026-06-17 v7.01r Hyperref: PDFDocEncoding definition (HO)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count295
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2026-06-17 v7.01r Hyperref: PDF Unicode definition (HO)
+)
+Package hyperref Info: Option `pdfa' set `true' on input line 4070.
+Package hyperref Info: Hyper figures OFF on input line 4199.
+Package hyperref Info: Link nesting OFF on input line 4204.
+Package hyperref Info: Hyper index ON on input line 4207.
+Package hyperref Info: Plain pages OFF on input line 4214.
+Package hyperref Info: Backreferencing OFF on input line 4219.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4466.
+\c@Hy@tempcnt=\count296
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip17
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4805.
+\XeTeXLinkMargin=\dimen162
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
+))
+\Fld@menulength=\count297
+\Field@Width=\dimen163
+\Fld@charsize=\dimen164
+Package hyperref Info: Hyper figures OFF on input line 6091.
+Package hyperref Info: Link nesting OFF on input line 6096.
+Package hyperref Info: Hyper index ON on input line 6099.
+Package hyperref Info: backreferencing OFF on input line 6106.
+Package hyperref Info: Link coloring OFF on input line 6111.
+Package hyperref Info: Link coloring with OCG OFF on input line 6116.
+Package hyperref Info: PDF/A mode ON on input line 6119.
+\Hy@abspage=\count298
+\c@Item=\count299
+\c@Hfootnote=\count300
+)
+Package hyperref Info: Driver: hpdftex.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2026-06-17 v7.01r Hyperref driver for pdfTeX
+\Fld@listcount=\count301
+\c@bookmark@seq@number=\count302
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 284.
+)
+\Hy@SectionHShift=\skip54
+)
+Package hyperref Info: Option `psdextra' set `true' on input line 1535.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyperref/psdextra.def
+File: psdextra.def 2026-06-17 v7.01r Hyperref: Additions to PDF string support
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/colorprofiles/colorprofiles.sty
+Package: colorprofiles 2018/11/01 v1.0.1 color profiles for PDF/X and PDF/A support
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/colorprofiles/colorprofiles.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/AdobeColorProfiles.tex) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+)
+** pdfx: Metadata file main.xmpdata read successfully.
+(./main.xmpdata)<<sRGB.icc>> (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/stringenc/se-utf8.def
+File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pdftex/glyphtounicode.tex) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/glyphtounicode-cmr.tex) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/glyphtounicode-ntx.tex) (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/xmpincl/xmpincl.sty
+Package: xmpincl 2021/09/22 v2.4 Include XMP data in pdflatex
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pdfx/8bit.def
+File: 8bit.def 2008/03/30 v1.1d Input encoding file
+)
+Using XMP template file: pdfa.xmp
+\xmpinclWrite=\write3
+\xmpinclRead=\read2
+\openout3 = `pdfa.xmpi'.
+
+<<pdfa.xmpi>>
+
+Package pdfx Warning: Setting all color commands to rgb,
+consistent with the Color Model for PDF/A  on input line 3126.
+
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/utf8.def
+File: utf8.def 2022/06/07 v1.3c UTF-8 support
+Now handling font encoding OML ...
+... no UTF-8 mapping file for font encoding OML
+Now handling font encoding OMS ...
+... processing UTF-8 mapping file for font encoding OMS
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/omsenc.dfu
+File: omsenc.dfu 2022/06/07 v1.3c UTF-8 support
+   defining Unicode char U+00A7 (decimal 167)
+   defining Unicode char U+00B6 (decimal 182)
+   defining Unicode char U+00B7 (decimal 183)
+   defining Unicode char U+2020 (decimal 8224)
+   defining Unicode char U+2021 (decimal 8225)
+   defining Unicode char U+2022 (decimal 8226)
+)
+Now handling font encoding OT1 ...
+... processing UTF-8 mapping file for font encoding OT1
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/ot1enc.dfu
+File: ot1enc.dfu 2022/06/07 v1.3c UTF-8 support
+   defining Unicode char U+00A0 (decimal 160)
+   defining Unicode char U+00A1 (decimal 161)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00AD (decimal 173)
+   defining Unicode char U+00B8 (decimal 184)
+   defining Unicode char U+00BF (decimal 191)
+   defining Unicode char U+00C5 (decimal 197)
+   defining Unicode char U+00C6 (decimal 198)
+   defining Unicode char U+00D8 (decimal 216)
+   defining Unicode char U+00DF (decimal 223)
+   defining Unicode char U+00E6 (decimal 230)
+   defining Unicode char U+00EC (decimal 236)
+   defining Unicode char U+00ED (decimal 237)
+   defining Unicode char U+00EE (decimal 238)
+   defining Unicode char U+00EF (decimal 239)
+   defining Unicode char U+00F8 (decimal 248)
+   defining Unicode char U+0131 (decimal 305)
+   defining Unicode char U+0141 (decimal 321)
+   defining Unicode char U+0142 (decimal 322)
+   defining Unicode char U+0152 (decimal 338)
+   defining Unicode char U+0153 (decimal 339)
+   defining Unicode char U+0174 (decimal 372)
+   defining Unicode char U+0175 (decimal 373)
+   defining Unicode char U+0176 (decimal 374)
+   defining Unicode char U+0177 (decimal 375)
+   defining Unicode char U+0218 (decimal 536)
+   defining Unicode char U+0219 (decimal 537)
+   defining Unicode char U+021A (decimal 538)
+   defining Unicode char U+021B (decimal 539)
+   defining Unicode char U+0237 (decimal 567)
+   defining Unicode char U+2013 (decimal 8211)
+   defining Unicode char U+2014 (decimal 8212)
+   defining Unicode char U+2018 (decimal 8216)
+   defining Unicode char U+2019 (decimal 8217)
+   defining Unicode char U+201C (decimal 8220)
+   defining Unicode char U+201D (decimal 8221)
+   defining Unicode char U+FB00 (decimal 64256)
+   defining Unicode char U+FB01 (decimal 64257)
+   defining Unicode char U+FB02 (decimal 64258)
+   defining Unicode char U+FB03 (decimal 64259)
+   defining Unicode char U+FB04 (decimal 64260)
+   defining Unicode char U+FB05 (decimal 64261)
+   defining Unicode char U+FB06 (decimal 64262)
+)
+Now handling font encoding T1 ...
+... processing UTF-8 mapping file for font encoding T1
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/t1enc.dfu
+File: t1enc.dfu 2022/06/07 v1.3c UTF-8 support
+   defining Unicode char U+00A0 (decimal 160)
+   defining Unicode char U+00A1 (decimal 161)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00AB (decimal 171)
+   defining Unicode char U+00AD (decimal 173)
+   defining Unicode char U+00BB (decimal 187)
+   defining Unicode char U+00BF (decimal 191)
+   defining Unicode char U+00C0 (decimal 192)
+   defining Unicode char U+00C1 (decimal 193)
+   defining Unicode char U+00C2 (decimal 194)
+   defining Unicode char U+00C3 (decimal 195)
+   defining Unicode char U+00C4 (decimal 196)
+   defining Unicode char U+00C5 (decimal 197)
+   defining Unicode char U+00C6 (decimal 198)
+   defining Unicode char U+00C7 (decimal 199)
+   defining Unicode char U+00C8 (decimal 200)
+   defining Unicode char U+00C9 (decimal 201)
+   defining Unicode char U+00CA (decimal 202)
+   defining Unicode char U+00CB (decimal 203)
+   defining Unicode char U+00CC (decimal 204)
+   defining Unicode char U+00CD (decimal 205)
+   defining Unicode char U+00CE (decimal 206)
+   defining Unicode char U+00CF (decimal 207)
+   defining Unicode char U+00D0 (decimal 208)
+   defining Unicode char U+00D1 (decimal 209)
+   defining Unicode char U+00D2 (decimal 210)
+   defining Unicode char U+00D3 (decimal 211)
+   defining Unicode char U+00D4 (decimal 212)
+   defining Unicode char U+00D5 (decimal 213)
+   defining Unicode char U+00D6 (decimal 214)
+   defining Unicode char U+00D8 (decimal 216)
+   defining Unicode char U+00D9 (decimal 217)
+   defining Unicode char U+00DA (decimal 218)
+   defining Unicode char U+00DB (decimal 219)
+   defining Unicode char U+00DC (decimal 220)
+   defining Unicode char U+00DD (decimal 221)
+   defining Unicode char U+00DE (decimal 222)
+   defining Unicode char U+00DF (decimal 223)
+   defining Unicode char U+00E0 (decimal 224)
+   defining Unicode char U+00E1 (decimal 225)
+   defining Unicode char U+00E2 (decimal 226)
+   defining Unicode char U+00E3 (decimal 227)
+   defining Unicode char U+00E4 (decimal 228)
+   defining Unicode char U+00E5 (decimal 229)
+   defining Unicode char U+00E6 (decimal 230)
+   defining Unicode char U+00E7 (decimal 231)
+   defining Unicode char U+00E8 (decimal 232)
+   defining Unicode char U+00E9 (decimal 233)
+   defining Unicode char U+00EA (decimal 234)
+   defining Unicode char U+00EB (decimal 235)
+   defining Unicode char U+00EC (decimal 236)
+   defining Unicode char U+00ED (decimal 237)
+   defining Unicode char U+00EE (decimal 238)
+   defining Unicode char U+00EF (decimal 239)
+   defining Unicode char U+00F0 (decimal 240)
+   defining Unicode char U+00F1 (decimal 241)
+   defining Unicode char U+00F2 (decimal 242)
+   defining Unicode char U+00F3 (decimal 243)
+   defining Unicode char U+00F4 (decimal 244)
+   defining Unicode char U+00F5 (decimal 245)
+   defining Unicode char U+00F6 (decimal 246)
+   defining Unicode char U+00F8 (decimal 248)
+   defining Unicode char U+00F9 (decimal 249)
+   defining Unicode char U+00FA (decimal 250)
+   defining Unicode char U+00FB (decimal 251)
+   defining Unicode char U+00FC (decimal 252)
+   defining Unicode char U+00FD (decimal 253)
+   defining Unicode char U+00FE (decimal 254)
+   defining Unicode char U+00FF (decimal 255)
+   defining Unicode char U+0100 (decimal 256)
+   defining Unicode char U+0101 (decimal 257)
+   defining Unicode char U+0102 (decimal 258)
+   defining Unicode char U+0103 (decimal 259)
+   defining Unicode char U+0104 (decimal 260)
+   defining Unicode char U+0105 (decimal 261)
+   defining Unicode char U+0106 (decimal 262)
+   defining Unicode char U+0107 (decimal 263)
+   defining Unicode char U+0108 (decimal 264)
+   defining Unicode char U+0109 (decimal 265)
+   defining Unicode char U+010A (decimal 266)
+   defining Unicode char U+010B (decimal 267)
+   defining Unicode char U+010C (decimal 268)
+   defining Unicode char U+010D (decimal 269)
+   defining Unicode char U+010E (decimal 270)
+   defining Unicode char U+010F (decimal 271)
+   defining Unicode char U+0110 (decimal 272)
+   defining Unicode char U+0111 (decimal 273)
+   defining Unicode char U+0112 (decimal 274)
+   defining Unicode char U+0113 (decimal 275)
+   defining Unicode char U+0114 (decimal 276)
+   defining Unicode char U+0115 (decimal 277)
+   defining Unicode char U+0116 (decimal 278)
+   defining Unicode char U+0117 (decimal 279)
+   defining Unicode char U+0118 (decimal 280)
+   defining Unicode char U+0119 (decimal 281)
+   defining Unicode char U+011A (decimal 282)
+   defining Unicode char U+011B (decimal 283)
+   defining Unicode char U+011C (decimal 284)
+   defining Unicode char U+011D (decimal 285)
+   defining Unicode char U+011E (decimal 286)
+   defining Unicode char U+011F (decimal 287)
+   defining Unicode char U+0120 (decimal 288)
+   defining Unicode char U+0121 (decimal 289)
+   defining Unicode char U+0122 (decimal 290)
+   defining Unicode char U+0123 (decimal 291)
+   defining Unicode char U+0124 (decimal 292)
+   defining Unicode char U+0125 (decimal 293)
+   defining Unicode char U+0128 (decimal 296)
+   defining Unicode char U+0129 (decimal 297)
+   defining Unicode char U+012A (decimal 298)
+   defining Unicode char U+012B (decimal 299)
+   defining Unicode char U+012C (decimal 300)
+   defining Unicode char U+012D (decimal 301)
+   defining Unicode char U+012E (decimal 302)
+   defining Unicode char U+012F (decimal 303)
+   defining Unicode char U+0130 (decimal 304)
+   defining Unicode char U+0131 (decimal 305)
+   defining Unicode char U+0132 (decimal 306)
+   defining Unicode char U+0133 (decimal 307)
+   defining Unicode char U+0134 (decimal 308)
+   defining Unicode char U+0135 (decimal 309)
+   defining Unicode char U+0136 (decimal 310)
+   defining Unicode char U+0137 (decimal 311)
+   defining Unicode char U+0139 (decimal 313)
+   defining Unicode char U+013A (decimal 314)
+   defining Unicode char U+013B (decimal 315)
+   defining Unicode char U+013C (decimal 316)
+   defining Unicode char U+013D (decimal 317)
+   defining Unicode char U+013E (decimal 318)
+   defining Unicode char U+0141 (decimal 321)
+   defining Unicode char U+0142 (decimal 322)
+   defining Unicode char U+0143 (decimal 323)
+   defining Unicode char U+0144 (decimal 324)
+   defining Unicode char U+0145 (decimal 325)
+   defining Unicode char U+0146 (decimal 326)
+   defining Unicode char U+0147 (decimal 327)
+   defining Unicode char U+0148 (decimal 328)
+   defining Unicode char U+014A (decimal 330)
+   defining Unicode char U+014B (decimal 331)
+   defining Unicode char U+014C (decimal 332)
+   defining Unicode char U+014D (decimal 333)
+   defining Unicode char U+014E (decimal 334)
+   defining Unicode char U+014F (decimal 335)
+   defining Unicode char U+0150 (decimal 336)
+   defining Unicode char U+0151 (decimal 337)
+   defining Unicode char U+0152 (decimal 338)
+   defining Unicode char U+0153 (decimal 339)
+   defining Unicode char U+0154 (decimal 340)
+   defining Unicode char U+0155 (decimal 341)
+   defining Unicode char U+0156 (decimal 342)
+   defining Unicode char U+0157 (decimal 343)
+   defining Unicode char U+0158 (decimal 344)
+   defining Unicode char U+0159 (decimal 345)
+   defining Unicode char U+015A (decimal 346)
+   defining Unicode char U+015B (decimal 347)
+   defining Unicode char U+015C (decimal 348)
+   defining Unicode char U+015D (decimal 349)
+   defining Unicode char U+015E (decimal 350)
+   defining Unicode char U+015F (decimal 351)
+   defining Unicode char U+0160 (decimal 352)
+   defining Unicode char U+0161 (decimal 353)
+   defining Unicode char U+0162 (decimal 354)
+   defining Unicode char U+0163 (decimal 355)
+   defining Unicode char U+0164 (decimal 356)
+   defining Unicode char U+0165 (decimal 357)
+   defining Unicode char U+0168 (decimal 360)
+   defining Unicode char U+0169 (decimal 361)
+   defining Unicode char U+016A (decimal 362)
+   defining Unicode char U+016B (decimal 363)
+   defining Unicode char U+016C (decimal 364)
+   defining Unicode char U+016D (decimal 365)
+   defining Unicode char U+016E (decimal 366)
+   defining Unicode char U+016F (decimal 367)
+   defining Unicode char U+0170 (decimal 368)
+   defining Unicode char U+0171 (decimal 369)
+   defining Unicode char U+0172 (decimal 370)
+   defining Unicode char U+0173 (decimal 371)
+   defining Unicode char U+0174 (decimal 372)
+   defining Unicode char U+0175 (decimal 373)
+   defining Unicode char U+0176 (decimal 374)
+   defining Unicode char U+0177 (decimal 375)
+   defining Unicode char U+0178 (decimal 376)
+   defining Unicode char U+0179 (decimal 377)
+   defining Unicode char U+017A (decimal 378)
+   defining Unicode char U+017B (decimal 379)
+   defining Unicode char U+017C (decimal 380)
+   defining Unicode char U+017D (decimal 381)
+   defining Unicode char U+017E (decimal 382)
+   defining Unicode char U+01C4 (decimal 452)
+   defining Unicode char U+01C5 (decimal 453)
+   defining Unicode char U+01C6 (decimal 454)
+   defining Unicode char U+01C7 (decimal 455)
+   defining Unicode char U+01C8 (decimal 456)
+   defining Unicode char U+01C9 (decimal 457)
+   defining Unicode char U+01CA (decimal 458)
+   defining Unicode char U+01CB (decimal 459)
+   defining Unicode char U+01CC (decimal 460)
+   defining Unicode char U+01CD (decimal 461)
+   defining Unicode char U+01CE (decimal 462)
+   defining Unicode char U+01CF (decimal 463)
+   defining Unicode char U+01D0 (decimal 464)
+   defining Unicode char U+01D1 (decimal 465)
+   defining Unicode char U+01D2 (decimal 466)
+   defining Unicode char U+01D3 (decimal 467)
+   defining Unicode char U+01D4 (decimal 468)
+   defining Unicode char U+01E2 (decimal 482)
+   defining Unicode char U+01E3 (decimal 483)
+   defining Unicode char U+01E6 (decimal 486)
+   defining Unicode char U+01E7 (decimal 487)
+   defining Unicode char U+01E8 (decimal 488)
+   defining Unicode char U+01E9 (decimal 489)
+   defining Unicode char U+01EA (decimal 490)
+   defining Unicode char U+01EB (decimal 491)
+   defining Unicode char U+01F0 (decimal 496)
+   defining Unicode char U+01F4 (decimal 500)
+   defining Unicode char U+01F5 (decimal 501)
+   defining Unicode char U+0218 (decimal 536)
+   defining Unicode char U+0219 (decimal 537)
+   defining Unicode char U+021A (decimal 538)
+   defining Unicode char U+021B (decimal 539)
+   defining Unicode char U+0232 (decimal 562)
+   defining Unicode char U+0233 (decimal 563)
+   defining Unicode char U+0237 (decimal 567)
+   defining Unicode char U+02D9 (decimal 729)
+   defining Unicode char U+02DB (decimal 731)
+   defining Unicode char U+1E02 (decimal 7682)
+   defining Unicode char U+1E03 (decimal 7683)
+   defining Unicode char U+1E0D (decimal 7693)
+   defining Unicode char U+1E1E (decimal 7710)
+   defining Unicode char U+1E1F (decimal 7711)
+   defining Unicode char U+1E25 (decimal 7717)
+   defining Unicode char U+1E30 (decimal 7728)
+   defining Unicode char U+1E31 (decimal 7729)
+   defining Unicode char U+1E37 (decimal 7735)
+   defining Unicode char U+1E8E (decimal 7822)
+   defining Unicode char U+1E8F (decimal 7823)
+   defining Unicode char U+1E43 (decimal 7747)
+   defining Unicode char U+1E45 (decimal 7749)
+   defining Unicode char U+1E47 (decimal 7751)
+   defining Unicode char U+1E5B (decimal 7771)
+   defining Unicode char U+1E63 (decimal 7779)
+   defining Unicode char U+1E6D (decimal 7789)
+   defining Unicode char U+1E90 (decimal 7824)
+   defining Unicode char U+1E91 (decimal 7825)
+   defining Unicode char U+1E9E (decimal 7838)
+   defining Unicode char U+1EF2 (decimal 7922)
+   defining Unicode char U+1EF3 (decimal 7923)
+   defining Unicode char U+200C (decimal 8204)
+   defining Unicode char U+2010 (decimal 8208)
+   defining Unicode char U+2011 (decimal 8209)
+   defining Unicode char U+2012 (decimal 8210)
+   defining Unicode char U+2013 (decimal 8211)
+   defining Unicode char U+2014 (decimal 8212)
+   defining Unicode char U+2015 (decimal 8213)
+   defining Unicode char U+2018 (decimal 8216)
+   defining Unicode char U+2019 (decimal 8217)
+   defining Unicode char U+201A (decimal 8218)
+   defining Unicode char U+201C (decimal 8220)
+   defining Unicode char U+201D (decimal 8221)
+   defining Unicode char U+201E (decimal 8222)
+   defining Unicode char U+2030 (decimal 8240)
+   defining Unicode char U+2031 (decimal 8241)
+   defining Unicode char U+2039 (decimal 8249)
+   defining Unicode char U+203A (decimal 8250)
+   defining Unicode char U+2423 (decimal 9251)
+   defining Unicode char U+1E20 (decimal 7712)
+   defining Unicode char U+1E21 (decimal 7713)
+   defining Unicode char U+FB00 (decimal 64256)
+   defining Unicode char U+FB01 (decimal 64257)
+   defining Unicode char U+FB02 (decimal 64258)
+   defining Unicode char U+FB03 (decimal 64259)
+   defining Unicode char U+FB04 (decimal 64260)
+   defining Unicode char U+FB05 (decimal 64261)
+   defining Unicode char U+FB06 (decimal 64262)
+)
+Now handling font encoding TS1 ...
+... processing UTF-8 mapping file for font encoding TS1
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/ts1enc.dfu
+File: ts1enc.dfu 2022/06/07 v1.3c UTF-8 support
+   defining Unicode char U+00A2 (decimal 162)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00A4 (decimal 164)
+   defining Unicode char U+00A5 (decimal 165)
+   defining Unicode char U+00A6 (decimal 166)
+   defining Unicode char U+00A7 (decimal 167)
+   defining Unicode char U+00A8 (decimal 168)
+   defining Unicode char U+00A9 (decimal 169)
+   defining Unicode char U+00AA (decimal 170)
+   defining Unicode char U+00AC (decimal 172)
+   defining Unicode char U+00AE (decimal 174)
+   defining Unicode char U+00AF (decimal 175)
+   defining Unicode char U+00B0 (decimal 176)
+   defining Unicode char U+00B1 (decimal 177)
+   defining Unicode char U+00B2 (decimal 178)
+   defining Unicode char U+00B3 (decimal 179)
+   defining Unicode char U+00B4 (decimal 180)
+   defining Unicode char U+00B5 (decimal 181)
+   defining Unicode char U+00B6 (decimal 182)
+   defining Unicode char U+00B7 (decimal 183)
+   defining Unicode char U+00B9 (decimal 185)
+   defining Unicode char U+00BA (decimal 186)
+   defining Unicode char U+00BC (decimal 188)
+   defining Unicode char U+00BD (decimal 189)
+   defining Unicode char U+00BE (decimal 190)
+   defining Unicode char U+00D7 (decimal 215)
+   defining Unicode char U+00F7 (decimal 247)
+   defining Unicode char U+0192 (decimal 402)
+   defining Unicode char U+02C7 (decimal 711)
+   defining Unicode char U+02D8 (decimal 728)
+   defining Unicode char U+02DD (decimal 733)
+   defining Unicode char U+0E3F (decimal 3647)
+   defining Unicode char U+2016 (decimal 8214)
+   defining Unicode char U+2020 (decimal 8224)
+   defining Unicode char U+2021 (decimal 8225)
+   defining Unicode char U+2022 (decimal 8226)
+   defining Unicode char U+2030 (decimal 8240)
+   defining Unicode char U+2031 (decimal 8241)
+   defining Unicode char U+203B (decimal 8251)
+   defining Unicode char U+203D (decimal 8253)
+   defining Unicode char U+2044 (decimal 8260)
+   defining Unicode char U+204E (decimal 8270)
+   defining Unicode char U+2052 (decimal 8274)
+   defining Unicode char U+20A1 (decimal 8353)
+   defining Unicode char U+20A4 (decimal 8356)
+   defining Unicode char U+20A6 (decimal 8358)
+   defining Unicode char U+20A9 (decimal 8361)
+   defining Unicode char U+20AB (decimal 8363)
+   defining Unicode char U+20AC (decimal 8364)
+   defining Unicode char U+20B1 (decimal 8369)
+   defining Unicode char U+2103 (decimal 8451)
+   defining Unicode char U+2116 (decimal 8470)
+   defining Unicode char U+2117 (decimal 8471)
+   defining Unicode char U+211E (decimal 8478)
+   defining Unicode char U+2120 (decimal 8480)
+   defining Unicode char U+2122 (decimal 8482)
+   defining Unicode char U+2126 (decimal 8486)
+   defining Unicode char U+2127 (decimal 8487)
+   defining Unicode char U+212E (decimal 8494)
+   defining Unicode char U+2190 (decimal 8592)
+   defining Unicode char U+2191 (decimal 8593)
+   defining Unicode char U+2192 (decimal 8594)
+   defining Unicode char U+2193 (decimal 8595)
+   defining Unicode char U+2329 (decimal 9001)
+   defining Unicode char U+3008 (decimal 12296)
+   defining Unicode char U+232A (decimal 9002)
+   defining Unicode char U+3009 (decimal 12297)
+   defining Unicode char U+2422 (decimal 9250)
+   defining Unicode char U+25E6 (decimal 9702)
+   defining Unicode char U+25EF (decimal 9711)
+   defining Unicode char U+266A (decimal 9834)
+   defining Unicode char U+27E8 (decimal 10216)
+   defining Unicode char U+27E9 (decimal 10217)
+   defining Unicode char U+FEFF (decimal 65279)
+)
+Now handling font encoding OMX ...
+... no UTF-8 mapping file for font encoding OMX
+Now handling font encoding U ...
+... no UTF-8 mapping file for font encoding U
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+   defining Unicode char U+00A9 (decimal 169)
+   defining Unicode char U+00AA (decimal 170)
+   defining Unicode char U+00AE (decimal 174)
+   defining Unicode char U+00BA (decimal 186)
+   defining Unicode char U+02C6 (decimal 710)
+   defining Unicode char U+02DC (decimal 732)
+   defining Unicode char U+200C (decimal 8204)
+   defining Unicode char U+2026 (decimal 8230)
+   defining Unicode char U+2122 (decimal 8482)
+   defining Unicode char U+2423 (decimal 9251)
+   defining Unicode char U+FEFF (decimal 65279)
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 38.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2026/05/19 v2.18d AMS math features
+\@mathmargin=\skip55
+
+For additional information on amsmath, use the `?' option.
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2024/11/17 v2.01 AMS text
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks24
+\ex@=\dimen165
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen166
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count303
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count304
+\leftroot@=\count305
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count306
+\DOTSCASE@=\count307
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box55
+\strutbox@=\box56
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen167
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count308
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count309
+\dotsspace@=\muskip18
+\c@parentequation=\count310
+\dspbrk@lvl=\count311
+\tag@help=\toks25
+\row@=\count312
+\column@=\count313
+\maxfields@=\count314
+\andhelp@=\toks26
+\eqnshift@=\dimen168
+\alignsep@=\dimen169
+\tagshift@=\dimen170
+\tagwidth@=\dimen171
+\totwidth@=\dimen172
+\lineht@=\dimen173
+\@envbody=\toks27
+\multlinegap=\skip56
+\multlinetaggap=\skip57
+\mathdisplay@stack=\toks28
+LaTeX Info: Redefining \[ on input line 2965.
+LaTeX Info: Redefining \] on input line 2966.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/amscls/amsthm.sty
+Package: amsthm 2020/05/29 v2.20.6
+\thm@style=\toks29
+\thm@bodyfont=\toks30
+\thm@headfont=\toks31
+\thm@notefont=\toks32
+\thm@headpunct=\toks33
+\thm@preskip=\skip58
+\thm@postskip=\skip59
+\thm@headsep=\skip60
+\dth@everypar=\toks34
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/txfonts.sty
+Package: txfonts 2008/01/22 v3.2.1
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 21.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/txr/m/n on input line 21.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/txr/m/n on input line 21.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/txr/m/n --> OT1/txr/bx/n on input line 22.
+\symitalic=\mathgroup6
+LaTeX Font Info:    Overwriting symbol font `italic' in version `bold'
+(Font)                  OT1/txr/m/it --> OT1/txr/bx/it on input line 26.
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 29.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/txr/bx/n on input line 29.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/txr/bx/n on input line 29.
+LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 30.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/txr/m/it on input line 30.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/txr/m/it on input line 30.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/txr/m/it --> OT1/txr/bx/it on input line 31.
+LaTeX Font Info:    Redeclaring math alphabet \mathsf on input line 40.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
+(Font)                  OT1/cmss/m/n --> OT1/txss/m/n on input line 40.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
+(Font)                  OT1/cmss/bx/n --> OT1/txss/m/n on input line 40.
+LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
+(Font)                  OT1/txss/m/n --> OT1/txss/b/n on input line 41.
+LaTeX Font Info:    Redeclaring math alphabet \mathtt on input line 50.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
+(Font)                  OT1/cmtt/m/n --> OT1/txtt/m/n on input line 50.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
+(Font)                  OT1/cmtt/m/n --> OT1/txtt/m/n on input line 50.
+LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
+(Font)                  OT1/txtt/m/n --> OT1/txtt/b/n on input line 51.
+LaTeX Font Info:    Redeclaring symbol font `letters' on input line 58.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/txmi/m/it on input line 58.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/txmi/m/it on input line 58.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/txmi/m/it --> OML/txmi/bx/it on input line 59.
+\symlettersA=\mathgroup7
+LaTeX Font Info:    Overwriting symbol font `lettersA' in version `bold'
+(Font)                  U/txmia/m/it --> U/txmia/bx/it on input line 67.
+LaTeX Font Info:    Redeclaring math alphabet \mathfrak on input line 70.
+LaTeX Font Info:    Redeclaring symbol font `symbols' on input line 77.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/txsy/m/n on input line 77.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/txsy/m/n on input line 77.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/txsy/m/n --> OMS/txsy/bx/n on input line 78.
+LaTeX Font Info:    Redeclaring symbol font `AMSa' on input line 93.
+LaTeX Font Info:    Overwriting symbol font `AMSa' in version `normal'
+(Font)                  U/msa/m/n --> U/txsya/m/n on input line 93.
+LaTeX Font Info:    Overwriting symbol font `AMSa' in version `bold'
+(Font)                  U/msa/m/n --> U/txsya/m/n on input line 93.
+LaTeX Font Info:    Overwriting symbol font `AMSa' in version `bold'
+(Font)                  U/txsya/m/n --> U/txsya/bx/n on input line 94.
+LaTeX Font Info:    Redeclaring symbol font `AMSb' on input line 102.
+LaTeX Font Info:    Overwriting symbol font `AMSb' in version `normal'
+(Font)                  U/msb/m/n --> U/txsyb/m/n on input line 102.
+LaTeX Font Info:    Overwriting symbol font `AMSb' in version `bold'
+(Font)                  U/msb/m/n --> U/txsyb/m/n on input line 102.
+LaTeX Font Info:    Overwriting symbol font `AMSb' in version `bold'
+(Font)                  U/txsyb/m/n --> U/txsyb/bx/n on input line 103.
+\symsymbolsC=\mathgroup8
+LaTeX Font Info:    Overwriting symbol font `symbolsC' in version `bold'
+(Font)                  U/txsyc/m/n --> U/txsyc/bx/n on input line 113.
+LaTeX Font Info:    Redeclaring symbol font `largesymbols' on input line 120.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/txex/m/n on input line 120.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/txex/m/n on input line 120.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/txex/m/n --> OMX/txex/bx/n on input line 121.
+\symlargesymbolsA=\mathgroup9
+LaTeX Font Info:    Overwriting symbol font `largesymbolsA' in version `bold'
+(Font)                  U/txexa/m/n --> U/txexa/bx/n on input line 129.
+LaTeX Encoding Info:    Redeclaring text symbol \L (encoding OT1) on input line 160.
+LaTeX Encoding Info:    Redeclaring text symbol \l (encoding OT1) on input line 161.
+LaTeX Font Info:    Redeclaring math symbol \mathsterling on input line 164.
+LaTeX Info: Redefining \not on input line 1043.
+LaTeX Info: Redefining \textsquare on input line 1063.
+LaTeX Info: Redefining \openbox on input line 1064.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
+LaTeX Font Info:    Trying to load font information for T1+txr on input line 116.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/t1txr.fd
+File: t1txr.fd 2000/12/15 v3.1
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2026/08/21 v26.11 The multilingual framework for LuaLaTeX, pdfLaTeX and XeLaTeX
+\babel@savecnt=\count315
+LaTeX Encoding Info:    Redeclaring text command \ij (encoding OT1) on input line 2105.
+LaTeX Encoding Info:    Redeclaring text command \IJ (encoding OT1) on input line 2107.
+LaTeX Encoding Info:    Redeclaring text command \ij (encoding T1) on input line 2109.
+LaTeX Encoding Info:    Redeclaring text command \IJ (encoding T1) on input line 2110.
+LaTeX Encoding Info:    Ignoring declaration for text command \ij (encoding ?) on input line 2111.
+LaTeX Encoding Info:    Ignoring declaration for text command \IJ (encoding ?) on input line 2113.
+LaTeX Encoding Info:    Ignoring declaration for text command \SS (encoding ?) on input line 2138.
+\U@D=\dimen174
+\l@unhyphenated=\language5
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/babel/txtbabel.def)
+\bbl@readstream=\read3
+\bbl@dirlevel=\count316
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/babel/locale/en/babel-english.tex)
+Package babel Info: Importing font and identification data for 'english'
+(babel)             from babel-en.ini. Reported on input line 4460.
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/babel-english/english.ldf
+Language: english 2017/06/06 v3.3r English support from the babel system
+Package babel Info: Hyphen rules for 'canadian' set to \l@english
+(babel)             (\language0). Reported on input line 102.
+Package babel Info: Hyphen rules for 'australian' set to \l@ukenglish
+(babel)             (\language3). Reported on input line 105.
+Package babel Info: Hyphen rules for 'newzealand' set to \l@ukenglish
+(babel)             (\language3). Reported on input line 108.
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.sty
+Package: csquotes 2026-05-19 v5.2p context-sensitive quotations (JAW)
+\csq@reset=\count317
+\csq@gtype=\count318
+\csq@glevel=\count319
+\csq@qlevel=\count320
+\csq@maxlvl=\count321
+\csq@tshold=\count322
+\csq@ltx@everypar=\toks35
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.def
+File: csquotes.def 2026-05-19 v5.2p csquotes generic definitions (JAW)
+)
+Package csquotes Info: Trying to load configuration file 'csquotes.cfg'...
+Package csquotes Info: ... configuration file loaded successfully.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/csquotes/csquotes.cfg
+File: csquotes.cfg 
+)
+Package csquotes Info: Option 'babel' depreciated.
+(csquotes)             Using 'autostyle'.
+Package csquotes Info: Enabling multilingual quotes.
+Package csquotes Info: Redefining alias 'english' -> 'english/american'.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
+\f@nch@headwidth=\skip61
+\f@nch@offset@elh=\skip62
+\f@nch@offset@erh=\skip63
+\f@nch@offset@olh=\skip64
+\f@nch@offset@orh=\skip65
+\f@nch@offset@elf=\skip66
+\f@nch@offset@erf=\skip67
+\f@nch@offset@olf=\skip68
+\f@nch@offset@orf=\skip69
+\f@nch@height=\skip70
+\f@nch@footalignment=\skip71
+\f@nch@widthL=\skip72
+\f@nch@widthC=\skip73
+\f@nch@widthR=\skip74
+\@temptokenb=\toks36
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/titlesec/titlesec.sty
+Package: titlesec 2025/01/04 v2.17 Sectioning titles
+\ttl@box=\box57
+\beforetitleunit=\skip75
+\aftertitleunit=\skip76
+\ttl@plus=\dimen175
+\ttl@minus=\dimen176
+\ttl@toksa=\toks37
+\titlewidth=\dimen177
+\titlewidthlast=\dimen178
+\titlewidthfirst=\dimen179
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/titlesec/titletoc.sty
+Package: titletoc 2025/01/04 v2.17 TOC entries
+\ttl@leftsep=\dimen180
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
+\multirow@colwidth=\skip77
+\multirow@cntb=\count323
+\multirow@dima=\skip78
+\bigstrutjot=\dimen181
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen182
+\captionmargin=\dimen183
+\caption@leftmargin=\dimen184
+\caption@rightmargin=\dimen185
+\caption@width=\dimen186
+\caption@indent=\dimen187
+\caption@parindent=\dimen188
+\caption@hangindent=\dimen189
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count324
+\c@continuedfloat=\count325
+Package caption Info: hyperref package is loaded.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/floatrow/floatrow.sty
+Package: floatrow 2008/08/02 v0.3b floatrow: float package extension
+\c@float@type=\count326
+\float@exts=\toks38
+\float@box=\box58
+\@floatcapt=\box59
+Package floatrow Info: Modified float package code loaded on input line 455.
+Package floatrow Info: Modified rotfloat package code loaded on input line 473.
+\FR@everyfloat=\toks39
+\flrow@foot=\insert252
+\FB@wd=\dimen190
+\FBo@wd=\dimen191
+\FBc@wd=\dimen192
+\FBo@ht=\skip79
+\FBc@ht=\skip80
+\FBf@ht=\skip81
+\FBo@max=\skip82
+\FBc@max=\skip83
+\FBf@max=\skip84
+\c@FBl@b=\count327
+\floatbox@depth=\count328
+\c@FRobj=\count329
+\c@FRsobj=\count330
+\Xhsize=\skip85
+\sXhsize=\skip86
+\Zhsize=\skip87
+\sZhsize=\skip88
+\flrow@rowbox=\box60
+\FR@Zunitlength=\dimen193
+\c@FBcnt=\count331
+\FPOScnt=\count332
+\LTleft=\skip89
+\LTright=\skip90
+\LTleft=\skip91
+\LTright=\skip92
+\flrow@types=\toks40
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen194
+\lightrulewidth=\dimen195
+\cmidrulewidth=\dimen196
+\belowrulesep=\dimen197
+\belowbottomsep=\dimen198
+\aboverulesep=\dimen199
+\abovetopsep=\dimen256
+\cmidrulesep=\dimen257
+\cmidrulekern=\dimen258
+\defaultaddspace=\dimen259
+\@cmidla=\count333
+\@cmidlb=\count334
+\@aboverulesep=\dimen260
+\@belowrulesep=\dimen261
+\@thisruleclass=\count335
+\@lastruleclass=\count336
+\@thisrulewidth=\dimen262
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/hyphenat/hyphenat.sty
+Package: hyphenat 2009/09/02 v2.3c hyphenation utilities
+
+
+Package hyphenat Warning: *******************************
+(hyphenat)                * You have used the htt option.
+(hyphenat)                * You are likely to get many Font Warning messages.
+(hyphenat)                * These can usually be ignored.
+(hyphenat)                *******************************.
+
+\langwohyphens=\language6
+LaTeX Info: Redefining \_ on input line 43.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/makecell/makecell.sty
+Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
+\rotheadsize=\dimen263
+\c@nlinenum=\count337
+\TeXr@lab=\toks41
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2026-05-17 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2026-05-17 v1.4h Standard LaTeX Graphics (DPC,SPQR)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+)
+\Gin@req@height=\dimen264
+\Gin@req@width=\dimen265
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/chngcntr/chngcntr.sty
+Package: chngcntr 2018/04/09 v1.1a change counter resetting
+Package chngcntr Info: \counterwithout already defined.
+(chngcntr)             Quitting chngcntr on input line 21.
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count338
+\lst@gtempboxa=\box61
+\lst@token=\toks42
+\lst@length=\count339
+\lst@currlwidth=\dimen266
+\lst@column=\count340
+\lst@pos=\count341
+\lst@lostspace=\dimen267
+\lst@width=\dimen268
+\lst@newlines=\count342
+\lst@lineno=\count343
+\lst@maxwidth=\dimen269
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstpatch.sty
+File: lstpatch.sty 2025/11/14 1.11b (Carsten Heinz)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
+\c@lstnumber=\count344
+\lst@skipnumbers=\count345
+\lst@framebox=\box62
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2025/11/14 1.11b listings configuration
+))
+Package: listings 2025/11/14 1.11b (Carsten Heinz)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks43
+\pgfutil@tempdima=\dimen270
+\pgfutil@tempdimb=\dimen271
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+\pgfutil@abb=\box63
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+Package: pgfrcs 2026-08-01 v3.1.12 (3.1.12)
+))
+Package: pgf 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+Package: pgfsys 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks44
+\pgfkeys@temptoks=\toks45
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.tex
+\pgfkeys@tmptoks=\toks46
+))
+\pgf@x=\dimen272
+\pgf@y=\dimen273
+\pgf@xa=\dimen274
+\pgf@ya=\dimen275
+\pgf@xb=\dimen276
+\pgf@yb=\dimen277
+\pgf@xc=\dimen278
+\pgf@yc=\dimen279
+\pgf@xd=\dimen280
+\pgf@yd=\dimen281
+\w@pgf@writea=\write4
+\r@pgf@reada=\read4
+\c@pgf@counta=\count346
+\c@pgf@countb=\count347
+\c@pgf@countc=\count348
+\c@pgf@countd=\count349
+\t@pgf@toka=\toks47
+\t@pgf@tokb=\toks48
+\t@pgf@tokc=\toks49
+\pgf@sys@id@count=\count350
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+File: pgf.cfg 2026-08-01 v3.1.12 (3.1.12)
+)
+Driver file for pgf: pgfsys-pdftex.def
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
+File: pgfsys-common-pdf.def 2026-08-01 v3.1.12 (3.1.12)
+))) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+File: pgfsyssoftpath.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfsyssoftpath@smallbuffer@items=\count351
+\pgfsyssoftpath@bigbuffer@items=\count352
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+File: pgfsysprotocol.code.tex 2026-08-01 v3.1.12 (3.1.12)
+)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+Package: pgfcore 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+\pgfmath@dimen=\dimen282
+\pgfmath@count=\count353
+\pgfmath@box=\box64
+\pgfmath@toks=\toks50
+\pgfmath@stack@operand=\toks51
+\pgfmath@stack@operation=\toks52
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count354
+)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
+File: pgfcorepoints.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@picminx=\dimen283
+\pgf@picmaxx=\dimen284
+\pgf@picminy=\dimen285
+\pgf@picmaxy=\dimen286
+\pgf@pathminx=\dimen287
+\pgf@pathmaxx=\dimen288
+\pgf@pathminy=\dimen289
+\pgf@pathmaxy=\dimen290
+\pgf@xx=\dimen291
+\pgf@xy=\dimen292
+\pgf@yx=\dimen293
+\pgf@yy=\dimen294
+\pgf@zx=\dimen295
+\pgf@zy=\dimen296
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+File: pgfcorepathconstruct.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@path@lastx=\dimen297
+\pgf@path@lasty=\dimen298
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
+File: pgfcorepathusage.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@shorten@end@additional=\dimen299
+\pgf@shorten@start@additional=\dimen300
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
+File: pgfcorescopes.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfpic=\box65
+\pgf@hbox=\box66
+\pgf@layerbox@main=\box67
+\pgf@picture@serial@count=\count355
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
+File: pgfcoregraphicstate.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgflinewidth=\dimen301
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.tex
+File: pgfcoretransformations.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@pt@x=\dimen302
+\pgf@pt@y=\dimen303
+\pgf@pt@temp=\dimen304
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
+File: pgfcoreobjects.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.tex
+File: pgfcorepathprocessing.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
+File: pgfcorearrows.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfarrowsep=\dimen305
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@max=\dimen306
+\pgf@sys@shading@range@num=\count356
+\pgf@shadingcount=\count357
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+File: pgfcoreexternal.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfexternal@startupbox=\box68
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
+File: pgfcoretransparency.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+File: pgfcorepatterns.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2026-08-01 v3.1.12 (3.1.12)
+))) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfnodeparttextbox=\box69
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
+Package: pgfcomp-version-0-65 2026-08-01 v3.1.12 (3.1.12)
+\pgf@nodesepstart=\dimen307
+\pgf@nodesepend=\dimen308
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
+Package: pgfcomp-version-1-18 2026-08-01 v3.1.12 (3.1.12)
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/utilities/pgffor.sty (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgf/math/pgfmath.sty (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+Package: pgffor 2026-08-01 v3.1.12 (3.1.12)
+\pgffor@iter=\dimen309
+\pgffor@skip=\dimen310
+\pgffor@stack=\toks53
+\pgffor@toks=\toks54
+)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+Package: tikz 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.tex
+File: pgflibraryplothandlers.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgf@plot@mark@count=\count358
+\pgfplotmarksize=\dimen311
+)
+\tikz@lastx=\dimen312
+\tikz@lasty=\dimen313
+\tikz@lastxsaved=\dimen314
+\tikz@lastysaved=\dimen315
+\tikz@lastmovetox=\dimen316
+\tikz@lastmovetoy=\dimen317
+\tikzleveldistance=\dimen318
+\tikzsiblingdistance=\dimen319
+\tikz@figbox=\box70
+\tikz@figbox@bg=\box71
+\tikz@tempbox=\box72
+\tikz@tempbox@bg=\box73
+\tikztreelevel=\count359
+\tikznumberofchildren=\count360
+\tikznumberofcurrentchild=\count361
+\tikz@fig@count=\count362
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfmatrixcurrentrow=\count363
+\pgfmatrixcurrentcolumn=\count364
+\pgf@matrix@numberofcolumns=\count365
+)
+\tikz@expandcount=\count366
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2026-08-01 v3.1.12 (3.1.12)
+))) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryshapes.geometric.code.tex
+File: tikzlibraryshapes.geometric.code.tex 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.geometric.code.tex
+File: pgflibraryshapes.geometric.code.tex 2026-08-01 v3.1.12 (3.1.12)
+)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.code.tex
+File: pgflibraryarrows.meta.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfarrowinset=\dimen320
+\pgfarrowlength=\dimen321
+\pgfarrowwidth=\dimen322
+\pgfarrowlinewidth=\dimen323
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryfit.code.tex
+File: tikzlibraryfit.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarycalc.code.tex
+File: tikzlibrarycalc.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/pgfplots/pgfplots.sty (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.revision.tex)
+Package: pgfplots 2026/08/26 v1.18.3 Data Visualization (1.18.3)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotscore.code.tex
+\t@pgfplots@toka=\toks55
+\t@pgfplots@tokb=\toks56
+\t@pgfplots@tokc=\toks57
+\pgfplots@tmpa=\dimen324
+\c@pgfplots@coordindex=\count367
+\c@pgfplots@scanlineindex=\count368
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/sys/pgfplotssysgeneric.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/libs/pgfplotslibrary.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/oldpgfcompatib/pgfplotsoldpgfsupp_loader.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/pgflibraryfpu.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/oldpgfcompatib/pgfplotsoldpgfsupp_pgfutil-common-lists.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/liststructure/pgfplotsliststructure.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/liststructure/pgfplotsliststructureext.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/liststructure/pgfplotsarray.code.tex
+\c@pgfplotsarray@tmp=\count369
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/liststructure/pgfplotsmatrix.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/numtable/pgfplotstableshared.code.tex
+\c@pgfplotstable@counta=\count370
+\t@pgfplotstable@a=\toks58
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/liststructure/pgfplotsdeque.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotsbinary.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotsbinary.data.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.verb.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/libs/pgflibrarypgfplots.surfshading.code.tex
+\c@pgfplotslibrarysurf@no=\count371
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/sys/pgflibrarypgfplots.surfshading.pgfsys-pdftex.def))) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotscolormap.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/util/pgfplotscolor.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotsstackedplots.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotsplothandlers.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotsmeshplothandler.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotsmeshplotimage.code.tex))) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.scaling.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotscoordprocessing.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.errorbars.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.markers.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplotsticks.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/pgfplots.paths.code.tex) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarydecorations.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/modules/pgfmoduledecorations.code.tex
+\pgfdecoratedcompleteddistance=\dimen325
+\pgfdecoratedremainingdistance=\dimen326
+\pgfdecoratedinputsegmentcompleteddistance=\dimen327
+\pgfdecoratedinputsegmentremainingdistance=\dimen328
+\pgf@decorate@distancetomove=\dimen329
+\pgf@decorate@repeatstate=\count372
+\pgfdecorationsegmentamplitude=\dimen330
+\pgfdecorationsegmentlength=\dimen331
+)
+\tikz@lib@dec@box=\box74
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarydecorations.pathmorphing.code.tex (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/decorations/pgflibrarydecorations.pathmorphing.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarydecorations.pathreplacing.code.tex
+(/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/decorations/pgflibrarydecorations.pathreplacing.code.tex)) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgfplots/libs/tikzlibrarypgfplots.contourlua.code.tex)
+\pgfplots@numplots=\count373
+\pgfplots@xmin@reg=\dimen332
+\pgfplots@xmax@reg=\dimen333
+\pgfplots@ymin@reg=\dimen334
+\pgfplots@ymax@reg=\dimen335
+\pgfplots@zmin@reg=\dimen336
+\pgfplots@zmax@reg=\dimen337
+) (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryplotmarks.code.tex
+File: tikzlibraryplotmarks.code.tex 2026-08-01 v3.1.12 (3.1.12)
+ (/home/admin/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/pgflibraryplotmarks.code.tex
+File: pgflibraryplotmarks.code.tex 2026-08-01 v3.1.12 (3.1.12)
+))) (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/biblatex.sty
+Package: biblatex 2026/08/13 v3.22 programmable bibliographies (PK/MW)
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/logreq/logreq.sty
+Package: logreq 2010/08/04 v1.0 xml request logger
+\lrq@indent=\count374
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/logreq/logreq.def
+File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
+))
+\c@tabx@nest=\count375
+\c@listtotal=\count376
+\c@listcount=\count377
+\c@liststart=\count378
+\c@liststop=\count379
+\c@citecount=\count380
+\c@citetotal=\count381
+\c@multicitecount=\count382
+\c@multicitetotal=\count383
+\c@instcount=\count384
+\c@maxnames=\count385
+\c@minnames=\count386
+\c@maxitems=\count387
+\c@minitems=\count388
+\c@citecounter=\count389
+\c@maxcitecounter=\count390
+\c@savedcitecounter=\count391
+\c@uniquelist=\count392
+\c@uniquename=\count393
+\c@refsection=\count394
+\c@refsegment=\count395
+\c@maxextratitle=\count396
+\c@maxextratitleyear=\count397
+\c@maxextraname=\count398
+\c@maxextradate=\count399
+\c@maxextraalpha=\count400
+\c@abbrvpenalty=\count401
+\c@highnamepenalty=\count402
+\c@lownamepenalty=\count403
+\c@maxparens=\count404
+\c@parenlevel=\count405
+\blx@tempcnta=\count406
+\blx@tempcntb=\count407
+\blx@tempcntc=\count408
+\c@blx@maxsection=\count409
+\blx@maxsegment@0=\count410
+\blx@notetype=\count411
+\blx@parenlevel@text=\count412
+\blx@parenlevel@foot=\count413
+\blx@sectionciteorder@0=\count414
+\blx@sectionciteorderinternal@0=\count415
+\blx@entrysetcounter=\count416
+\blx@biblioinstance=\count417
+\labelnumberwidth=\skip93
+\labelalphawidth=\skip94
+\biblabelsep=\skip95
+\bibitemsep=\skip96
+\bibnamesep=\skip97
+\bibinitsep=\skip98
+\bibparsep=\skip99
+\bibhang=\skip100
+\blx@bcfin=\read5
+\blx@bcfout=\write5
+\blx@langwohyphens=\language7
+\c@mincomprange=\count418
+\c@maxcomprange=\count419
+\c@mincompwidth=\count420
+Package biblatex Info: Trying to load biblatex default data model...
+Package biblatex Info: ... file 'blx-dm.def' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/blx-dm.def
+File: blx-dm.def 2026/08/13 v3.22 biblatex datamodel (PK/MW)
+)
+Package biblatex Info: Trying to load biblatex style data model...
+Package biblatex Info: ... file 'ieee.dbx' not found.
+Package biblatex Info: Trying to load biblatex custom data model...
+Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
+\c@afterword=\count421
+\c@savedafterword=\count422
+\c@annotator=\count423
+\c@savedannotator=\count424
+\c@author=\count425
+\c@savedauthor=\count426
+\c@bookauthor=\count427
+\c@savedbookauthor=\count428
+\c@commentator=\count429
+\c@savedcommentator=\count430
+\c@editor=\count431
+\c@savededitor=\count432
+\c@editora=\count433
+\c@savededitora=\count434
+\c@editorb=\count435
+\c@savededitorb=\count436
+\c@editorc=\count437
+\c@savededitorc=\count438
+\c@foreword=\count439
+\c@savedforeword=\count440
+\c@holder=\count441
+\c@savedholder=\count442
+\c@introduction=\count443
+\c@savedintroduction=\count444
+\c@namea=\count445
+\c@savednamea=\count446
+\c@nameb=\count447
+\c@savednameb=\count448
+\c@namec=\count449
+\c@savednamec=\count450
+\c@translator=\count451
+\c@savedtranslator=\count452
+\c@shortauthor=\count453
+\c@savedshortauthor=\count454
+\c@shorteditor=\count455
+\c@savedshorteditor=\count456
+\c@labelname=\count457
+\c@savedlabelname=\count458
+\c@institution=\count459
+\c@savedinstitution=\count460
+\c@lista=\count461
+\c@savedlista=\count462
+\c@listb=\count463
+\c@savedlistb=\count464
+\c@listc=\count465
+\c@savedlistc=\count466
+\c@listd=\count467
+\c@savedlistd=\count468
+\c@liste=\count469
+\c@savedliste=\count470
+\c@listf=\count471
+\c@savedlistf=\count472
+\c@location=\count473
+\c@savedlocation=\count474
+\c@organization=\count475
+\c@savedorganization=\count476
+\c@origlocation=\count477
+\c@savedoriglocation=\count478
+\c@origpublisher=\count479
+\c@savedorigpublisher=\count480
+\c@publisher=\count481
+\c@savedpublisher=\count482
+\c@language=\count483
+\c@savedlanguage=\count484
+\c@origlanguage=\count485
+\c@savedoriglanguage=\count486
+\c@pageref=\count487
+\c@savedpageref=\count488
+\shorthandwidth=\skip101
+\shortjournalwidth=\skip102
+\shortserieswidth=\skip103
+\shorttitlewidth=\skip104
+\shortauthorwidth=\skip105
+\shorteditorwidth=\skip106
+\locallabelnumberwidth=\skip107
+\locallabelalphawidth=\skip108
+\localshorthandwidth=\skip109
+\localshortjournalwidth=\skip110
+\localshortserieswidth=\skip111
+\localshorttitlewidth=\skip112
+\localshortauthorwidth=\skip113
+\localshorteditorwidth=\skip114
+Package biblatex Info: Trying to load compatibility code...
+Package biblatex Info: ... file 'blx-compat.def' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/blx-compat.def
+File: blx-compat.def 2026/08/13 v3.22 biblatex compatibility (PK/MW)
+)
+Package biblatex Info: Trying to load generic definitions...
+Package biblatex Info: ... file 'biblatex.def' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/biblatex.def
+File: biblatex.def 2026/08/13 v3.22 biblatex compatibility (PK/MW)
+\c@textcitecount=\count489
+\c@textcitetotal=\count490
+\c@textcitemaxnames=\count491
+\c@biburlbigbreakpenalty=\count492
+\c@biburlbreakpenalty=\count493
+\c@biburlnumpenalty=\count494
+\c@biburlucpenalty=\count495
+\c@biburllcpenalty=\count496
+\biburlbigskip=\muskip19
+\biburlnumskip=\muskip20
+\biburlucskip=\muskip21
+\biburllcskip=\muskip22
+\c@smartand=\count497
+)
+Package biblatex Info: Trying to load bibliography style 'ieee'...
+Package biblatex Info: ... file 'ieee.bbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex-ieee/ieee.bbx
+File: ieee.bbx 2025-08-01 v1.4f biblatex bibliography style
+Package biblatex Info: Trying to load bibliography style 'numeric-comp'...
+Package biblatex Info: ... file 'numeric-comp.bbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/bbx/numeric-comp.bbx
+File: numeric-comp.bbx 2026/08/13 v3.22 biblatex bibliography style (PK/MW)
+Package biblatex Info: Trying to load bibliography style 'numeric'...
+Package biblatex Info: ... file 'numeric.bbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/bbx/numeric.bbx
+File: numeric.bbx 2026/08/13 v3.22 biblatex bibliography style (PK/MW)
+Package biblatex Info: Trying to load bibliography style 'standard'...
+Package biblatex Info: ... file 'standard.bbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/bbx/standard.bbx
+File: standard.bbx 2026/08/13 v3.22 biblatex bibliography style (PK/MW)
+\c@bbx:relatedcount=\count498
+\c@bbx:relatedtotal=\count499
+))))
+Package biblatex Info: Trying to load citation style 'ieee'...
+Package biblatex Info: ... file 'ieee.cbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex-ieee/ieee.cbx
+File: ieee.cbx 2025-08-01 v1.4f biblatex citation style
+Package biblatex Info: Trying to load citation style 'numeric-verb'...
+Package biblatex Info: ... file 'numeric-verb.cbx' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/cbx/numeric-verb.cbx
+File: numeric-verb.cbx 2026/08/13 v3.22 biblatex citation style (PK/MW)
+Package biblatex Info: Redefining '\cite'.
+Package biblatex Info: Redefining '\parencite'.
+Package biblatex Info: Redefining '\footcite'.
+Package biblatex Info: Redefining '\footcitetext'.
+Package biblatex Info: Redefining '\smartcite'.
+Package biblatex Info: Redefining '\textcite'.
+Package biblatex Info: Redefining '\supercite'.
+Package biblatex Info: Redefining '\parencites'.
+Package biblatex Info: Redefining '\smartcites'.
+Package biblatex Info: Redefining '\textcites'.
+))
+Package biblatex Info: Trying to load configuration file...
+Package biblatex Info: ... file 'biblatex.cfg' found.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/biblatex.cfg
+File: biblatex.cfg 
+)
+Package biblatex Info: Input encoding 'utf8' detected.
+Package biblatex Info: Document encoding is UTF8 ....
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
+Package: expl3 2026-08-10 L3 programming layer (loader) 
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/l3kernel/l3backend-pdftex.def
+File: l3backend-pdftex.def 2026-08-10 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count500
+))
+Package biblatex Info: ... and expl3
+(biblatex)             2026-08-10 L3 programming layer (loader) 
+(biblatex)             is new enough (at least 2020/04/06),
+(biblatex)             setting 'casechanger=expl3'.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty (/home/admin/.TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+Package: xparse 2025-10-09 L3 Experimental document command parser
+)
+Package: blx-case-expl3 2026/08/13 v3.22 expl3 case changing code for biblatex
+)) (/home/admin/.TinyTeX/texmf-dist/tex/latex/appendix/appendix.sty
+Package: appendix 2020/02/08 v1.2c extra appendix facilities
+\c@@pps=\count501
+\c@@ppsavesec=\count502
+\c@@ppsaveapp=\count503
+)
+Package csquotes Info: Checking for multilingual support...
+Package csquotes Info: ... found 'babel' package.
+ (./main.aux)
+\openout1 = `main.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/txmi/m/it on input line 219.
+LaTeX Font Info:    Trying to load font information for OML+txmi on input line 219.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/omltxmi.fd
+File: omltxmi.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for OMS/txsy/m/n on input line 219.
+LaTeX Font Info:    Trying to load font information for OMS+txsy on input line 219.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/omstxsy.fd
+File: omstxsy.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 219.
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 219.
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 219.
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for OMX/txex/m/n on input line 219.
+LaTeX Font Info:    Trying to load font information for OMX+txex on input line 219.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/omxtxex.fd
+File: omxtxex.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for U/txexa/m/n on input line 219.
+LaTeX Font Info:    Trying to load font information for U+txexa on input line 219.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/utxexa.fd
+File: utxexa.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 219.
+LaTeX Font Info:    ... okay on input line 219.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 219.
+LaTeX Font Info:    ... okay on input line 219.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(85.35826pt, 426.79135pt, 85.35826pt)
+* v-part:(T,H,B)=(71.13188pt, 702.78308pt, 71.13188pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=426.79135pt
+* \textheight=702.78308pt
+* \oddsidemargin=13.08827pt
+* \evensidemargin=13.08827pt
+* \topmargin=-38.1381pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=12.0pt
+* \footskip=30.0pt
+* \marginparwidth=44.0pt
+* \marginparsep=10.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
+))
+Package hyperref Info: Link coloring ON on input line 219.
+ (./main.out) (./main.out)
+\@outlinefile=\write6
+\openout6 = `main.out'.
+
+LaTeX Encoding Info:    Redeclaring text command \k (encoding T1) on input line 219.
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: float package is loaded.
+Package caption Info: floatrow package is loaded.
+Package caption Info: floatrow package is loaded.
+Package caption Info: listings package is loaded.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Trying to load font information for T1+txtt on input line 219.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/t1txtt.fd
+File: t1txtt.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Font shape `T1/txtt/m/it' in size <12> not available
+(Font)              Font shape `T1/txtt/m/sl' tried instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/m/scsl' undefined
+(Font)              using `T1/txtt/m/sc' instead on input line 219.
+
+LaTeX Font Info:    Font shape `T1/txtt/b/n' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/n' tried instead on input line 219.
+LaTeX Font Info:    Font shape `T1/txtt/b/it' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/it' tried instead on input line 219.
+LaTeX Font Info:    Font shape `T1/txtt/bx/it' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/sl' tried instead on input line 219.
+LaTeX Font Info:    Font shape `T1/txtt/b/sl' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/sl' tried instead on input line 219.
+
+LaTeX Font Warning: Font shape `T1/txtt/b/scsl' undefined
+(Font)              using `T1/txtt/b/sc' instead on input line 219.
+
+LaTeX Font Info:    Font shape `T1/txtt/b/sc' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/sc' tried instead on input line 219.
+LaTeX Font Info:    Font shape `T1/txtt/bx/it' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/sl' tried instead on input line 219.
+
+LaTeX Font Warning: Font shape `T1/txtt/bx/scsl' undefined
+(Font)              using `T1/txtt/bx/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/sbx/sc' undefined
+(Font)              using `T1/txtt/bx/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/sbx/n' undefined
+(Font)              using `T1/txtt/bx/n' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/sbx/it' undefined
+(Font)              using `T1/txtt/bx/it' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/sbx/sl' undefined
+(Font)              using `T1/txtt/bx/sl' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/bx/scsl' undefined
+(Font)              using `T1/txtt/bx/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/bc/sc' undefined
+(Font)              using `T1/txtt/c/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/n' undefined
+(Font)              using `T1/txtt/m/n' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/it' undefined
+(Font)              using `T1/txtt/c/n' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/sl' undefined
+(Font)              using `T1/txtt/c/it' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/scit' undefined
+(Font)              using `T1/txtt/c/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/sc' undefined
+(Font)              using `T1/txtt/c/n' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/lc/sc' undefined
+(Font)              using `T1/txtt/c/sc' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/lc/n' undefined
+(Font)              using `T1/txtt/c/n' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/lc/it' undefined
+(Font)              using `T1/txtt/c/it' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/sl' undefined
+(Font)              using `T1/txtt/c/it' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/lc/it' undefined
+(Font)              using `T1/txtt/c/it' instead on input line 219.
+
+
+LaTeX Font Warning: Font shape `T1/txtt/c/scit' undefined
+(Font)              using `T1/txtt/c/sc' instead on input line 219.
+
+LaTeX Font Info:    Font shape `T1/txtt/m/ui' in size <12> not available
+(Font)              Font shape `T1/txtt/m/sl' tried instead on input line 219.
+LaTeX Font Info:    Font shape `T1/txtt/bx/ui' in size <12> not available
+(Font)              Font shape `T1/txtt/bx/sl' tried instead on input line 219.
+
+LaTeX Font Warning: Font shape `T1/txtt/m/In' undefined
+(Font)              using `T1/txtt/m/n' instead on input line 219.
+
+\c@lstlisting=\count504
+Package pgfplots notification 'compat/show suggested version=true': document has been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
+
+Package biblatex Info: Trying to load language 'english'...
+Package biblatex Info: ... file 'english.lbx' found.
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/biblatex/lbx/english.lbx
+File: english.lbx 2026/08/13 v3.22 biblatex localization (PK/MW)
+)
+Package biblatex Info: Input encoding 'utf8' detected.
+Package biblatex Info: Automatic encoding selection.
+(biblatex)             Assuming data encoding 'utf8'.
+\openout5 = `main.bcf'.
+
+Package biblatex Info: Trying to load bibliographic data...
+Package biblatex Info: ... file 'main.bbl' found.
+ (./main.bbl)
+Package biblatex Info: Reference section=0 on input line 219.
+Package biblatex Info: Reference segment=0 on input line 219.
+Package babel Info: Main language set to 'english'.
+LaTeX Font Info:    Trying to load font information for T1+txss on input line 226.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/t1txss.fd
+File: t1txss.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Font shape `T1/txss/m/n' will be
+(Font)              scaled to size 11.39996pt on input line 226.
+<imagenes/Portada_Logo.png, id=444, 456.2865pt x 45.99pt>
+File: imagenes/Portada_Logo.png Graphic file (type png)
+<use imagenes/Portada_Logo.png>
+Package pdftex.def Info: imagenes/Portada_Logo.png  used on input line 230.
+(pdftex.def)             Requested size: 455.24408pt x 45.88531pt.
+LaTeX Font Info:    Font shape `T1/txss/m/n' will be
+(Font)              scaled to size 16.41594pt on input line 233.
+LaTeX Font Info:    Font shape `T1/txss/m/sl' will be
+(Font)              scaled to size 16.41594pt on input line 237.
+LaTeX Font Info:    Font shape `T1/txss/m/n' will be
+(Font)              scaled to size 23.63593pt on input line 241.
+LaTeX Font Info:    Font shape `T1/txss/m/n' will be
+(Font)              scaled to size 19.70294pt on input line 245.
+LaTeX Font Info:    Font shape `T1/txss/b/n' in size <20.74> not available
+(Font)              Font shape `T1/txss/bx/n' tried instead on input line 245.
+LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
+(Font)              scaled to size 19.70294pt on input line 245.
+LaTeX Font Info:    Font shape `T1/txss/b/n' in size <17.28> not available
+(Font)              Font shape `T1/txss/bx/n' tried instead on input line 248.
+LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
+(Font)              scaled to size 16.41594pt on input line 248.
+<imagenes/creativecommons.png, id=446, 338.76563pt x 118.19156pt>
+File: imagenes/creativecommons.png Graphic file (type png)
+<use imagenes/creativecommons.png>
+Package pdftex.def Info: imagenes/creativecommons.png  used on input line 254.
+(pdftex.def)             Requested size: 119.50148pt x 41.69228pt.
+LaTeX Font Info:    Font shape `T1/txss/b/n' in size <12> not available
+(Font)              Font shape `T1/txss/bx/n' tried instead on input line 255.
+LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
+(Font)              scaled to size 11.39996pt on input line 255.
+ [1
+
+{/home/admin/.TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc} <./imagenes/Portada_Logo.png> <./imagenes/creativecommons.png>]
+pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.267 \begin{abstract}
+                       [1]
+LaTeX Font Info:    Font shape `T1/txr/b/n' in size <12> not available
+(Font)              Font shape `T1/txr/bx/n' tried instead on input line 267.
+LaTeX Font Info:    Font shape `T1/txr/b/n' in size <14.4> not available
+(Font)              Font shape `T1/txr/bx/n' tried instead on input line 267.
+ (./chapters/abstract.tex
+LaTeX Font Info:    Trying to load font information for OT1+txr on input line 5.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/ot1txr.fd
+File: ot1txr.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Trying to load font information for U+txsya on input line 5.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/utxsya.fd
+File: utxsya.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Trying to load font information for U+txsyb on input line 5.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/utxsyb.fd
+File: utxsyb.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Trying to load font information for U+txmia on input line 5.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/utxmia.fd
+File: utxmia.fd 2000/12/15 v3.1
+)
+LaTeX Font Info:    Trying to load font information for U+txsyc on input line 5.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/utxsyc.fd
+File: utxsyc.fd 2000/12/15 v3.1
+) [3]) [4]
+pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.282 \chapter
+              *{Dedication} [1] (./chapters/dedication.tex) [5
+
+] [6] (./main.toc
+Overfull \hbox (3.40796pt too wide) detected at line 2
+ \T1/txr/m/n/12 xviii
+ []
+
+[7
+
+] [8] [9])
+\tf@toc=\write7
+\openout7 = `main.toc'.
+
+ [10] [11] (./main.lof
+Overfull \hbox (9.85275pt too wide) in paragraph at lines 16--16
+ [][] [][][]\T1/txr/m/n/12 Per-dataset recorded agentic-round wall-clock (sum of round sec-onds across 
+ []
+
+
+Overfull \hbox (36.0127pt too wide) in paragraph at lines 18--18
+ [][] [][][]\T1/txr/m/n/12 Arm B: best value per driver team and dataset (ac-cu-racy for kid-ney/clinvar/crypto, 
+ []
+
+
+Overfull \hbox (6.80472pt too wide) in paragraph at lines 19--19
+ [][] [][][]\T1/txr/m/n/12 Prediction la-tency per sur-face over the 17 ab-sorbed cham-pi-ons (CLI, HTTP, 
+ []
+
+
+Overfull \hbox (6.72073pt too wide) in paragraph at lines 21--21
+ [][] [][][]\T1/txr/m/n/12 Feature-engineering trans-form cost per driver: com-ple-tion to-kens per round 
+ []
+
+)
+\tf@lof=\write8
+\openout8 = `main.lof'.
+
+ [12
+
+] [13] [14] (./main.lot [15
+
+]
+Overfull \hbox (9.69675pt too wide) in paragraph at lines 33--33
+ \T1/txr/m/n/12 generation-length-bound, so trivial-ping la-tency alone un-der-es-ti-mates round 
+ []
+
+)
+\tf@lot=\write9
+\openout9 = `main.lot'.
+
+ [16] (./chapters/abbreviations.tex [17]
+Overfull \hbox (4.08313pt too wide) in paragraph at lines 6--43
+ [][] 
+ []
+
+) [18
+
+] (./chapters/ch1_introduction.tex
+Chapter 1.
+[1
+
+
+]
+LaTeX Font Info:    Trying to load font information for TS1+txr on input line 25.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/ts1txr.fd
+File: ts1txr.fd 2000/12/15 v3.1
+)
+Overfull \hbox (5.97464pt too wide) in paragraph at lines 25--26
+[]\T1/txr/bx/n/12 Reproducibility. \T1/txr/m/n/12 A model-training run must be ex-actly re-pro-ducible from its dataset,
+ []
+
+[2]
+Overfull \hbox (4.3276pt too wide) in paragraph at lines 69--70
+[]\T1/txr/m/n/12 Can a model-training run be re-pro-duced us-ing the same dataset
+ []
+
+[3] [4]) (./chapters/ch2_background.tex [5]
+Chapter 2.
+[6
+
+] [7] [8]
+LaTeX Font Info:    Font shape `T1/txr/b/n' in size <10.95> not available
+(Font)              Font shape `T1/txr/bx/n' tried instead on input line 60.
+
+Underfull \hbox (badness 4859) in paragraph at lines 62--62
+[]|\T1/txr/m/n/10.95 Conversable agents;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 62--62
+[]|\T1/txr/m/n/10.95 Partial (cloud
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 62--63
+[]|\T1/txr/m/n/10.95 Conversation
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--63
+[]|\T1/txr/m/n/10.95 Stateful graphs of
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--63
+[]|\T1/txr/m/n/10.95 Agnostic via
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--64
+[]|\T1/txr/m/n/10.95 Graph
+ []
+
+
+Overfull \hbox (1.39137pt too wide) in paragraph at lines 63--64
+\T1/txr/m/n/10.95 state/checkpoints| 
+ []
+
+
+Underfull \hbox (badness 1067) in paragraph at lines 65--65
+[]|\T1/txr/m/n/10.95 Typed agent + tool
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 66--66
+[]|\T1/txr/m/n/10.95 Microsoft-
+ []
+
+LaTeX Font Info:    Font shape `T1/txr/b/it' in size <10.95> not available
+(Font)              Font shape `T1/txr/bx/it' tried instead on input line 68.
+
+Underfull \hbox (badness 8000) in paragraph at lines 68--68
+[]|\T1/txr/m/n/10.95 Contracts + de-ter-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
+\T1/txr/m/n/10.95 min-is-tic fac-tory;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--68
+[]|\T1/txr/m/n/10.95 Agnostic (4
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+[]|\T1/txr/m/n/10.95 Manifests +
+ []
+
+
+Overfull \hbox (23.01213pt too wide) in paragraph at lines 58--71
+ [][] 
+ []
+
+[9]) (./chapters/ch3_design.tex [10]
+Chapter 3.
+LaTeX Font Info:    Font shape `T1/txr/b/it' in size <14.4> not available
+(Font)              Font shape `T1/txr/bx/it' tried instead on input line 1.
+[11
+
+]
+LaTeX Font Info:    Font shape `T1/txr/b/n' in size <8> not available
+(Font)              Font shape `T1/txr/bx/n' tried instead on input line 36.
+LaTeX Font Info:    Font shape `TS1/txr/b/n' in size <8> not available
+(Font)              Font shape `TS1/txr/bx/n' tried instead on input line 46.
+
+Overfull \hbox (6.92815pt too wide) in paragraph at lines 71--87
+ [][] 
+ []
+
+[12]
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 96.
+ [13] [14]
+Overfull \hbox (80.94318pt too wide) in paragraph at lines 156--171
+ [][] 
+ []
+
+[15]
+Overfull \hbox (7.9309pt too wide) in paragraph at lines 191--192
+[]\T1/txr/bx/n/12 Privacy lev-els. \T1/txr/m/n/12 En-tries are clas-si-fied \T1/txtt/c/sc/12 pub-lic\T1/txr/m/n/12 /\T1/txtt/c/sc/12 internal\T1/txr/m/n/12 /\T1/txtt/c/sc/12 restricted\T1/txr/m/n/12 /\T1/txtt/c/sc/12 secret\T1/txr/m/n/12 ; read-
+ []
+
+[16]
+Underfull \hbox (badness 10000) in paragraph at lines 228--228
+[]|\T1/txtt/m/n/10.95 context \T1/txr/m/n/10.95 (read-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 230--231
+[]|\T1/txtt/m/n/10.95 missing_-profile\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 correlation_-hints\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 class_-balance\T1/txr/m/n/10.95 ,
+ []
+
+
+Underfull \hbox (badness 5681) in paragraph at lines 231--232
+\T1/txtt/m/n/10.95 journey\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 get_-journey_-status\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 spawn_-subagent\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 run_-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--232
+\T1/txtt/m/n/10.95 deterministic_-skill\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 run_-training_-job\T1/txr/m/n/10.95 , \T1/txtt/m/n/10.95 get_-job_-
+ []
+
+[17] [18]
+LaTeX Font Info:    Trying to load font information for TS1+txtt on input line 263.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/txfonts/ts1txtt.fd
+File: ts1txtt.fd 2000/12/15 v3.1
+)
+Overfull \hbox (11.39917pt too wide) in paragraph at lines 264--265
+\T1/txr/m/n/12 man-date. The de-ter-min-is-tic stages are ap-proved au-to-mat-i-cally as \T1/txtt/c/sc/12 auto:experiment:
+ []
+
+
+Overfull \hbox (5.80858pt too wide) in paragraph at lines 270--271
+\T1/txr/m/n/12 tic-i-pate in an or-ches-trated ex-per-i-ment, each with a \T1/txr/m/it/12 dis-tinct system-prompt con-tract \T1/txr/m/n/12 (\T1/txtt/c/sc/12 ROLE_-
+ []
+
+[19]
+Overfull \hbox (15.70865pt too wide) in paragraph at lines 275--276
+\T1/txr/m/n/12 The agen-tic round is the sys-tem's \T1/txr/m/it/12 grounded au-ton-omy \T1/txr/m/n/12 mech-a-nism and the multi-orquestration
+ []
+
+[20]
+Overfull \hbox (29.60385pt too wide) in paragraph at lines 287--288
+\T1/txtt/c/sc/12 search_-con-text\T1/txr/m/n/12 , \T1/txtt/c/sc/12 list_-re-cent_-runs\T1/txr/m/n/12 , \T1/txtt/c/sc/12 get_-run_-sum-mary\T1/txr/m/n/12 , \T1/txtt/c/sc/12 dataset_-eda\T1/txr/m/n/12 , \T1/txtt/c/sc/12 get_-dataset_-
+ []
+
+
+Overfull \hbox (50.19618pt too wide) in paragraph at lines 287--288
+\T1/txtt/c/sc/12 con-text\T1/txr/m/n/12 , \T1/txtt/c/sc/12 clean_-dataset\T1/txr/m/n/12 , \T1/txtt/c/sc/12 run_-python \T1/txr/m/n/12 (sand-boxed; dataset ex-posed read-only as \T1/txtt/c/sc/12 dataset.csv\T1/txr/m/n/12 ),
+ []
+
+[21] [22]
+Underfull \hbox (badness 10000) in paragraph at lines 366--366
+[]|\T1/txr/m/n/10.95 Workspace-relative paths only;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 366--366
+\T1/txtt/m/n/10.95 resolve()+relative_-to \T1/txr/m/n/10.95 blocks
+ []
+
+
+Underfull \hbox (badness 2460) in paragraph at lines 366--367
+\T1/txr/m/n/10.95 li-brary er-ror strings (MAJ-01,
+ []
+
+
+Underfull \hbox (badness 7081) in paragraph at lines 367--367
+[]|\T1/txr/m/n/10.95 Import whitelist (22 mod-ules), 14
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 367--368
+[]|\T1/txr/m/n/10.95 Compute iso-la-tion only; no
+ []
+
+
+Underfull \hbox (badness 1924) in paragraph at lines 367--368
+\T1/txr/m/n/10.95 (BLK-01, open). The trade-
+ []
+
+
+Underfull \hbox (badness 1117) in paragraph at lines 367--368
+\T1/txr/m/n/10.95 off is de-lib-er-ate: a local-first,
+ []
+
+
+Underfull \hbox (badness 2717) in paragraph at lines 367--368
+\T1/txr/m/n/10.95 and ev-ery sand-box ar-ti-fact is
+ []
+
+
+Underfull \hbox (badness 6559) in paragraph at lines 367--368
+\T1/txr/m/n/10.95 treated as un-trusted and re-
+ []
+
+
+Underfull \hbox (badness 6641) in paragraph at lines 368--369
+\T1/txr/m/n/10.95 prin-ci-pal is recorded (\T1/txtt/m/n/10.95 auto:
+ []
+
+
+Overfull \hbox (18.92857pt too wide) in paragraph at lines 362--371
+ [][] 
+ []
+
+[23] [24]) (./chapters/ch4_implementation.tex [25]
+Chapter 4.
+[26
+
+]
+Overfull \hbox (7.58336pt too wide) in paragraph at lines 60--61
+\T1/txr/m/n/12 dataset, and in-cludes a re-pro-duce cell that in-vokes the pipeline with the ex-act recorded
+ []
+
+(/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2025/11/14 1.11b listings language file
+) (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2025/11/14 1.11b listings language file
+) [27]
+LaTeX Font Info:    Font shape `T1/txtt/b/n' in size <10> not available
+(Font)              Font shape `T1/txtt/bx/n' tried instead on input line 82.
+ (/home/admin/.TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2025/11/14 1.11b listings language file
+) [28] [29] [30]
+Overfull \hbox (2.1196pt too wide) in paragraph at lines 183--184
+[]\T1/txr/m/n/12 The de-ter-min-is-tic core was the first thing built.
+ []
+
+[31]) (./chapters/ch5_methodology.tex [32]
+Chapter 5.
+
+Overfull \hbox (12.54068pt too wide) in paragraph at lines 9--10
+\T1/txr/m/it/12 ducible by con-struc-tion\T1/txr/m/n/12 : checks that run au-to-mat-i-cally, in a dis-pos-able tem-po-rary workspace,
+ []
+
+
+Overfull \hbox (2.68738pt too wide) in paragraph at lines 14--15
+[]\T1/txr/bx/n/12 Grounded-autonomy ex-per-i-ment (Ex-per-i-ment 3, RQ4--RQ6). \T1/txr/m/n/12 An ablation-based
+ []
+
+
+Underfull \hbox (badness 7777) in paragraph at lines 34--35
+[]|\T1/txr/m/n/10.95 Both com-plete; \T1/txtt/m/n/10.95 test_-accuracy \T1/txr/m/n/10.95 and
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 34--35
+\T1/txtt/m/n/10.95 test_-f1_-macro \T1/txr/m/n/10.95 match within $\OT1/txr/m/n/10.95 10[]$\T1/txr/m/n/10.95 ;
+ []
+
+
+Underfull \hbox (badness 4981) in paragraph at lines 34--35
+\T1/txr/m/n/10.95 man-i-fest records seed and non-empty
+ []
+
+
+Underfull \hbox (badness 4279) in paragraph at lines 35--35
+[]|\T1/txr/m/n/10.95 Independent stdio MCP client against
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 35--35
+\T1/txtt/m/n/10.95 model_-registry_-mcp\T1/txr/m/n/10.95 ; \T1/txtt/m/n/10.95 list_-tools\T1/txr/m/n/10.95 ,
+ []
+
+
+Underfull \hbox (badness 4416) in paragraph at lines 40--40
+[]|\T1/txr/m/n/10.95 Agentic round: agent-written feature-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 40--40
+\T1/txr/m/n/10.95 engineering and train-ing code in
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 40--40
+\T1/txtt/m/n/10.95 thelab/sandbox\T1/txr/m/n/10.95 ; val-ida-tor re-com-
+ []
+
+
+Underfull \hbox (badness 4805) in paragraph at lines 41--41
+[]|\T1/txr/m/n/10.95 Ablation: multi-agent round vs. sin-
+ []
+
+
+Underfull \hbox (badness 3271) in paragraph at lines 41--41
+\T1/txr/m/n/10.95 gle shared-prompt agent; de-ter-min-is-tic
+ []
+
+
+Overfull \hbox (18.92859pt too wide) in paragraph at lines 29--44
+ [][] 
+ []
+
+[33
+
+] [34]
+Overfull \hbox (14.79485pt too wide) in paragraph at lines 60--61
+\T1/txtt/c/sc/12 sis/evidence/raw/\T1/txr/m/n/12 ; a com-mit-ted gen-er-a-tor script (\T1/txtt/c/sc/12 scripts/thesis/generate_-
+ []
+
+[35] [36]
+Overfull \hbox (13.00737pt too wide) in paragraph at lines 107--108
+\T1/txr/m/n/12 shape/schema/target/leakage, and met-rics are re-com-puted out-side the sand-box. Record
+ []
+
+[37]
+Overfull \hbox (16.116pt too wide) in paragraph at lines 123--124
+\T1/txr/m/n/12 de-ter-min-is-tic base-lines (churn, Cal-i-for-nia hous-ing, IBM HR, e-commerce, Ti-tanic, S&P 500).
+ []
+
+[38] [39]) (./chapters/ch6_results.tex [40]
+Chapter 6.
+Package pgfplots info on input line 45: Overriding colorspace to rgb due to xcolor configuration.
+Package pgfplots info on input line 45: Using 'lua backend=false' for axis: x coord trafo unsupported.
+[41
+
+]
+Package pgfplots info on input line 67: Overriding colorspace to rgb due to xcolor configuration.
+Package pgfplots info on input line 67: Using 'lua backend=false' for axis: x coord trafo unsupported.
+Package pgfplots info on input line 88: Overriding colorspace to rgb due to xcolor configuration.
+ [42] [43]
+Overfull \hbox (2.24147pt too wide) in paragraph at lines 142--143
+[]\T1/txr/bx/n/12 Provider di-men-sion (recorded). \T1/txr/m/n/12 The same ex-per-i-ment ex-e-cuted on the Ti-tanic dataset
+ []
+
+
+Overfull \hbox (8.16583pt too wide) in paragraph at lines 149--158
+ [][] 
+ []
+
+
+Underfull \hbox (badness 6542) in paragraph at lines 174--174
+\T1/txr/m/n/10.95 date-time parsed; 501 tick-ers / 306 firms
+ []
+
+
+Underfull \hbox (badness 4981) in paragraph at lines 176--176
+[]|\T1/txr/m/n/10.95 logistic re-gres-sion com-pleted with per-sisted
+ []
+
+
+Overfull \hbox (18.92813pt too wide) in paragraph at lines 170--181
+ [][] 
+ []
+
+[44]
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+[]|\T1/txtt/m/n/10.95 shrutimechlearn/
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 200--200
+[]|\T1/txtt/m/n/10.95 camnugent/
+ []
+
+
+Overfull \hbox (12.8355pt too wide) in paragraph at lines 200--200
+\T1/txtt/m/n/10.95 california-housing-prices| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 200--200
+[]|\T1/txtt/m/n/10.95 random_-forest_-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 201--201
+[]|\T1/txtt/m/n/10.95 pavansubhasht/
+ []
+
+
+Overfull \hbox (64.5741pt too wide) in paragraph at lines 201--201
+\T1/txtt/m/n/10.95 ibm-hr-analytics-attrition-dataset| 
+ []
+
+
+Overfull \hbox (30.92899pt too wide) in paragraph at lines 195--204
+ [][] 
+ []
+
+[45]
+Underfull \hbox (badness 10000) in paragraph at lines 222--222
+[]|\T1/txr/bx/n/10.95 Verified-claim
+ []
+
+
+Overfull \hbox (5.55666pt too wide) in paragraph at lines 222--223
+[]|\T1/txr/bx/n/10.95 Hallucinations| 
+ []
+
+
+Overfull \hbox (31.54716pt too wide) in paragraph at lines 220--232
+ [][] 
+ []
+
+<figures/validity_story.pdf, id=1448, 375.804pt x 173.448pt>
+File: figures/validity_story.pdf Graphic file (type pdf)
+<use figures/validity_story.pdf>
+Package pdftex.def Info: figures/validity_story.pdf  used on input line 238.
+(pdftex.def)             Requested size: 349.97203pt x 161.53258pt.
+[46]
+Underfull \hbox (badness 1997) in paragraph at lines 253--254
+[]|\T1/txr/m/n/10.95 +0.0000 (tie at
+ []
+
+
+Underfull \hbox (badness 1527) in paragraph at lines 254--255
+[]|\T1/txr/m/n/10.95 -- (all 9 loudly
+ []
+
+
+Underfull \hbox (badness 1845) in paragraph at lines 254--255
+\T1/txr/m/n/10.95 re-jected pre-F4;
+ []
+
+
+Overfull \hbox (37.2381pt too wide) in paragraph at lines 249--258
+ [][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 269--270
+[]|\T1/txr/bx/n/10.95 Mode
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 272--273
+[]|\T1/txtt/m/n/10.95 degraded_-
+ []
+
+
+Overfull \hbox (12.13757pt too wide) in paragraph at lines 272--273
+\T1/txtt/m/n/10.95 deterministic| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 274--275
+[]|\T1/txtt/m/n/10.95 degraded_-
+ []
+
+
+Overfull \hbox (12.13757pt too wide) in paragraph at lines 274--275
+\T1/txtt/m/n/10.95 deterministic| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 276--277
+[]|\T1/txtt/m/n/10.95 degraded_-
+ []
+
+
+Overfull \hbox (12.13757pt too wide) in paragraph at lines 276--277
+\T1/txtt/m/n/10.95 deterministic| 
+ []
+
+
+Overfull \hbox (25.85672pt too wide) in paragraph at lines 267--279
+ [][] 
+ []
+
+[47 <./figures/validity_story.pdf>] [48]
+Underfull \hbox (badness 2726) in paragraph at lines 304--304
+[]|\T1/txr/bx/n/10.95 Best de-ter-min-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 306--306
+[]|\T1/txr/m/n/10.95 HGB s128
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 307--307
+[]|\T1/txr/m/n/10.95 HGB-regressor
+ []
+
+
+Underfull \hbox (badness 6493) in paragraph at lines 309--309
+[]|\T1/txr/m/n/10.95 LR $\OML/txmi/m/it/10.95 R[]$ \T1/txr/m/n/10.95 1.0000
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 309--309
+[]|\T1/txr/m/n/10.95 headroom
+ []
+
+
+Overfull \hbox (3.09485pt too wide) in paragraph at lines 302--314
+ [][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 327--327
+[]|\T1/txtt/m/n/10.95 kevinarvai/
+ []
+
+
+Overfull \hbox (3.12071pt too wide) in paragraph at lines 327--327
+[]|\T1/txr/m/n/10.95 classification| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 327--328
+[]|\T1/txr/m/n/10.95 HGB 0.8029
+ []
+
+
+Underfull \hbox (badness 7814) in paragraph at lines 327--328
+\T1/txr/m/n/10.95 (+0.26), 2/3 ab-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 328--328
+[]|\T1/txtt/m/n/10.95 rabieelkharoua/chronic-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 328--328
+\T1/txtt/m/n/10.95 kidney-disease-dataset-
+ []
+
+
+Overfull \hbox (3.12071pt too wide) in paragraph at lines 328--328
+[]|\T1/txr/m/n/10.95 classification| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
+[]|\T1/txr/m/n/10.95 HGB 0.9488
+ []
+
+
+Underfull \hbox (badness 7814) in paragraph at lines 328--329
+\T1/txr/m/n/10.95 (+1.81), 2/3 ab-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+[]|\T1/txtt/m/n/10.95 sudalairajkumar/
+ []
+
+
+Overfull \hbox (4.35785pt too wide) in paragraph at lines 329--329
+\T1/txtt/m/n/10.95 cryptocurrencypricehistory| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+[]|\T1/txr/m/n/10.95 direction
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 329--329
+\T1/txr/m/n/10.95 clas-si-fi-ca-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 329--330
+[]|\T1/txr/m/n/10.95 HGB 0.5646
+ []
+
+
+Underfull \hbox (badness 7814) in paragraph at lines 329--330
+\T1/txr/m/n/10.95 (+1.86), 2/3 ab-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 330--330
+[]|\T1/txtt/m/n/10.95 robikscube/hourly-energy-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 330--331
+[]|\T1/txr/m/n/10.95 0/3 ab-sorbed:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 330--331
+\T1/txr/m/n/10.95 RF+calendar
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 330--331
+\T1/txr/m/n/10.95 base-line (0.9590)
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 331--331
+[]|\T1/txtt/m/n/10.95 shivamb/real-or-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 331--331
+\T1/txtt/m/n/10.95 fake-fake-jobposting-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 331--331
+[]|\T1/txr/m/n/10.95 text-
+ []
+
+
+Underfull \hbox (badness 4995) in paragraph at lines 331--331
+\T1/txr/m/n/10.95 featurize +
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 332--332
+[]|\T1/txtt/m/n/10.95 andradaolteanu/gtzan-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 332--332
+\T1/txtt/m/n/10.95 dataset-music-genre-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 332--332
+\T1/txtt/m/n/10.95 classification \T1/txr/m/n/10.95 (fea-tures
+ []
+
+
+Overfull \hbox (3.12071pt too wide) in paragraph at lines 332--332
+[]|\T1/txr/m/n/10.95 classification| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 333--333
+[]|\T1/txtt/m/n/10.95 mczielinski/
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 333--333
+\T1/txtt/m/n/10.95 bitcoin-historical-data
+ []
+
+
+Overfull \hbox (10.95503pt too wide) in paragraph at lines 334--334
+[]|\T1/txr/m/n/10.95 Clustering/graph| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 334--334
+[]|\T1/txtt/m/n/10.95 rahman4li/patch-bay-the-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 334--334
+\T1/txtt/m/n/10.95 mcp-server-ecosystem-
+ []
+
+
+Overfull \hbox (3.72299pt too wide) in paragraph at lines 334--334
+[]|\T1/txr/m/n/10.95 unsupervised| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 335--335
+[]|\T1/txtt/m/n/10.95 adarsh1077/huggingface-
+ []
+
+
+Overfull \hbox (3.72299pt too wide) in paragraph at lines 335--335
+[]|\T1/txr/m/n/10.95 unsupervised| 
+ []
+
+
+Overfull \hbox (17.32082pt too wide) in paragraph at lines 323--338
+ [][] 
+ []
+
+[49]
+<figures/exp4_wallclock.pdf, id=1513, 375.804pt x 187.902pt>
+File: figures/exp4_wallclock.pdf Graphic file (type pdf)
+<use figures/exp4_wallclock.pdf>
+Package pdftex.def Info: figures/exp4_wallclock.pdf  used on input line 342.
+(pdftex.def)             Requested size: 362.77525pt x 181.39597pt.
+ [50]
+<figures/ratchet_uplift.pdf, id=1518, 375.804pt x 202.356pt>
+File: figures/ratchet_uplift.pdf Graphic file (type pdf)
+<use figures/ratchet_uplift.pdf>
+Package pdftex.def Info: figures/ratchet_uplift.pdf  used on input line 349.
+(pdftex.def)             Requested size: 349.97203pt x 188.45467pt.
+ [51 <./figures/exp4_wallclock.pdf> <./figures/ratchet_uplift.pdf>] (./evidence/ratchet_generations_ratchet_ledger_clinvar.tex) (./evidence/ratchet_generations_ratchet_ledger_kidney.tex) (./evidence/ratchet_generations_ratchet_ledger_crypto.tex) (./evidence/ratchet_generations_ratchet_ledger_energy.tex) [52]
+Underfull \hbox (badness 10000) in paragraph at lines 380--380
+[]|\T1/txr/m/n/10.95 0.83
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 381--381
+[]|\T1/txr/m/n/10.95 1.00
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 382--382
+[]|\T1/txr/m/n/10.95 1.00
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 384--384
+[]|\T1/txr/m/n/10.95 0.00
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+[]|\T1/txr/m/n/10.95 1.00
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 387--387
+[]|\T1/txr/m/n/10.95 1.00
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/txr/m/n/10.95 1.00
+ []
+
+
+Overfull \hbox (8.78491pt too wide) in paragraph at lines 376--391
+ [][] 
+ []
+
+[53]
+<figures/team_comparison.pdf, id=1635, 375.804pt x 187.902pt>
+File: figures/team_comparison.pdf Graphic file (type pdf)
+<use figures/team_comparison.pdf>
+Package pdftex.def Info: figures/team_comparison.pdf  used on input line 397.
+(pdftex.def)             Requested size: 349.97203pt x 174.99362pt.
+ [54] [55 <./figures/team_comparison.pdf>]
+<figures/predict_latency.pdf, id=1692, 332.44202pt x 158.99399pt>
+File: figures/predict_latency.pdf Graphic file (type pdf)
+<use figures/predict_latency.pdf>
+Package pdftex.def Info: figures/predict_latency.pdf  used on input line 420.
+(pdftex.def)             Requested size: 307.29028pt x 146.96523pt.
+ (./evidence/predictions_prediction_sweep_full.tex) [56 <./figures/predict_latency.pdf>] [57]
+LaTeX Font Info:    Font shape `T1/txtt/m/it' in size <10.95> not available
+(Font)              Font shape `T1/txtt/m/sl' tried instead on input line 444.
+ [58]
+Underfull \hbox (badness 1259) in paragraph at lines 475--475
+[]|\T1/txr/m/n/10.95 B1 agent legs, Open-Router
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 476--476
+[]|\T1/txr/m/n/10.95 B1 agent legs, Ol-lama
+ []
+
+
+Underfull \hbox (badness 7221) in paragraph at lines 477--477
+[]|\T1/txr/m/n/10.95 Titanic or-ches-tra-tion, both
+ []
+
+
+Underfull \hbox (badness 1810) in paragraph at lines 477--478
+[]|\T1/txr/m/n/10.95 Ollama Fea-tureEngi-neer in-
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 478--478
+[]|\T1/txr/m/n/10.95 Case study (IBM HR, chat
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 479--479
+[]|\T1/txr/m/n/10.95 Live agen-tic rounds, iris
+ []
+
+
+Underfull \hbox (badness 2521) in paragraph at lines 479--480
+[]|\T1/txr/m/n/10.95 15/15 batch en-tries trained
+ []
+
+
+Underfull \hbox (badness 1242) in paragraph at lines 480--481
+[]|\T1/txr/m/n/10.95 30/30 batch en-tries trained;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 482--482
+[]|\T1/txr/m/n/10.95 Live agen-tic round,
+ []
+
+
+Overfull \hbox (8.16626pt too wide) in paragraph at lines 471--485
+ [][] 
+ []
+
+[59] [60]
+Overfull \hbox (7.54721pt too wide) in paragraph at lines 496--507
+ [][] 
+ []
+
+<figures/fe_cost.pdf, id=1760, 332.44202pt x 158.99399pt>
+File: figures/fe_cost.pdf Graphic file (type pdf)
+<use figures/fe_cost.pdf>
+Package pdftex.def Info: figures/fe_cost.pdf  used on input line 511.
+(pdftex.def)             Requested size: 349.97203pt x 167.378pt.
+(./evidence/model_latency_latency_probe_openrouter_realistic.tex) [61 <./figures/fe_cost.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 534--534
+[]|\T1/txtt/m/n/10.95 LinearRegression \T1/txr/m/n/10.95 got un-ex-
+ []
+
+
+Underfull \hbox (badness 4096) in paragraph at lines 534--534
+\T1/txr/m/n/10.95 pected \T1/txtt/m/n/10.95 alpha\T1/txr/m/n/10.95 : shared hy-per-pa-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 534--534
+\T1/txr/m/n/10.95 ram-e-ter grids con-tained for-eign
+ []
+
+
+Underfull \hbox (badness 3058) in paragraph at lines 535--535
+[]|\T1/txr/m/n/10.95 Experiments re-ported \T1/txtt/m/n/10.95 completed
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 536--536
+[]|\T1/txr/m/n/10.95 Fixture datasets re-jected mid-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 536--536
+\T1/txr/m/n/10.95 orchestration ("only up-loaded
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 537--537
+[]|\T1/txr/m/n/10.95 EDA crashed on array-valued
+ []
+
+
+Underfull \hbox (badness 4647) in paragraph at lines 537--537
+[]|\T1/txr/m/n/10.95 Non-scalar col-umn guard (pro-
+ []
+
+
+Underfull \hbox (badness 1975) in paragraph at lines 538--538
+[]|\T1/txr/m/n/10.95 Re-running an ex-per-i-ment on an
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--540
+[]|\T1/txr/m/n/10.95 BLK-010--
+ []
+
+
+Underfull \hbox (badness 1953) in paragraph at lines 540--540
+[]|\T1/txr/m/n/10.95 Constant columns re-jected; scale
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--540
+\T1/txr/m/n/10.95 non-numeric fea-tures re-jected;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--540
+\T1/txr/m/n/10.95 missing-target re-jec-tion; un-safe
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--540
+\T1/txr/m/n/10.95 dataset-id re-jec-tion; wrong-task
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--541
+[]|\T1/txr/m/n/10.95 applied
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 540--541
+\T1/txr/m/n/10.95 (by de-
+ []
+
+
+Overfull \hbox (30.92857pt too wide) in paragraph at lines 530--543
+ [][] 
+ []
+
+[62]) (./chapters/ch7_discussion.tex [63]
+Chapter 7.
+
+Overfull \hbox (1.72867pt too wide) in paragraph at lines 15--16
+\T1/txr/m/n/12 GLM-5.3-flash was the only model that ini-tially pro-duced factory-safe feature-engineering
+ []
+
+[64
+
+] [65]
+Overfull \hbox (1.87135pt too wide) in paragraph at lines 28--29
+[]\T1/txr/bx/n/12 The sand-box is com-pute iso-la-tion, not con-fine-ment. \T1/txr/m/n/12 The ad-ver-sar-ial au-dit demon-
+ []
+
+[66] [67] [68] [69]
+Overfull \hbox (1.19934pt too wide) in paragraph at lines 96--97
+[]\T1/txr/bx/n/12 Originality. \T1/txr/m/n/12 The sys-tem is orig-i-nal work; third-party stan-dards it im-ple-ments (MCP,
+ []
+
+[70]
+Underfull \hbox (badness 2460) in paragraph at lines 119--120
+[]|\T1/txr/m/n/10.95 No GPU; all ex-per-i-ments
+ []
+
+
+Underfull \hbox (badness 2173) in paragraph at lines 120--121
+[]|\T1/txr/m/n/10.95 Credit-metered; one week
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 122--123
+\T1/txr/m/n/10.95 pro-cess re-designed (Sec-
+ []
+
+
+Underfull \hbox (badness 1533) in paragraph at lines 123--124
+[]|\T1/txr/m/n/10.95 qwen3:4b / qwen2.5-coder
+ []
+
+
+Overfull \hbox (7.54677pt too wide) in paragraph at lines 115--128
+ [][] 
+ []
+
+[71]) (./chapters/ch8_conclusions.tex [72]
+Chapter 8.
+[73
+
+]
+Overfull \hbox (27.0713pt too wide) in paragraph at lines 29--30
+[]\T1/txr/bx/n/12 Live-provider au-to-mated eval-u-a-tion. \T1/txr/m/n/12 Ex-tend the eval-u-a-tor with a provider-configurable
+ []
+
+[74]) [75]
+Overfull \hbox (16.00613pt too wide) in paragraph at lines 345--345
+\T1/txr/m/n/12 els,^^Q in \T1/txr/m/it/12 Ad-vances in Neu-ral In-for-ma-tion Pro-cess-ing Sys-tems\T1/txr/m/n/12 , vol. 35, 2022, pp. 24 824^^U
+ []
+
+
+Overfull \hbox (8.17886pt too wide) in paragraph at lines 345--345
+\T1/txr/m/n/12 frame-work,^^Q in \T1/txr/m/it/12 In-ter-na-tional Con-fer-ence on Learn-ing Rep-re-sen-ta-tions (ICLR)\T1/txr/m/n/12 , 2024. 
+ []
+
+
+Overfull \hbox (24.9101pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 Anthropic, \T1/txr/m/it/12 Model con-text pro-to-col: Spec-i-fi-ca-tion\T1/txr/m/n/12 , [][]$\T1/txtt/c/sc/12 https : / / modelcontextprotocol .
+ []
+
+
+Overfull \hbox (4.11589pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 B. Gar-cía, \T1/txr/m/it/12 Con-text en-gi-neer-ing: Com-pan-ion repos-i-tory (sys-tem prompts, tools/MCP,
+ []
+
+
+Overfull \hbox (17.18626pt too wide) in paragraph at lines 345--345
+\T1/txr/m/it/12 mem-ory, eval-u-a-tion)\T1/txr/m/n/12 , [][]$\T1/txtt/c/sc/12 https : / / github . com / bonigarcia / context -[] engineering$[][]
+ []
+
+[76
+
+
+]
+Overfull \hbox (7.60641pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 Iterative, Inc., \T1/txr/m/it/12 DVC: Data ver-sion con-trol ^^V git for data sci-ence mod-els and datasets\T1/txr/m/n/12 ,
+ []
+
+[77]
+Overfull \hbox (3.39072pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 OWASP Foun-da-tion, \T1/txr/m/it/12 OWASP top 10 for large lan-guage model ap-pli-ca-tions\T1/txr/m/n/12 , [][]$\T1/txtt/c/sc/12 https :
+ []
+
+
+Overfull \hbox (16.02904pt too wide) in paragraph at lines 345--345
+\T1/txr/m/n/12 and fu-ture re-search di-rec-tions,^^Q \T1/txr/m/it/12 ACM Com-put-ing Sur-veys\T1/txr/m/n/12 , 2026, doi:10.1145/3796519. 
+ []
+
+
+Overfull \hbox (0.2087pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 European Par-lia-ment and Coun-cil of the Eu-ro-pean Union, \T1/txr/m/it/12 Reg-u-la-tion (eu) 2016/679
+ []
+
+
+Overfull \hbox (6.2087pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 European Par-lia-ment and Coun-cil of the Eu-ro-pean Union, \T1/txr/m/it/12 Reg-u-la-tion (eu) 2024/1689
+ []
+
+[78]
+Overfull \hbox (8.48029pt too wide) in paragraph at lines 345--345
+[]\T1/txr/m/n/12 mempalace con-trib-u-tors, \T1/txr/m/it/12 Mem-ory palace: Struc-tured mem-ory ac-cess for LLM agents\T1/txr/m/n/12 ,
+ []
+
+[79] (./chapters/annexes.tex
+Appendix A.
+
+Overfull \hbox (0.70526pt too wide) in paragraph at lines 26--27
+[]\T1/txr/m/n/12 Re-running the com-mand yields a new \T1/txtt/c/sc/12 run_-id \T1/txr/m/n/12 with equiv-a-lent met-rics; \T1/txtt/c/sc/12 runs/<run_-
+ []
+
+[80
+
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
+[]|\T1/txtt/m/n/10.95 dataset must be a relative
+ []
+
+
+Underfull \hbox (badness 4353) in paragraph at lines 84--85
+[]|\T1/txr/m/n/10.95 Run from the workspace
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 86--86
+[]|\T1/txtt/m/n/10.95 model 'X' is limited to N
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--88
+[]|\T1/txtt/m/n/10.95 feature columns contain
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--89
+[]|\T1/txtt/m/n/10.95 constant feature columns
+ []
+
+
+Overfull \hbox (18.92813pt too wide) in paragraph at lines 80--94
+ [][] 
+ []
+
+[81] [82]
+Appendix B.
+[83
+
+] [84]
+Appendix C.
+[85
+
+]
+Appendix D.
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--180
+[]|\T1/txtt/m/n/10.95 camnugent/california-housing-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+[]|\T1/txtt/m/n/10.95 pavansubhasht/
+ []
+
+
+Overfull \hbox (13.35948pt too wide) in paragraph at lines 181--181
+\T1/txtt/m/n/10.95 ibm-hr-analytics-attrition-dataset| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 182--182
+[]|\T1/txtt/m/n/10.95 erfan4524/e-commerce-sales-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 186--186
+[]|\T1/txr/m/n/10.95 genomics
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 187--187
+[]|\T1/txtt/m/n/10.95 rabieelkharoua/chronic-kidney-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 188--188
+[]|\T1/txtt/m/n/10.95 sudalairajkumar/
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 188--188
+[]|\T1/txr/m/n/10.95 direction
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 189--189
+[]|\T1/txtt/m/n/10.95 robikscube/hourly-energy-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--190
+[]|\T1/txtt/m/n/10.95 shivamb/real-or-fake-fake-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--190
+[]|\T1/txr/m/n/10.95 featurize +
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 191--191
+[]|\T1/txtt/m/n/10.95 andradaolteanu/gtzan-dataset-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 191--191
+[]|\T1/txr/m/n/10.95 music sig-nals
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]|\T1/txtt/m/n/10.95 mczielinski/bitcoin-historical-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]|\T1/txr/m/n/10.95 crypto (1-min
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]|\T1/txr/m/n/10.95 scale-stress,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[]|\T1/txtt/m/n/10.95 rahman4li/patch-bay-the-mcp-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[]|\T1/txr/m/n/10.95 MCP ecosys-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[]|\T1/txr/m/n/10.95 graph +
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 195--195
+[]|\T1/txtt/m/n/10.95 adarsh1077/huggingface-hub-50k-
+ []
+
+
+Overfull \hbox (2.47537pt too wide) in paragraph at lines 175--198
+ [][] 
+ []
+
+) [86
+
+] [87] (./main.aux)
+ ***********
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-08-10>
+ ***********
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: 26247977AF9AC7672045F33FEF7C2933;20981.
+Package logreq Info: Writing requests to 'main.run.xml'.
+\openout1 = `main.run.xml'.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 52294 strings out of 469046
+ 1121917 string characters out of 5457988
+ 2271139 words of memory out of 5000000
+ 79925 multiletter control sequences out of 15000+600000
+ 721281 words of font info for 191 fonts, out of 8000000 for 9000
+ 36 hyphenation exceptions out of 8191
+ 92i,12n,103p,2456b,3932s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtcxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxb.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxmi.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xbtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/tcxtt.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/public/txfonts/txsy.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></home/admin/.TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (106 pages, 745940 bytes).
+PDF statistics:
+ 2289 PDF objects out of 2487 (max. 8388607)
+ 583 named destinations out of 1000 (max. 500000)
+ 937 words of extra memory for PDF output out of 10000 (max. 10000000)
+
