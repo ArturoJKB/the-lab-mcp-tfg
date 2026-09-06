@@ -1,4 +1,4 @@
-\chapter{Results}
+++\chapter{Results}
 \label{ch:results}
 
 This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}) and the automated RQ1--RQ3 checks (Section~\ref{sec:rq-results}). It continues with Experiments 1 and 2 plus the Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
@@ -6,25 +6,27 @@ This chapter reports the results in the order of the methodology. It opens with 
 \section{The recorded evidence base}
 \label{sec:evidence}
 
-Before the per-claim results, this section documents the evidence base itself: every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window (August 19 -- September 5, 2026) the workspace accumulated \textbf{1{,}591 recorded runs}: 1{,}247 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error). The window includes in-flight development of the agentic round and the multi-domain loop (P5/P6), so counts reflect the live system rather than a curated benchmark; the section is deliberately self-contained so it can be trimmed without affecting the per-experiment results that follow.
+Before the presenting the claimed results, is good to state that every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window the workspace accumulated \textbf{1{,}596 recorded runs}: 1{,}252 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error).
+
+Note: The follwing window includes records stored during development, so counts reflect the live system rather than a curated benchmark once the project had finished.
 
 \begin{table}[H]
 \centering
-\caption{Recorded run inventory by status and model family (1{,}591 runs, Aug 19 -- Sep 5, 2026, from \texttt{runs/} manifests).}
+\caption{Recorded run inventory by status and model family (1{,}596 runs, Aug 19 -- Sep 6, 2026, from \texttt{runs/} manifests).}
 \label{tab:runinventory}
 \small
 \begin{tabular}{lr lr}
 \toprule
 \textbf{Status} & \textbf{Runs} & \textbf{Model family} & \textbf{Runs} \\
 \midrule
-completed & 1{,}247 & random\_forest & 325+ \\
-rejected & 314 & logistic\_regression & 288+ \\
-failed & 30 & hist\_gradient\_boosting & 186+ \\
+completed & 1{,}252 & random\_forest & 371 \\
+rejected & 314 & logistic\_regression & 297 \\
+failed & 30 & hist\_gradient\_boosting & 207 \\
 \midrule
-\textbf{Total} & \textbf{1{,}591} & svc / sgd\_classifier & 107+ / 107+ \\
-Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 106 / 106 \\
- & & hist\_gradient\_boosting\_regressor & 96+ \\
- & & linear\_regression / other & 61+ / 2 \\
+\textbf{Total} & \textbf{1{,}596} & svc / sgd\_classifier & 237 \\
+Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
+ & & hist\_gradient\_boosting\_regressor & 134 \\
+ & & linear\_regression & 67\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -93,7 +95,7 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 106 / 106 \\
 \label{fig:runacc}
 \end{figure}
 
-Two inventory facts carry argumentative weight. First, the rejection rate: 314 of 1{,}591 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable-refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread: the factory guarantees the evidence, not the winner.
+Two inventory facts carry argumentative weight. First, the rejection rate: 314 of 1{,}596 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable-refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread: the factory guarantees the evidence, not the winner.
 
 \section{Automated evaluation: RQ1--RQ3}
 \label{sec:rq-results}
