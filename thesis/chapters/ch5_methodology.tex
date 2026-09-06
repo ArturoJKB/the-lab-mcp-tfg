@@ -142,7 +142,7 @@ fields.
 	\item \textbf{Deterministic reference arm} The standard detreministic experiment pipeline produces the baseline runs, artifacts, and indexed evidence.
 	\item \textbf{Grounded arm (RQ4).} vs \textbf{Ungrounded arm (RQ4).} The grounded round runs with the full context pack (EDA brief + baseline metrics + prior-run evidence) and the ungrounded round with the context pack stripped to the minimum schema (no EDA findings, no baseline metrics, no prior runs). The idea is to compare the verified-claim rate (claims resolving to real run ids and recorded metrics), the hallucinated-claim count, and the proposal validity (contract acceptance without repair).
 	\item \textbf{Multi-agent arm (RQ6).} vs \textbf{Single-agent control (RQ6).} The comparison is between the three specialized role agentic round of Section~\ref{sec:agenticround} and one individual agent with performing all three stages. Comparing the completion rate, the handoff artifacts, and the final model accuracies.
-	\item \textbf{Generated-code track (RQ5) vs fixed grid baseline.} The FeatureEngineer agent generates and runs code exclusively in the sandbox, accepted only after a deterministic validation that checks shape, schema, target intactness, and leakage. What is compared is the script validity rate (produces actually usable code), the silent-failure count (must be zero), and the best agentic result against the best deterministic one.
+	\item \textbf{Generated-code track (RQ5).} The FeatureEngineer transforms and any training scripts execute only in the sandbox; the deterministic post-validator checks shape/schema/target/leakage, and metrics are recomputed outside the sandbox. Record script validity rate, silent-failure count (must be zero), and best-agentic vs.\ best-deterministic deltas.
 \end{enumerate}
 
 
@@ -190,19 +190,13 @@ claims, not to runs. This scope decision is recorded in Section~\ref{sec:limitat
 Wall-clock times are reported on the development machine (Intel laptop,
 16~GB RAM, no GPU), so every result is reproducible on commodity hardware.
 
-The agent-level metrics complete the set. They are required by the
-registered performance-evaluation objective and by the agentic research
-questions.
+The agent-level metrics complete the set. They are required by the registered performance-evaluation objective and by the agentic research questions.
 
 \begin{itemize}
-	\item \textbf{Task success rate.} An agent task, an experiment proposal cycle, succeeds when the proposal passes contract validation, is approved, runs through the deterministic pipeline to completion, and survives the grounding checks. Success is computed over the recorded agent legs of the benchmark suite and case study, never over informal impressions.
-	\item \textbf{Token efficiency.} Tokens consumed per completed agent task (prompt plus completion) are recorded when the provider reports them. The deterministic fallback and the mock provider consume zero tokens by design, so efficiency is reported per provider. The interpretation follows the cost asymmetry documented in Section~\ref{sec:process}: the LLM only works at proposal level, and execution is free.
-	\item \textbf{Verified-claim rate and hallucinated-claim count (RQ4).} The verified-claim rate is the fraction of an agent's factual claims that resolve to real run ids and recorded metrics within the grounding tolerance. Its complement, claims that reference non-existent evidence, is reported explicitly as hallucinated claims.
-	\item \textbf{Script validity and silent-failure count (RQ5).} Script validity is the fraction of agent-generated sandbox scripts that execute and pass the deterministic post-validator. A silent failure, code that runs but produces an invalid artifact, is counted separately.
-	\item \textbf{Intervention rate (RQ6).} The intervention rate is the number of human actions (approvals, rejections, feedback) per completed experiment round, taken from the approval-gate records.
+	\item \textbf{Task success rate.} A task counts as successful when the full cycle works. When the agent proposes an experiment, the proposal passes validation, the human approves it, and the deterministic pipeline trains the model to completion.
+	\item \textbf{Token efficiency.} Tokens are counted per completed agent task, using the usage data each provider reports. The mock provider and the deterministic fallback use none, so the whole test suite runs at zero cost. Token spending only happens at proposal time, never during training, and it is reported separately for each provider.
+	\item \textbf{Verified-claim rate (RQ4).} When an agent answers, it cites run ids and metrics. The verified-claim rate is the share of those citations that check out against the recorded evidence. Anything pointing to evidence that does not exist is reported as a hallucinated claim.
+	\item \textbf{Script validity (RQ5).} Agents write code, so the thesis measures how often that code actually works. Script validity is the share of generated scripts that run in the sandbox and pass the deterministic post-validator. A silent failure, code that runs but produces a broken artifact, is counted on its own.
 \end{itemize}
 
-All agent metrics share the same honesty rule: they are computed over
-recorded, inspectable sessions, never reconstructed from memory. The counts
-for local providers (Ollama) come from the provider's own usage reports,
-where available.
+All agent metrics share the same honesty rule: they are computed over recorded, inspectable sessions, never reconstructed from memory.
