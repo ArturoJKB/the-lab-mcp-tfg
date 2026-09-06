@@ -1,77 +1,56 @@
 ++\chapter{Results}
 \label{ch:results}
 
-This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}) and the automated RQ1--RQ3 checks (Section~\ref{sec:rq-results}). It continues with Experiments 1 and 2 plus the Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
+This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}), which includes the automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology}. It continues with Experiments 1 and 2 plus the Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
 
 \section{The recorded evidence base}
 \label{sec:evidence}
 
-Before the presenting the claimed results, is good to state that every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window the workspace accumulated \textbf{1{,}596 recorded runs}: 1{,}252 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error).
+Before the presenting the claimed results, is good to state that every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window the workspace accumulated \textbf{1{,}591 recorded runs}: 1{,}247 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error).
 
 Note: The follwing window includes records stored during development, so counts reflect the live system rather than a curated benchmark once the project had finished.
 
 \begin{table}[H]
 \centering
-\caption{Recorded run inventory by status and model family (1{,}596 runs, Aug 19 -- Sep 6, 2026, from \texttt{runs/} manifests).}
+\caption{Recorded run inventory by status and model family (1{,}591 runs, from \texttt{runs/} manifests).}
 \label{tab:runinventory}
 \small
 \begin{tabular}{lr lr}
 \toprule
 \textbf{Status} & \textbf{Runs} & \textbf{Model family} & \textbf{Runs} \\
 \midrule
-completed & 1{,}252 & random\_forest & 371 \\
+completed & 1{,}247 & random\_forest & 371 \\
 rejected & 314 & logistic\_regression & 297 \\
 failed & 30 & hist\_gradient\_boosting & 207 \\
 \midrule
-\textbf{Total} & \textbf{1{,}596} & svc / sgd\_classifier & 237 \\
+\textbf{Total} & \textbf{1{,}591} & svc / sgd\_classifier & 237 \\
 Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
  & & hist\_gradient\_boosting\_regressor & 134 \\
- & & linear\_regression & 67\\
+ & & linear\_regression / other & 67\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-	width=0.92\linewidth, height=4.8cm,
-	ybar, bar width=4.6pt,
-	ymin=0, ylabel={runs},
-	xtick=data,
-	symbolic x coords={19,20,23,24,25,27,29,30,31,01,02,03,04,05},
-	x tick label style={font=\scriptsize},
-	xlabel={active day (Aug 19 -- Sep 5, 2026)},
-	tick label style={font=\scriptsize},
-	label style={font=\small},
-]
-\addplot coordinates {(19,1) (20,8) (23,3) (24,42) (25,22) (27,3) (29,32) (30,12) (31,9) (01,28) (02,67) (03,180) (04,559) (05,625)};
-\end{axis}
-\end{tikzpicture}
-\caption{Runs per active day, generated from run-manifest timestamps. The early peaks correspond to the B1 benchmark sweep (Aug 24) and real-dataset hardening (Aug 29); the Sep 3--5 surge is the live agentic-round recording campaign and the multi-domain ratchet loop.}
-\label{fig:runsdaily}
-\end{figure}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-	width=0.86\linewidth, height=5.4cm,
-	xbar, bar width=6pt,
-	xmin=0, xlabel={runs},
-	symbolic y coords={other,linreg,hgb-r,rfr,ridge,sgd,svc,hgb,logreg,rf},
-	ytick=data,
-	y tick label style={font=\scriptsize},
+	width=0.86\linewidth, height=4.6cm,
+	ybar, bar width=14pt,
+	ymin=0, ylabel={completed runs},
+	xtick={1,...,7},
+	xticklabels={{[0,0.4)},{[0.4, 0.6)},{[0.6, 0.7)},{[0.7, 0.8)},{[0.8, 0.9)},{[0.9,00.99)},{$\geq$.99}},
 	x tick label style={font=\scriptsize},
-	xlabel={runs (all statuses)},
+	xlabel={test accuracy bucket (864 classification runs)},
 	tick label style={font=\scriptsize},
 	label style={font=\small},
 ]
-\addplot coordinates {(2,other) (61,linreg) (96,hgb-r) (106,rfr) (106,ridge) (107,sgd) (107,svc) (186,hgb) (288,logreg) (325,rf)};
+\addplot coordinates {(1,7) (2,22) (3,15) (4,262) (5,303) (6,157) (7,98)};
 \end{axis}
 \end{tikzpicture}
-\caption{Run count by model family. Random forest and logistic regression dominate by count; every registered family appears in recorded use.}
-\label{fig:runmodels}
+\caption{Test-accuracy distribution of completed classification runs. The distribution now spreads across the 0.6--0.9 range on real datasets, with the fixture-driven mass at $\geq 0.99$ a visible minority; the honest left tail (0.33--0.67) remains recorded evidence that determinism guarantees repeatability, not quality.}
+\label{fig:accdist}
 \end{figure}
 
 \begin{figure}[H]
@@ -82,7 +61,7 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
 	ybar, bar width=14pt,
 	ymin=0, ylabel={completed runs},
 	xtick={1,...,7},
-	xticklabels={{[0,.4)},{[.4,.6)},{[.6,.7)},{[.7,.8)},{[.8,.9)},{[.9,.99)},{$\geq$.99}},
+	xticklabels={{[0,0.4)},{[0.4, 0.6)},{[0.6, 0.7)},{[0.7, 0.8)},{[0.8, 0.9)},{[0.9,00.99)},{$\geq$.99}},
 	x tick label style={font=\scriptsize},
 	xlabel={test accuracy bucket (864 classification runs)},
 	tick label style={font=\scriptsize},
@@ -95,28 +74,7 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
 \label{fig:runacc}
 \end{figure}
 
-Two inventory facts carry argumentative weight. First, the rejection rate: 314 of 1{,}596 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable-refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread: the factory guarantees the evidence, not the winner.
-
-\section{Automated evaluation: RQ1--RQ3}
-\label{sec:rq-results}
-
-The evaluator has been executed at every project milestone; two representative records are reported. The P0 closeout record (2026-08-10) is kept as evidence of the original protocol execution in its locked environment:
-
-\begin{lstlisting}[language={}, caption={P0 closeout evaluation record (2026-08-10, verbatim).}, label={lst:evalp0}, style=cli]
-thelab-mcp P0 -- Thesis Evaluation Report
-Overall: PASS
-  RQ1: PASS
-    run_ids: ['run-20260810-023703-2e37998c',
-              'run-20260810-023703-237bc12c']
-    metrics: {'test_accuracy': 1.0, 'test_f1_macro': 1.0}
-  RQ2: PASS
-    predictions: ['setosa']
-  RQ3: PASS
-    hits: 1
-    event_id: evt-repro
-\end{lstlisting}
-
-The latest full re-run (2026-08-29, after the real-dataset hardening and agent work) repeats the verdict, \textbf{Overall PASS}. RQ1 metrics match at exact tolerance with seed and dependency provenance in the manifest; RQ2's independent client completes the discovery--prediction round trip; RQ3 retrieves the seeded event with the database byte-identical before and after the read. Every claim of system completeness in this thesis is gated by this verdict.
+Two inventory facts carry argumentative weight. First, the rejection rate: 314 of 1{,}591 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable-refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread: the factory guarantees the evidence, not the winner. The automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology} gate every claim of system completeness that follows.
 
 \section{Experiment 1: three ways in}
 \label{sec:exp1-results}
@@ -141,7 +99,7 @@ MCP & \texttt{run\_training\_job} + status poll & 1.0000 & 1.0000 & $\sim$0.2 s 
 
 This result carries the interoperability claim beyond RQ2's registry check. Not only can an independent agent \emph{use} a model, it can drive the factory itself, and the run it triggers is indistinguishable from a human's.
 
-\textbf{Provider dimension (recorded).} The same experiment executed on the Titanic dataset (891 rows, 14 features, target \texttt{Survived}) through three execution paths: deterministic-only (no LLM), the Ollama brain (llama3.2:3b), and the OpenRouter brain (GLM~5.3 Flash), produced bit-for-bit identical training outcomes (Table~\ref{tab:providers}). This is the central design claim made measurable: \emph{changing the LLM changes the explanation, never the training outcome}, and the deterministic-only path is always available as a ground-truth baseline for validating that the agentic layer adds interpretation without injecting non-determinism.
+\textbf{Provider dimension (recorded).} The same experiment executed on the Titanic dataset (891 rows, 14 features, target \texttt{Survived}) through three execution paths: deterministic-only (no LLM), the Ollama local brain (llama3.2:3b), and the OpenRouter cloud brain (GLM~5.3 Flash), produced bit-for-bit identical training outcomes (Table~\ref{tab:providers}). This is the central design claim made measurable: \emph{changing the LLM changes the explanation, never the training outcome}, and the deterministic-only path is always available as a ground-truth baseline for validating that the agentic layer adds interpretation without injecting non-determinism when is not wanted. In later experiments is showed that different accuracies from the baseline are obtained when the models are given access to the controlled sandbox.
 
 \begin{table}[H]
 \centering
@@ -182,12 +140,14 @@ Leakage study & naive features \textbf{84.2\%} $\rightarrow$ at-decision-time fe
 \end{tabular}
 \end{table}
 
-Two results deserve interpretation. First, the \emph{before/after of the cleaning policy}. A naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV; the cardinality-aware policy produces 16--21~MB for the same data, a three-order-of-magnitude difference that turns an infeasible run into a 6-second one, with every decision auditable in the report. Second, the \emph{leakage study}: the naive feature set's 84.2\% accuracy is exactly the kind of number that does not survive contact with reality; constraining features to those available at decision time yields 60.3\% (domain-plausible for analyst ratings) and both runs remain inspectable evidence, which is the practical payoff of rejection-and-provenance discipline.
+Two results deserve interpretation. First, the \emph{before/after of the cleaning policy}. A first run with naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV. the second run with the cardinality-aware policy produces 16--21~MB for the same data, a three-order-of-magnitude difference that turns an infeasible run into a 6-second one, with every decision auditable in the report.
+
+Second, the \emph{leakage study}: the naive feature set's 84.2\% accuracy is exactly the kind of number that does not survive contact with reality; constraining features to those available at decision time yields 60.3\% (domain-plausible for analyst ratings) and both runs remain inspectable evidence, which is the practical payoff of rejection-and-provenance discipline.
 
 \section{Kaggle pipeline proof (P3.7)}
 \label{sec:kaggle-results}
 
-Before the ten-dataset benchmark, a three-dataset proof recorded the full journey end-to-end with live Kaggle download and page context (Table~\ref{tab:kaggleproof}).
+Before Experiment 4 (ten-dataset benchmark), a three-dataset proof recorded the full journey end-to-end with live Kaggle download and page context (Table~\ref{tab:kaggleproof}).
 
 \begin{table}[H]
 \centering
@@ -205,7 +165,7 @@ Before the ten-dataset benchmark, a three-dataset proof recorded the full journe
 \end{tabular}
 \end{table}
 
-The proof produced one genuine engineering finding: on the HR dataset, constant columns (\texttt{EmployeeCount}, \texttt{StandardHours}, and the one-hot \texttt{Over18\_Y}) were rejected by validation, correctly refusing to train on zero-information features, and the cleaning policy was extended (constant-column drop) so that the \emph{system} handles the case, not the operator. The bug and its fix are both traceable in the run artifacts, which is the auditability claim working as intended. All three runs produced valid generated notebooks (six cells, nbformat~4) through \texttt{GET /runs/\{id\}/notebook}.
+The sytem worked correctly, but there was a genuine engineering finding: on the HR dataset, constant columns (\texttt{EmployeeCount}, \texttt{StandardHours}, and the one-hot \texttt{Over18\_Y}) were rejected by validation, correctly refusing to train on zero-information features, and the cleaning policy was extended (constant-column drop) so that the \emph{system} handles the case, not the operator. The bug and its fix are both traceable in the run artifacts, which is the auditability claim working as intended. All three runs produced valid generated notebooks (six cells, nbformat~4) through \texttt{GET /runs/\{id\}/notebook}.
 
 \section{Experiment 3: grounded autonomy (agentic round)}
 \label{sec:exp-agentic-results}
