@@ -145,7 +145,7 @@ def test_generates_tables_figure_and_manifest(raw_dir: Path, tmp_path: Path):
         encoding="utf-8"
     )
     assert r"\label{tab:ratchet-generations-ratchet-ledger-titanic}" in ratchet_gen
-    assert "random\\_forest" in ratchet_gen
+    assert "RF" in ratchet_gen and "n\\_estimators" in ratchet_gen
     rounds_tex = (out / "ratchet_rounds_ratchet_ledger_titanic.tex").read_text(
         encoding="utf-8"
     )

@@ -1,14 +1,14 @@
-\begin{table}[htbp]
-\centering\footnotesize
-\caption{Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}
+\begin{table}[H]
+\centering\small
+\caption{Ratchet loop per generation for energy.}
 \label{tab:ratchet-generations-ratchet-ledger-energy}
-\resizebox{\textwidth}{!}{\begin{tabular}{lllllll}
+\begin{tabular}{llllllll}
 \toprule
-Gen & Baseline & Agentic best & Delta & Validity & Absorbed & Champion \\
+Gen & Baseline & Agentic best & Delta & Seed & Validity & Absorbed & Champion \\
 \midrule
-g0 & RF-reg 0.9590 & RF-reg 0.9590 & -- & 1.00 & False & -- \\
-g1 & RF-reg 0.9590 & HGB-reg 0.8167 & -- & 1.00 & False & -- \\
-g2 & RF-reg 0.9590 & HGB-reg 0.8192 & -- & 1.00/1.00/1.00 & False & -- \\
+g0 & RF-r 0.9590 & RF-r 0.9590 & -- & -- & 1.00 & False & -- \\
+g1 & RF-r 0.9590 & HGB-r 0.8167 & -- & -- & 1.00 & False & -- \\
+g2 & RF-r 0.9590 & HGB-r 0.8192 & -- & -- & 1.00/1.00/1.00 & False & -- \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}

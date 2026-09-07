@@ -92,24 +92,26 @@ def _tex_escape(text: str) -> str:
 
 
 def _booktabs_table(
-    caption: str, label: str, header: list[str], rows: list[list[str]]
+    caption: str, label: str, header: list[str], rows: list[list[str]],
+    resize: bool = False,
 ) -> str:
     """Emit a standalone booktabs table float ready for \\input."""
     col_spec = "l" * len(header)
-    lines = [
-        "\\begin{table}[htbp]",
-        "\\centering",
-        f"\\caption{{{_tex_escape(caption)}}}",
-        f"\\label{{{label}}}",
-        f"\\begin{{tabular}}{{{col_spec}}}",
-        "\\toprule",
-        " & ".join(header) + " \\\\",
-        "\\midrule",
-    ]
+    body_lines = []
+    body_lines.append("\\begin{table}[H]")
+    body_lines.append("\\centering\\small")
+    body_lines.append(f"\\caption{{{_tex_escape(caption)}}}")
+    body_lines.append(f"\\label{{{label}}}")
+    tab_open = "\\resizebox{\\textwidth}{!}{" if resize else ""
+    tab_close = "}" if resize else ""
+    body_lines.append(f"{tab_open}\\begin{{tabular}}{{{col_spec}}}")
+    body_lines.append("\\toprule")
+    body_lines.append(" & ".join(header) + " \\\\")
+    body_lines.append("\\midrule")
     for row in rows:
-        lines.append(" & ".join(_tex_escape(cell) for cell in row) + " \\\\")
-    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
-    return "\n".join(lines)
+        body_lines.append(" & ".join(_tex_escape(cell) for cell in row) + " \\\\")
+    body_lines += ["\\bottomrule", f"\\end{{tabular}}{tab_close}", "\\end{table}", ""]
+    return "\n".join(body_lines)
 
 
 # ---------------------------------------------------------------------------
@@ -331,7 +333,25 @@ def _round_rows(ledger: dict[str, Any]) -> list[list[str]]:
     return rows
 
 
+_MODEL_ABBREV = {
+    "random_forest": "RF",
+    "random_forest_regressor": "RF-r",
+    "logistic_regression": "LR",
+    "hist_gradient_boosting": "HGB",
+    "hist_gradient_boosting_regressor": "HGB-r",
+    "svc": "SVC",
+    "sgd_classifier": "SGD",
+    "ridge": "Ridge",
+    "linear_regression": "LinR",
+}
+
+
+def _short_model(name: str) -> str:
+    return _MODEL_ABBREV.get(name, name)
+
+
 def build_ratchet_generation_table(ledger: dict[str, Any], source_stem: str) -> str:
+    dataset_name = source_stem.replace("ratchet_ledger_", "")
     rows: list[list[str]] = []
     for gen_index, generation in enumerate(ledger.get("generations") or []):
         base = generation.get("baseline") or {}
@@ -353,8 +373,9 @@ def build_ratchet_generation_table(ledger: dict[str, Any], source_stem: str) -> 
                 ):
                     best_value, best_model = float(value), best.get("model")
         hp = champion.get("hyperparameters") or {}
+        seed = champion.get("seed", "")
         champion_cfg = (
-            f"{champion.get('model')} s{champion.get('seed')}"
+            f"{_short_model(champion.get('model', ''))}"
             + (" " + " ".join(f"{k}={v}" for k, v in list(hp.items())[:2]) if hp else "")
             if champion
             else "--"
@@ -362,27 +383,24 @@ def build_ratchet_generation_table(ledger: dict[str, Any], source_stem: str) -> 
         rows.append(
             [
                 f"g{gen_index}",
-                f"{base.get('model')} {_fmt_v(base_value)}",
-                f"{best_model} {_fmt_v(best_value)}" if best_model else "--",
+                f"{_short_model(base.get('model', ''))} {_fmt_v(base_value)}",
+                f"{_short_model(best_model)} {_fmt_v(best_value)}" if best_model else "--",
                 (
                     f"{float(absorption['delta']):+.4f}"
                     if isinstance(absorption.get("delta"), (int, float))
                     else "--"
                 ),
+                str(seed) if seed else "--",
                 "/".join(validities) or "--",
                 str(absorption.get("absorbed", False)),
                 champion_cfg,
             ]
         )
-    caption = (
-        "Ratchet loop per generation: deterministic try-all baseline vs best "
-        "agentic round; absorption requires the champion config to replay "
-        "exactly through the deterministic factory (same seed)."
-    )
+    caption = f"Ratchet loop per generation for {dataset_name}."
     return _booktabs_table(
         caption,
         f"tab:ratchet-generations-{_label_safe(source_stem)}",
-        ["Gen", "Baseline", "Agentic best", "Delta", "Validity", "Absorbed", "Champion"],
+        ["Gen", "Baseline", "Agentic best", "Delta", "Seed", "Validity", "Absorbed", "Champion"],
         rows,
     )
 

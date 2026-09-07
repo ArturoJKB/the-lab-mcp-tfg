@@ -1,21 +1,21 @@
-\begin{table}[htbp]
-\centering\footnotesize
-\caption{Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}
+\begin{table}[H]
+\centering\small
+\caption{Ratchet loop per generation for titanic.}
 \label{tab:ratchet-generations-ratchet-ledger-titanic}
-\resizebox{\textwidth}{!}{\begin{tabular}{lllllll}
+\begin{tabular}{llllllll}
 \toprule
-Gen & Baseline & Agentic best & Delta & Validity & Absorbed & Champion \\
+Gen & Baseline & Agentic best & Delta & Seed & Validity & Absorbed & Champion \\
 \midrule
-g0 & LogReg 0.8045 & RF 0.8212 & +0.0168 & 0.83/1.00/1.00 & True & RF s87 n\_estimators=10 max\_depth=10 \\
-g1 & LogReg 0.8045 & LogReg 0.8045 & -- & 1.00/1.00 & False & -- \\
-g2 & LogReg 0.8045 & RF 0.8547 & +0.0503 & 1.00/1.00 & True & RF s456 \\
-g3 & LogReg 0.8045 & -- & -- & 0.00 & False & -- \\
-g4 & LogReg 0.8045 & LogReg 0.8045 & -- & 1.00 & False & -- \\
-g5 & LogReg 0.8045 & HGB 0.8436 & +0.0391 & 1.00 & True & HGB s27 max\_depth=5 \\
-g6 & LogReg 0.8045 & RF 0.8212 & +0.0168 & 1.00 & True & RF s87 n\_estimators=10 max\_depth=10 \\
-g7 & LogReg 0.8045 & RF 0.8492 & +0.0447 & 1.00 & True & RF s13 max\_depth=10 \\
-g8 & LogReg 0.8045 & LogReg 0.8436 & +0.0391 & 0.71 & True & LogReg s84 C=1.0 penalty=l2 \\
-g9 & LogReg 0.8045 & HGB 0.7374 & -- & 1.00 & False & -- \\
+g0 & LR 0.8045 & RF 0.8212 & +0.0168 & 87 & 0.83/1.00/1.00 & True & RF n\_estimators=10 max\_depth=10 \\
+g1 & LR 0.8045 & LR 0.8045 & -- & -- & 1.00/1.00 & False & -- \\
+g2 & LR 0.8045 & RF 0.8547 & +0.0503 & 456 & 1.00/1.00 & True & RF \\
+g3 & LR 0.8045 & -- & -- & -- & 0.00 & False & -- \\
+g4 & LR 0.8045 & LR 0.8045 & -- & -- & 1.00 & False & -- \\
+g5 & LR 0.8045 & HGB 0.8436 & +0.0391 & 27 & 1.00 & True & HGB max\_depth=5 \\
+g6 & LR 0.8045 & RF 0.8212 & +0.0168 & 87 & 1.00 & True & RF n\_estimators=10 max\_depth=10 \\
+g7 & LR 0.8045 & RF 0.8492 & +0.0447 & 13 & 1.00 & True & RF max\_depth=10 \\
+g8 & LR 0.8045 & LR 0.8436 & +0.0391 & 84 & 0.71 & True & LR C=1.0 penalty=l2 \\
+g9 & LR 0.8045 & HGB 0.7374 & -- & -- & 1.00 & False & -- \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}

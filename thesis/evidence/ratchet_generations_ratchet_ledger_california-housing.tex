@@ -1,15 +1,15 @@
-\begin{table}[htbp]
-\centering\footnotesize
-\caption{Ratchet loop per generation: deterministic try-all baseline vs best agentic round; absorption requires the champion config to replay exactly through the deterministic factory (same seed).}
+\begin{table}[H]
+\centering\small
+\caption{Ratchet loop per generation for california-housing.}
 \label{tab:ratchet-generations-ratchet-ledger-california-housing}
-\resizebox{\textwidth}{!}{\begin{tabular}{lllllll}
+\begin{tabular}{llllllll}
 \toprule
-Gen & Baseline & Agentic best & Delta & Validity & Absorbed & Champion \\
+Gen & Baseline & Agentic best & Delta & Seed & Validity & Absorbed & Champion \\
 \midrule
-g0 & HGB-reg 0.8234 & HGB-reg 0.8455 & +0.0221 & 1.00/1.00 & True & HGB-reg s42 \\
-g1 & HGB-reg 0.8234 & RF-reg 0.6346 & -- & 1.00 & False & -- \\
-g2 & HGB-reg 0.8234 & HGB-reg 0.8234 & -- & 1.00 & False & -- \\
-g3 & HGB-reg 0.8234 & HGB-reg 0.5333 & -- & 1.00 & False & -- \\
+g0 & HGB-r 0.8234 & HGB-r 0.8455 & +0.0221 & 42 & 1.00/1.00 & True & HGB-r \\
+g1 & HGB-r 0.8234 & RF-r 0.6346 & -- & -- & 1.00 & False & -- \\
+g2 & HGB-r 0.8234 & HGB-r 0.8234 & -- & -- & 1.00 & False & -- \\
+g3 & HGB-r 0.8234 & HGB-r 0.5333 & -- & -- & 1.00 & False & -- \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}

@@ -1,7 +1,7 @@
 ++\chapter{Results}
 \label{ch:results}
 
-This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}), which includes the automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology}. It continues with Experiments 1 and 2 plus a Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
+This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}), which includes the automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology}. It continues with Experiments 1 and 2 plus a Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}) and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
 
 \section{The recorded evidence base}
 \label{sec:evidence}
@@ -337,10 +337,37 @@ records the deterministic try-all baseline, the agentic rounds, the validity
 rates, the absorbed champions, and the exact configurations.
 
 \textbf{Clinvar (genomics).} Two of three generations absorbed champions.
-\input{evidence/ratchet_generations_ratchet_ledger_clinvar}
+\begin{table}[H]
+\centering\small
+\caption{Ratchet loop per generation for ClinVar.}
+\label{tab:ratchet-generations-ratchet-ledger-clinvar}
+\begin{tabular}{llllllll}
+\toprule
+Gen & Baseline & Agentic best & Delta & Seed & Validity & Absorbed & Champion \\
+\midrule
+g0 & RF 0.8003 & RF 0.7973 & -- & -- & 1.00 & False & -- \\
+g1 & RF 0.8003 & HGB 0.8029 & +0.0026 & 17 & 1.00 & True & \makecell[l]{HGB learning\_rate=0.1\\max\_iter=300} \\
+g2 & RF 0.8003 & RF 0.8023 & +0.0021 & 13 & 1.00/1.00/0.67 & True & RF n\_estimators=200 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Kidney (health).} Two of three generations absorbed champions.
-\input{evidence/ratchet_generations_ratchet_ledger_kidney}
+\begin{table}[H]
+\centering\small
+\caption{Ratchet loop per generation for Kidney.}
+\label{tab:ratchet-generations-ratchet-ledger-kidney}
+\begin{tabular}{llllllll}
+\toprule
+Gen & Baseline & Agentic best & Delta & Seed & Validity & Absorbed & Champion \\
+\midrule
+g0 & HGB 0.9307 & HGB 0.9367 & +0.0060 & 84 & 1.00 & True & \makecell[l]{HGB learning\_rate=0.1\\max\_depth=3} \\
+g1 & HGB 0.9307 & HGB 0.9187 & -- & -- & 1.00 & False & -- \\
+g2 & HGB 0.9307 & HGB 0.9488 & +0.0181 & 3 & 0.75/0.67/1.00 & True & HGB learning\_rate=0.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \textbf{Crypto (financial).} Two of three generations absorbed champions.
 \input{evidence/ratchet_generations_ratchet_ledger_crypto}
@@ -378,17 +405,17 @@ The architecture permits a different model per agent role (Analyst, FeatureEngin
 g0r0 & llama-3.3-70b-instruct & agentic & 0.83--(15/18) & RF 0.8212 \\
 g0r1 & llama-3.3-70b-instruct & agentic & 1.00--(15/15) & LR 0.8045 \\
 g0r2 & llama-3.3-70b-instruct & agentic & 1.00--(15/15) & RF 0.8156 \\
-g1--g2 & mistral-small-24b & 1 agentic, 2 degraded & 1.00 & RF 0.8547 \\
+g1--g2 & mistral-small-24b & degraded & 1.00 & RF 0.8547 \\
 g3 & GLM-5.3-flash  & agentic & 0.00--(0/15) & \\
-g4 & mixed team  & detrministic degraded & 1.00--(1/1) & LR 0.8045 \\
+g4 & mixed team  & ddegraded & 1.00--(1/1) & LR 0.8045 \\
 g5 & mixed team  & agentic & 1.00--(21/21) & HGB 0.8436 \\
 g6 & mixed team  & agentic & 1.00--(15/15) & RF 0.8212 \\
-g7 & mixed team  & agentic & 1.00--(15/15) & RF s13 0.8492 \\
+g7 & mixed team  & agentic & 1.00--(15/15) & RF 0.8492 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The finding is a (task, context) dependency. GLM uniform was the worst configuration measured (0/15 entries, its transform introduced a constant feature column that the factory correctly rejected), but GLM as FeatureEngineer inside the mixed team was the only model that produced factory-safe code (3/3 rounds at validity 1.0). Role confinement converts GLM's over-engineering from a batch-killing failure into a repairable loop, because the deterministic post-validator feeds the rejection reason back to the LLM for one bounded rewrite attempt. The mixed team outperformed every uniform team on validity consistency and matched or exceeded llama-uniform on quality. Across the full ratchet, the FE-capable pool grew from one model to two (GLM 5.3 Flash and deepseek-v4-flash both produced factory-safe transforms; llama-3.3-70b and mistral-small did not). The commercial mixed team (claude-haiku-4.5 analyst, deepseek-v4-flash-0731 feature engineer, gpt-5.6-luna selector) recorded its own per-stage token costs (deepseek transform: 18{,}688 tokens, \$0.0053), and no pattern of commercial-vs-open dominance appeared: the commercial team (claude-haiku-4.5 analyst, deepseek-v4-flash feature engineer, gpt-5.6-luna selector) and the open team (llama analyst, GLM feature engineer, mistral selector) each won two datasets, and llama-uniform won the other two (kidney, crypto). Figure~\ref{fig:exp4teams} compares the best value each team reached per Arm B dataset.
+The finding is a (task, context) dependency. For example GLM uniform was the worst configuration measured ,(0/15) entries, and its transform introduced a constant feature column that the factory correctly rejected, but GLM as FeatureEngineer inside the mixed team was the only model that produced factory-safe code (3/3) rounds at validity 1.0. Role confinement converts GLM's over-engineering from a batch-killing failure into a repairable loop. Because the deterministic post-validator feeds the rejection reason back to the LLM for one bounded rewrite attempt. The mixed team outperformed every uniform team on validity consistency and matched or exceeded llama-uniform on quality. Across the full ratchet, the FE-capable pool grew from one model to two. The reasoning models GLM 5.3 Flash and deepseek-v4-flash both produced factory-safe transforms while the non-reasoning ones, llama-3.3-70b and mistral-small did not. A commercial mixed-model team (claude-haiku-4.5 analyst, deepseek-v4-flash-0731 feature engineer, gpt-5.6-luna selector) was also tested, and no pattern of commercial-vs-open dominance appeared. The commercial team (claude-haiku-4.5 analyst, deepseek-v4-flash feature engineer, gpt-5.6-luna selector) and the open team (llama analyst, GLM feature engineer, mistral selector) each won two datasets, and llama-uniform won the other two (kidney, crypto). Figure~\ref{fig:exp4teams} compares the best value each team reached per Arm B dataset.
 
 \begin{figure}[H]
 \centering
@@ -399,7 +426,7 @@ The finding is a (task, context) dependency. GLM uniform was the worst configura
 \subsection{GLM-uniform control test: validator as capability enabler}
 \label{sec:glmcontrol}
 
-The titanic result left one mechanism question. Was the mixed team's success due to the cross-model context (llama's brief informing GLM's code) or to the deterministic validator and bounded rewrite loop? A GLM-uniform control test with the constant-feature validator and rewrite loop now active answered it. The round completed fully agentic at \textbf{validity 1.0 (12/12 trained, 392 s)}, with no absorption (best 0.7374 vs.\ baseline 0.8045; the selection choice was poor, recorded honestly). The validator + repair loop, not the mixed-team brief, made the reasoning model factory-safe. Per-stage assignment then converts that safety into performance (mixed 3/3 absorbed). Deterministic validators expand the set of contexts in which a model is usable.
+The titanic result left one mechanism question. Was the mixed team's success due to the cross-model context (llama's brief informing GLM's code) or to the deterministic validator and bounded rewrite loop? A GLM-uniform control test with the constant-feature validator and rewrite loop answered it. The round completed fully agentic at \textbf{validity 1.0 (12/12 trained, 392 s)}, with no absorption (best 0.7374 vs.\ baseline 0.8045.. The validator + repair loop was what made the reasoning model factory-safe,not the mixed-team brief. Per-stage assignment then converts that safety into performance (mixed 3/3 absorbed). Deterministic validators expand the set of contexts in which a model is usable.
 
 \subsection{Local-first proof: offline execution}
 \label{sec:localfirst}
@@ -409,7 +436,7 @@ The full RQ1--RQ6 chain was executed with \texttt{--live ollama} (llama3.2:3b, l
 \subsection{Three-ways-in prediction sweep}
 \label{sec:predictionsweep}
 
-Every absorbed champion model was verified as servable through all three interfaces: CLI (\texttt{thelab predict}), HTTP (\texttt{POST /predict}), and MCP (\texttt{model\_registry.predict}). All 17 distinct absorbed champion models across the loop's datasets returned identical predictions through every surface (Table~\ref{tab:predictions-prediction-sweep-full}). Inference latency ranged from 6 to 603~ms (Figure~\ref{fig:exp4latency}) and is LLM-token-free, the cost lives at agent-proposal time only, never at inference time. Every prediction event was stored through the system's own context-write MCP server (validated and redacted), indexed, and retrieved via context search. The hosted models are searchable evidence.
+Every absorbed champion model was verified as servable through all three interfaces: CLI (\texttt{thelab predict}), HTTP (\texttt{POST /predict}), and MCP (\texttt{model\_registry.predict}). All 17 distinct absorbed champion models across the loop's datasets returned identical predictions through every surface (Table~\ref{tab:predictions-prediction-sweep-full}). Inference latency ranged from 6 to 603~ms (Figure~\ref{fig:exp4latency}) and is LLM-token-free.The cost lives at agent-proposal time only, never at inference time. Every prediction event was stored through the system's own context-write MCP server (validated and redacted), indexed, and retrieved via context search. The hosted models are searchable evidence.
 
 \begin{figure}[H]
 \centering
@@ -425,15 +452,16 @@ Every absorbed champion model was verified as servable through all three interfa
 
 To show the pieces working together, this section documents a real recorded session with the grounded chat agent on the IBM HR attrition dataset (1{,}470 $\times$ 35, attrition rate 16.1\%). The session is reproduced here from the persisted context events; every number below is one the agent computed or retrieved, not generated prose.
 
-\textbf{Step 1: Grounded exploration.} Asked what would be interesting to study, the agent pulled the context pack (identifying the dataset from its Kaggle documentation, including the ordinal scales stored as bare integers), ran the deterministic EDA (zero missing cells across 1{,}470 $\times$ 35; class balance 1{,}233 No / 237 Yes), and executed sandboxed pandas code to verify leakage suspects: three constant columns and a per-row-unique \texttt{EmployeeNumber} id. Its recommendations matched classic attrition analysis: focus on recall/PR-AUC rather than accuracy given the 5.2:1 imbalance.
+\textbf{Step 1: Grounded exploration.} Asked what would be interesting to study, the agent pulled the context pack (identifying the dataset from its Kaggle documentation, including the ordinal scales stored as bare integers), ran the deterministic EDA (zero missing cells across 1{,}470 $\times$ 35; class balance 1{,}233 No / 237 Yes), and executed sandboxed pandas code to verify leakage suspects: three constant columns and a per-row-unique \texttt{EmployeeNumber} id. Its recommendations matched classic attrition analysis, focusing on recall/PR-AUC rather than accuracy given the 5.2:1 imbalance.
 
-\textbf{Step 2: Evidence-based signals.} Over several \texttt{run\_python} calls the agent computed the signals it reported: attrition rates by overtime (30.5\% with vs.\ 10.4\% without, the starkest single split), by job role (Sales Rep 39.8\% vs.\ Manager 4.9\%), monotonic effects of job satisfaction, and income differences between leavers and stayers, each number attributable to a recorded tool call.
+\textbf{Step 2: Evidence-based signals.} Over several \texttt{run\_python} calls the agent computed the signals it reported. Attrition rates by overtime (30.5\% with vs.\ 10.4\% without), by job role (Sales Rep 39.8\% vs.\ Manager 4.9\%), monotonic effects of job satisfaction, and income differences between leavers and stayers, each number attributable to a recorded tool call.
 
-\textbf{Step 3: Grounded memory.} Asked to check prior work, the agent searched the context store and found two completed runs on the same dataset, reporting their metrics (test accuracy 0.840 with a 0.557 macro-F1 (flagged by the agent itself as likely minority-class weakness) and 0.861 / 0.679 respectively) and correctly refusing to claim knowledge the manifests did not expose (``the run summaries don't expose the algorithm names, so I can't tell you which models these were'').
+\textbf{Step 3: Grounded memory.} Asked to check prior work, the agent searched the context store and found two completed runs on the same dataset. Reporting their metrics, test accuracy-0.840 with a
+0.557--macro-F1 (flagged by the agent itself as likely minority-class weakness) and 0.861 / 0.679 respectively. Correctly refusing to claim knowledge the manifests did not expose (``the run summaries don't expose the algorithm names, so I can't tell you which models these were'').
 
 \textbf{Step 4: Proposal inside the boundary.} The agent drafted an experiment proposal. Its first attempt included \texttt{gradient\_boosting}; validation rejected it as unsupported in this factory's registry, and the agent corrected the proposal and resubmitted, a small but exact illustration of validation-as-feedback rather than validation-as-obstacle. The final proposal (logistic regression + random forest, seeds 42 and 7, constants and id dropped, stratified splits) was left \emph{awaiting human approval}, with the agent stating: ``I don't train anything myself, this proposal sits ready, and the deterministic pipeline only executes after you approve it.''
 
-\textbf{Step 5: Honest tool failures.} The session's tool trace also records failures: two \texttt{run\_python} errors (one sandbox block: the agent rewrote its code without the blocked construct; one attempt to address a proposal through the wrong surface) and one proposal-validation \texttt{ValueError} with the full Pydantic message. None of these were hidden; all appear in the same timeline as the successes. The first of those failures foreshadows a genuine finding: the sandbox's original blanket block of lambda expressions was later identified by the RQ5 spike as the single incompatibility between AST-level policy and pandas-idiomatic code generation, and was safely lifted (Section~\ref{sec:exp-agentic-results}).
+\textbf{Step 5: Honest tool failures.} The session's tool trace also records failures: two \texttt{run\_python} errors (one sandbox block: the agent rewrote its code without the blocked construct; one attempt to address a proposal through the wrong surface) and one proposal-validation \texttt{ValueError} with the full Pydantic message. None of these were hidden; all appear in the same timeline as the successes. The first of those failures presented a genuine finding, the sandbox's originally blocked lambda expressions, a incompatibility between AST-level policy and pandas-idiomatic code generation, resulting in not usable code. After the experiemnt it was safely lifted and repaired.  (Section~\ref{sec:exp-agentic-results}).
 
 \begin{figure}[H]
 \centering
@@ -442,47 +470,37 @@ To show the pieces working together, this section documents a real recorded sess
 \label{fig:ui-chat}
 \end{figure}
 
-\section{Cross-cutting observations from the benchmark suite}
-\label{sec:b1results}
-
-An earlier cross-domain benchmark (B1, California housing, breast cancer, and wine quality, each with two providers) contributes two findings that inform the interpretation of Experiments 3 and 4:
-
-\begin{enumerate}
-	\item \textbf{Agents do not degrade deterministic performance when they succeed.} In four of five agent legs, the agent-proposed configuration converged on the deterministic baseline's metrics (byte-identical where the same model was chosen); in the fifth, a four-run search ended marginally \emph{better} than baseline (test RMSE 0.74551 vs.\ 0.74556). The agent's value is search and rationale, not magic.
-	\item \textbf{Small local models can fail at the proposal task itself.} With a 3B-parameter local model, the regression-domain proposal leg produced no valid proposal (\texttt{AGENT\_FAILED}) while both classification legs succeeded, concrete evidence of small-model brittleness that the agentic experiments' provider dimension should expect to encounter.
-\end{enumerate}
-
-A further recorded datapoint from the batch runner keeps the evaluation honest about determinism: on iris, \texttt{sgd\_classifier} reaches 0.667 accuracy where logistic regression and random forest reach 1.000. Deterministic pipelines guarantee repeatability, not quality; model choice still matters, and the comparison surfaces exist precisely to expose it.
 
 \section{Agent efficiency and reliability metrics}
 \label{sec:agentmetrics}
 
-The registered performance-evaluation objective requires task success rates and token efficiency. Computed over the recorded agent sessions:
+The registered performance evaluation objective required task success rates and token efficiency stored over rounds to compare agent session.
 
 \begin{table}[H]
 \centering
 \caption{Agent task success over recorded benchmark, case-study, and live agentic sessions.}
 \label{tab:agentsuccess}
 \small
-\begin{tabular}{p{4.6cm}p{2.2cm}p{2.2cm}p{4.6cm}}
+\begin{tabular}{p{4.6cm}cp{7.2cm}}
 \toprule
-\textbf{Session set} & \textbf{Tasks} & \textbf{Success} & \textbf{Failure mode (recorded)} \\
+\textbf{Session set} & \textbf{Success} & \textbf{Notes (recorded)} \\
 \midrule
-B1 agent legs, OpenRouter (stealth/ox-alpha) & 3 & 3/3 &: (one leg needed a 4-run search) \\
-B1 agent legs, Ollama (llama3.2:3b) & 3 & 2/3 & regression proposal \texttt{AGENT\_FAILED} \\
-Titanic orchestration, both providers & 2 & 2/2 & Ollama FeatureEngineer interpretation failed; deterministic fallback used \\
-Case study (IBM HR, chat agent) & 1 & 1/1 & first proposal rejected by validation, self-corrected \\
-Live agentic rounds, iris (GLM 5.3 Flash) & 1 & 1/1 & 15/15 batch entries trained (pre-fix baseline: 0/108) \\
-Live agentic rounds, churn $\times$ 3 (GLM 5.3 Flash) & 3 & 3/3 & 30/30 batch entries trained; grid cap bounded 15 $\rightarrow$ 9 $\rightarrow$ 6 \\
-Live agentic round, iris (Ollama 3B, fully offline) & 1 & 1/1 & 1/1 entry trained; 20--60~s/call on CPU \\
-Live agentic round, california-housing (GLM) & 1 & 0/1 & transform quantized the float target; validator rejected all 9 entries (honest failure, F4 fix) \\
+B1 agent legs, OpenRouter (stealth/ox-alpha) & 3/3 & one leg needed a 4-run search \\
+B1 agent legs, Ollama (llama3.2:3b) & 2/3 & regression proposal \texttt{AGENT\_FAILED} \\
+Titanic orchestration, both providers & 2/2 & Ollama FeatureEngineer interpretation failed, deterministic fallback used \\
+Case study (IBM HR, chat agent) & 1/1 & first proposal rejected by validation, self-corrected \\
+Live agentic rounds, iris (GLM 5.3 Flash) & 1/1 & 15 of 15 batch entries trained (pre-fix baseline 0/108) \\
+Live agentic rounds, churn $\times$ 3 (GLM 5.3 Flash) & 3/3 & 30 of 30 batch entries trained, grid cap bounded 15, then 9, then 6 \\
+Live agentic round, iris (Ollama 3B, fully offline) & 1/1 & 1 of 1 entry trained, 20 to 60~s per call on CPU \\
+Live agentic round, california-housing (GLM) & 0/1 & transform quantized the float target, validator rejected all 9 entries (honest failure, F4 fix) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The aggregate success rate over recorded end-to-end proposal cycles is 8/9 (89\%). The live agentic-round instrument adds the recorded batch-entry validity record. Across the first six live rounds, 46 of 55 entries trained (iris 15/15, churn 30/30, offline Ollama 1/1, california-housing 0/9, the one honest failure), and the Arm B stress rounds landed at 0.67--1.0 validity per round with champions absorbed on 3 of 4 datasets. Every recorded failure was caught by the deterministic validator (no silent failure reached training) and the two outright failure classes in the record (the B1 regression leg and the california-housing quantization) were both converted into engineering fixes (task-aware selection, F4 target validation) rather than suppressed.
+The aggregate success rate over recorded end-to-end proposal cycles is 8/9 (89\%). Every recorded failure was caught by the deterministic validator, so no silent failure reached training. The two found failure classes in the record, the B1 regression leg and the california-housing quantization, were both converted into engineering fixes (task-aware selection, F4 target validation) rather than suppressed.
 
-\textbf{Token efficiency.} Token consumption is recorded per provider from usage data, with two structural facts established by design. The deterministic fallback and the mock provider consume \emph{zero} tokens, so the entire 546-test suite and the automated RQ evaluator run token-free. And proposal-generation usage is bounded to one to a few LLM turns per proposal by the bounded loop. The recorded Titanic benchmark provides the first per-call usage numbers (Table~\ref{tab:tokens}); the ratchet round records extend this with per-stage prompt/completion token counts and provider-reported cost stored in every round record (for example, a deepseek-v4-flash feature-engineering transform: 18{,}688 completion tokens, \$0.0053; a gpt-5.6-luna selector turn: 751 tokens, \$0.0005); Figure~\ref{fig:exp4cost} compares the feature-engineering drivers. Interpretation quality differed measurably at equal cost structure: the 3B local model produced a valid but shallow EDA interpretation and exhausted its retries on the FeatureEngineer stage, while the cloud model produced quantified, structured analyses, yet both selected the same model and produced identical training outcomes (Table~\ref{tab:providers}). The asymmetry is the efficiency result: agent intelligence is spent deciding (cheap, bounded), while the expensive part (training) never touches an LLM.
+\textbf{Token efficiency.} Token consumption is recorded per provider from usage data. Two structural facts follow from the design. The deterministic fallback and the mock provider consume zero tokens, so the full 546-test suite and the automated RQ evaluator run token-free. Proposal generation is bounded to one or a few LLM turns per proposal by the bounded loop. The recorded Titanic benchmark provides the first per-call usage numbers (Table~\ref{tab:tokens}). The ratchet round records extend this with per-stage prompt and completion token counts and provider-reported cost stored in every round record. For example, a deepseek-v4-flash feature-engineering transform spent 18{,}688 completion tokens at \$0.0053, and a gpt-5.6-luna selector turn used 751 tokens at \$0.0005. Figure~\ref{fig:exp4cost} compares the feature-engineering drivers.
+
 
 \begin{table}[H]
 \centering
@@ -505,18 +523,33 @@ ModelSelector & 341 prompt + 89 completion & 349 prompt + 235 completion \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.82\textwidth]{figures/fe_cost.pdf}
-\caption{Feature-engineering transform cost per driver: completion tokens per round with provider-reported cost (deepseek-v4-flash reasoning burn vs GLM open route).}
+\caption{Feature-engineering transform cost per driver: completion tokens per round with provider-reported cost (deepseek-v4-flash reasoning burn vs GLM).}
 \label{fig:exp4cost}
 \end{figure}
 
-A second efficiency finding is model-dependent latency. Identical prompts show GLM 5.3 Flash (a reasoning model) burning 386 completion tokens at 3.7~s where llama-3.3-70b and mistral-small return 32 tokens in about 1~s, and one GLM call stalled beyond 15 minutes. Round cost is therefore dominated by reasoning-token burn, not infrastructure. A latency probe over candidate models (trivial and realistic generation modes) quantified this and drove the P6 model standardization; per-call latency in production was 5--10$\times$ lower with a non-reasoning model on the same route (Table~\ref{tab:latency-latency-probe-openrouter-realistic}).
+A second efficiency finding is model-dependent latency. Identical prompts show GLM 5.3 Flash (a reasoning model) burning 386 completion tokens at 3.7~s where llama-3.3-70b and mistral-small return 32 tokens in about 1~s.Round cost is therefore dominated by reasoning-token burn, not infrastructure. A latency probe over candidate models quantified this and drove the P6 model standardization. Per-call latency in production was 5 to 10$\times$ lower with a non-reasoning model on the same route (Table~\ref{tab:latency-latency-probe-openrouter-realistic}).
 
-\input{evidence/model_latency_latency_probe_openrouter_realistic}
 
-\section{P6 findings harvest: the loop debugging its own factory}
-\label{sec:p6findings}
+\begin{table}[H]
+\centering\small
+\caption{Model latency probe on OpenRouter with realistic generation.}
+\label{tab:latency-latency-probe-openrouter-realistic}
+\begin{tabular}{llccccc}
+\toprule
+Model & Tier & OK & p50 (s) & p90 (s) & mean (s) & avg out tokens \\
+\midrule
+z-ai/glm-5.3-flash               & paid & 4/4 & 5.34  & 8.32  & 5.38 & 360.0 \\
+deepseek/deepseek-v4-flash-0731  & paid & 4/4 & 11.56 & 17.57 & 9.56 & 200.8 \\
+google/gemini-2.5-flash-lite     & paid & 4/4 & 1.11  & 1.15  & 1.01 & 120.8 \\
+minimax/minimax-m2.7:free        & free & 4/4 & 9.04  & 9.45  & 8.88 & 372.5 \\
+google/gemma-4-31b-it:free       & free & 0/4 & 0.14  & 0.17  & 0.14 & -- \\
+\bottomrule
+\end{tabular}
+\footnotetext{Note:p50 and p90 are completion times in seconds. Half of the calls finish within p50 and nine of ten within p90, so p90 exposes the slow tail a round can hit.}
+\end{table}
 
-The continuous loop's second deliverable is the hole log. Every failure the loop hit (validation rejections, provider errors, orchestration dead-ends) was harvested into structured fix-tickets by a deterministic script (\texttt{scripts/harvest\_findings.py}) that reads the recorded evidence (\texttt{runs/}, job and experiment records) and groups failures by signature, citing the run identifiers that back each claim. The harvest produced \textbf{15 tickets} (5 major, 4 minor, 6 notes); 9 were already applied, the rest form the prioritized backlog. Table~\ref{tab:p6findings} summarizes the majors and the by-design notes.
+
+The continuous loop's second deliverable was findign the holes via the logs. Every failure the loop hit (validation rejections, provider errors, orchestration dead-ends) was harvested into structured fix-tickets by a deterministic script (\texttt{scripts/harvest\_findings.py}) that reads the recorded evidence (\texttt{runs/}, job and experiment records) and groups failures by signature, citing the run identifiers that back each claim. The harvest produced \textbf{15 tickets} (5 major, 4 minor, 6 notes); 9 were already applied, the rest form the prioritized backlog. Table~\ref{tab:p6findings} summarizes the majors and the by-design notes.
 
 \begin{table}[H]
 \centering
@@ -533,9 +566,9 @@ BLK-003 & Fixture datasets rejected mid-orchestration ("only uploaded datasets c
 BLK-004 & EDA crashed on array-valued columns (unhashable type) & Non-scalar column guard (proposed) & proposed \\
 BLK-005 & Re-running an experiment on an already-cleaned dataset id failed & Idempotent re-clean: return the existing cleaned id (proposed) & proposed \\
 \midrule
-BLK-010--015 & Constant columns rejected; scale guards fired (\texttt{svc} on 164k rows); non-numeric features rejected; missing-target rejection; unsafe dataset-id rejection; wrong-task models rejected & All by-design first-class rejections (P0 AC-02, P2.6.5 scale guards, task-aware selection) & applied (by design) \\
+BLK-010--015 & Constant columns rejected; scale guards fired (\texttt{svc} on 164k rows); non-numeric features rejected; missing-target rejection; unsafe dataset-id rejection; wrong-task models rejected & All by-design first-class rejections (scale guards, task-aware selection...) & applied (by design) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two properties of this harvest matter for the thesis. First, it is \emph{deterministic}. The same script over the same evidence produces the same tickets, each backed by run identifiers. The hole log is evidence, not recollection. Second, the majority of the by-design findings are the safety rails working as intended (constant columns, scale guards, path safety, task-aware selection), which converts what a naive reading would call "errors" into a demonstration of the rejection-as-first-class design under load. The three applied major fixes (foreign hyperparameters, status laundering, fixture cleaning) were each found by real data breaking real assumptions, exactly the continuous-software-development loop the architecture was built to enable.
+Two properties of this harvest matter for the thesis. First, it is \emph{deterministic}. The same script over the same evidence produces the same tickets, each backed by run identifiers. The hole log is evidence, not recollection. Second, the majority of the by-design findings are the safety rails working as intended (constant columns, scale guards, path safety, task-aware selection), which converts what a naive reading would call "errors" into a demonstration of the rejection-as-first-class design. The three applied major fixes (foreign hyperparameters, status laundering, fixture cleaning) were each found by real data breaking real assumptions, exactly the continuous-software-development loop the architecture was built to enable and to escalate.
