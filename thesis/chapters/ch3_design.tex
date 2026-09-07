@@ -9,10 +9,10 @@ This chapter presents the design of \emph{thelab-mcp}. Section~\ref{sec:principl
 Five principles were established at the start of the project before any code was written and have been preserved throughout the development:
 
 \begin{enumerate}
-	\item \textbf{Deterministic core first.} ``The first usable milestone must work without a UI, an LLM, or network access.'' The factory must be complete and useful before any intelligence is layered on; agents amplify the factory but do not substitute it.
+	\item \textbf{Deterministic core first.} ``The first usable milestone must work without a UI, an LLM, or network access.'' The factory must be complete and useful before any intelligence is layered on; agents amplify the factory but do not substitute for it.
 	\item \textbf{LLMs decide; deterministic code executes.} Language models propose experiments, interpret results, and answer questions. The training pipeline, cleaning, and inference are preserved to run through the same deterministic Python path. This is the invariant that makes RQ1 possible at all: an LLM that trains models itself would inject non-determinism into the very thing being measured.
-	\item \textbf{Agents autonomy.} Agent-initiated execution requires explicit human approval through a single gate and generated code always passes the sandbox and a deterministic validator. Nothing an agent writes is ever executed directly, and a rejected proposal can never be executed at all.
-	\item \textbf{Rejection as a first-class outcome.} A run that fails validation is a valid, traceable result (complete with manifest, validation report, and reason) not an error to swallow or a crash to retry. The system converts its own refusals into queryable evidence.
+	\item \textbf{Agent autonomy.} Agent-initiated execution requires explicit human approval through a single gate and generated code always passes the sandbox and a deterministic validator. Nothing an agent writes is ever executed directly, and a rejected proposal can never be executed at all.
+	\item \textbf{Rejection as a first-class outcome.} A run that fails validation is a valid, traceable result (complete with manifest, validation report, and reason), not an error to swallow or a crash to retry. The system converts its own refusals into queryable evidence.
 	\item \textbf{Local-first and provider-agnostic.} All execution, data, and evidence stay on the local machine; every LLM provider (Ollama, OpenAI-compatible endpoints, OpenRouter, or a deterministic mock) is an optional adapter behind one typed protocol, never a structural dependency.
 \end{enumerate}
 
@@ -68,7 +68,7 @@ Five principles were established at the start of the project before any code was
 \label{fig:architecture}
 \end{figure}
 
-The implementation is organized into ten Python packages, summarized in Table~\ref{tab:modules}; approximately 16{,}900 lines of code in total, excluding the workspace front end.
+The implementation is organized into ten Python packages, summarized in Table~\ref{tab:modules}, with approximately 16{,}900 lines of code in total, excluding the workspace front end.
 
 \begin{table}[H]
 \centering
@@ -98,7 +98,7 @@ The implementation is organized into ten Python packages, summarized in Table~\r
 
 A single worked path explains the architecture better than any component list. The sections that follow describe the pieces. This one follows one dataset through all of them, in the order the system actually executes.
 
-\textbf{Arrival.} A researcher brings a tabular CSV, a bank's customer records for example, and wants the best predictive model the system can produce and defend. The dataset enters through any of the three surfaces, uploaded in the browser, pointed at from the CLI, or ingested from a public repository. From this moment every object the system touches is a typed Pydantic contract (Section~\ref{sec:contracts}), never a loose dictionary.
+\textbf{Arrival.} A researcher brings a tabular CSV, a bank's customer records, for example, and wants the best predictive model the system can produce and defend. The dataset enters through any of the three surfaces, uploaded in the browser, pointed at from the CLI, or ingested from a public repository. From this moment every object the system touches is a typed Pydantic contract (Section~\ref{sec:contracts}), never a loose dictionary.
 
 \textbf{Validation and cleaning.} The deterministic pipeline first validates the dataset. The target must exist, the features must be usable, and every class must have enough rows to stratify. A failed check never raises an error to be hidden. It produces a \emph{rejected run}, a complete persisted record with the reason (Section~\ref{sec:pipeline}). The cleaning policy then applies its rules deterministically, from datetime parsing to cardinality-aware encoding and median imputation, and reports every change column by column.
 
@@ -165,7 +165,7 @@ The pipeline converts a local CSV into a registered model through a fixed sequen
 
 \subsection{Validation as a gate}
 
-Input validation is needed for the pipeline to work seamlessly without errors. It checks schema conformance, data types, missing values, duplicates, target validity, and split feasibility. It is also useful when the pipeline fails, when a run is rejected (\texttt{final\_status=rejected}), all the evidence is stored in the same format as successful runs, letting agents have context about failed runs to avoid similar mistakes in the future.
+Input validation is needed for the pipeline to work seamlessly without errors. It checks schema conformance, data types, missing values, duplicates, target validity, and split feasibility. It is also useful when the pipeline fails. When a run is rejected (\texttt{final\_status=rejected}), all the evidence is stored in the same format as successful runs, letting agents have context about failed runs to avoid similar mistakes in the future.
 
 \subsection{Task-type inference and the model registry}
 
@@ -199,7 +199,7 @@ The seed is injected into every estimator (\texttt{random\_state=seed}) and into
 
 \subsection{The cleaning policy}
 
-One of the first problems was that real datasets almost never arrive clean. To make it work, the deterministic cleaning policy turns raw uploads into trainable tables while remaining fully auditable: rows with a missing target are dropped; datetime columns are parsed into numeric calendar features; categorical columns with at most 20 distinct values are one-hot encoded, while high-cardinality categoricals (e.g., 500 ticker symbols) are frequency-encoded; missing numeric values are imputed and constant columns are dropped. Every action is recorded per column in a \texttt{cleaning\_report}. The importance of the cardinality rule is quantified in Chapter~\ref{ch:results}: for example on a real 164{,}231-row financial dataset, naive one-hot encoding produced a 22~GB intermediate file, while the final cleaning policy produced 16--21~MB with the same raw data.
+One of the first problems was that real datasets almost never arrive clean. To make it work, the deterministic cleaning policy turns raw uploads into trainable tables while remaining fully auditable: rows with a missing target are dropped; datetime columns are parsed into numeric calendar features; categorical columns with at most 20 distinct values are one-hot encoded, while high-cardinality categoricals (e.g., 500 ticker symbols) are frequency-encoded; missing numeric values are imputed and constant columns are dropped. Every action is recorded per column in a \texttt{cleaning\_report}. The importance of the cardinality rule is quantified in Chapter~\ref{ch:results}: for example, on a real 164{,}231-row financial dataset, naive one-hot encoding produced a 22~GB intermediate file, while the final cleaning policy produced 16--21~MB with the same raw data.
 
 \subsection{Run artifacts}
 
@@ -228,7 +228,7 @@ Seven MCP servers expose the factory to independent clients over \emph{stdio}, c
 
 \begin{itemize}
 	\item \texttt{data\_catalog}: what datasets exist, with their profiles and contracts.
-	\item \texttt{model\_registry}: the approved models, and inference with them. This is the RQ2 surface.
+	\item \texttt{model\_registry}: the approved models and inference with them. This is the RQ2 surface.
 	\item \texttt{workspace}: the runs, their manifests, and their artifacts.
 	\item \texttt{context}: search over the evidence store (read-only).
 	\item \texttt{context\_write}: one tool to append agent session summaries, redacted on arrival.
@@ -268,7 +268,7 @@ The read-only \texttt{context} server is the first half. It gives any client sea
 
 \subsection{Provider abstraction}
 
-Every LLM interaction goes through one small interface. The system asks a provider to complete a conversation, and the provider answers with either text or a tool call. Four providers implement this interface: a scriptable \texttt{MockProvider} (used by the entire test suite, making the system fully testable with zero network access), \texttt{OllamaProvider} for local models \cite{ollama2024}, \texttt{OpenAICompatProvider} for the de-facto \texttt{/v1/chat/completions} standard, and \texttt{OpenRouterProvider}. Switching providers is configuration, not code, so the abstraction layer follows the industry-standard protocol itself. This abstraction is what makes the provider experiments of Chapter~\ref{ch:results} possible. The same pipeline runs against a reasoning cloud model, a non-reasoning cloud model, or a fully offline local one, without a single code change.
+Every LLM interaction goes through one small interface. The system asks a provider to complete a conversation, and the provider answers with either text or a tool call. Four providers implement this interface: a scriptable \texttt{MockProvider} (used by the entire test suite, making the system fully testable with zero network access), \texttt{OllamaProvider} for local models \cite{ollama2024}, \texttt{OpenAICompatProvider} for the de facto \texttt{/v1/chat/completions} standard, and \texttt{OpenRouterProvider}. Switching providers is configuration, not code, so the abstraction layer follows the industry-standard protocol itself. This abstraction is what makes the provider experiments of Chapter~\ref{ch:results} possible. The same pipeline runs against a reasoning cloud model, a non-reasoning cloud model, or a fully offline local one, without a single code change.
 
 \subsection{The harness and grounding}
 
@@ -292,14 +292,14 @@ Approval is enforced and carried out in exactly one place, the module \texttt{ap
 
 \subsection{Role agents and the orchestrator}
 
-Three role-specialized agents (\texttt{EDAAnalyst}, \texttt{FeatureEngineer}, \texttt{ModelSelector}) participate in an orchestrated experiment, each with a \emph{distinct system-prompt contract} (\texttt{ROLE\_SYSTEM\_PROMPTS}) that fixes its identity, scope, and output format for the stage. The \texttt{ExperimentOrchestrator} sequences the stages (EDA $\rightarrow$ feature engineering $\rightarrow$ model selection $\rightarrow$ approved batch training). Aditionally it applies user feedback to all three stage interpretations and to the proposal goal over the deterministic pipeline outputs as well as emiting stage events. These interpretations are persisted alongside the results as searchable context, that can be used by the \emph{sub-agents} spawned by the \texttt{ExperimentOrchestrator} . If the provider fails, the pipeline continues deterministically, so interpretation never blocks execution.  (Section~\ref{sec:agentmetrics}).
+Three role-specialized agents (\texttt{EDAAnalyst}, \texttt{FeatureEngineer}, \texttt{ModelSelector}) participate in an orchestrated experiment, each with a \emph{distinct system-prompt contract} (\texttt{ROLE\_SYSTEM\_PROMPTS}) that fixes its identity, scope, and output format for the stage. The \texttt{ExperimentOrchestrator} sequences the stages (EDA $\rightarrow$ feature engineering $\rightarrow$ model selection $\rightarrow$ approved batch training). Additionally, it applies user feedback to all three stage interpretations and to the proposal goal, over the deterministic pipeline outputs, as well as emitting stage events. These interpretations are persisted alongside the results as searchable context that can be used by the \emph{sub-agents} spawned by the \texttt{ExperimentOrchestrator}. If the provider fails, the pipeline continues deterministically, so interpretation never blocks execution (Section~\ref{sec:agentmetrics}).
 
 \subsection{The agentic round}
 \label{sec:agenticround}
 
-Two design decisions define this mechanism. First, the round runs \emph{after} the deterministic batch, never instead of it. The batch's persisted artifacts are the evidence the roles reason over, so the agents are always grounded in something real and the factory's reproducibility is untouched by anything an LLM produces. Second, the roles \emph{propose} but never \emph{execute}: an LLM may decide which model to train, which seeds, and which feature transform to attempt, but the training itself is carried out by the deterministic factory, and every proposal crosses the approval gate before it can run. This separation bounds the "blast radius" of anything non-deterministic. So the worst a hallucinating agent can do is waste compute on a rejected attempt, which is then  recorded as useful evidence to later patch the system making it more robust.
+Two design decisions define this mechanism. First, the round runs \emph{after} the deterministic batch, never instead of it. The batch's persisted artifacts are the evidence the roles reason over, so the agents are always grounded in something real and the factory's reproducibility is untouched by anything an LLM produces. Second, the roles \emph{propose} but never \emph{execute}: an LLM may decide which model to train, which seeds, and which feature transform to attempt, but the training itself is carried out by the deterministic factory, and every proposal crosses the approval gate before it can run. This separation bounds the "blast radius" of anything non-deterministic. So the worst a hallucinating agent can do is waste compute on a rejected attempt, which is then recorded as useful evidence to later patch the system, making it more robust.
 
-The agentic round is the system's \emph{grounded autonomy} mechanism and its multi-orchestration claim. It is an additional exploration stage that runs \emph{after} the deterministic batch, starts from the artifacts that batch produced, and validates everything deterministically before it can affect training. A context pack (EDA brief, baseline metrics, prior-run evidence, and user feedback, assembled without any LLM) grounds three sequential roles: Each role can be assigned its own LLM provider (per-stage model assignment). The round's configuration accepts a role-to-provider mapping, so a mixed team (a fast analyst, a reasoning feature-engineer, a cheap selector) runs through the same gated pipeline. Every stage records its assigned model and, where the provider reports them, per-stage token counts and cost, making the role-to-model assignment a measurement rather than assumed choice.
+The agentic round is the system's \emph{grounded autonomy} mechanism and its multi-orchestration claim. It is an additional exploration stage that runs \emph{after} the deterministic batch, starts from the artifacts that batch produced, and validates everything deterministically before it can affect training. A context pack (EDA brief, baseline metrics, prior-run evidence, and user feedback, assembled without any LLM) grounds three sequential roles. Each role can be assigned its own LLM provider (per-stage model assignment). The round's configuration accepts a role-to-provider mapping, so a mixed team (a fast analyst, a reasoning feature-engineer, a cheap selector) runs through the same gated pipeline. Every stage records its assigned model and, where the provider reports them, per-stage token counts and cost, making the role-to-model assignment a measurement rather than an assumed choice.
 
 \begin{enumerate}
 	\item \textbf{Analyst}: reads the context store and EDA evidence through read-only MCP tools to explain \emph{why} the baseline performs as it does and what to try next. Output is a typed findings brief (findings, opportunities, risks) with deterministic fallback.
@@ -311,7 +311,7 @@ Once a proposal is approved, the round runs as a tracked background job. Stage e
 
 \subsection{The chat agent}
 
-The grounded chat agent (\texttt{POST /agent/chat}, and the UI chat drawer) is the user-facing intelligence of the workspace. It runs a bounded loop (12 steps) over eight tools: \texttt{search\_context}, \texttt{list\_recent\_runs}, \texttt{get\_run\_summary}, \texttt{dataset\_eda}, \texttt{get\_dataset\_context}, \texttt{clean\_dataset},\texttt{propose\_experiment} and \texttt{run\_python} (sandboxed; dataset exposed read-only as \texttt{dataset.csv}). Every turn is persisted to the context store as a redacted session summary. The agent's self-description is worth quoting because it states the design in first person: it reads context packs, runs deterministic EDA, explores data hands-on in the sandbox, \emph{proposes} experiments (``I never train models myself''), and searches memory. The a human approves it proposal and the factory is the one in charge of execution.
+The grounded chat agent (\texttt{POST /agent/chat} and the UI chat drawer) is the user-facing intelligence of the workspace. It runs a bounded loop (12 steps) over eight tools: \texttt{search\_context}, \texttt{list\_recent\_runs}, \texttt{get\_run\_summary}, \texttt{dataset\_eda}, \texttt{get\_dataset\_context}, \texttt{clean\_dataset}, \texttt{propose\_experiment}, and \texttt{run\_python} (sandboxed; dataset exposed read-only as \texttt{dataset.csv}). Every turn is persisted to the context store as a redacted session summary. The agent's self-description is worth quoting because it states the design in first person: it reads context packs, runs deterministic EDA, explores data hands-on in the sandbox, \emph{proposes} experiments (``I never train models myself''), and searches memory. A human approves the proposal, and the factory is the one in charge of execution.
 
 \subsection{Global agents}
 
@@ -345,7 +345,7 @@ $ thelab-agent --mode researcher \
 \section{Experiment lifecycle}
 \label{sec:lifecycle}
 
-Orchestrated experiments are state machines stored as JSON by an \texttt{ExperimentStore}. Persistence is what makes the machine trustworthy. A crash or restart does not lose the experiment, any state can be inspected later like any other evidence, and the JSON file uses the same evidence format as everything else. Figure~\ref{fig:lifecycle} shows the states. Two transitions deserve note. First, \texttt{completed} may cycle back through \texttt{iterating} when the user sends feedback (``focus on tree models''), which starts a new planning phase informed by the previous results. Second, \texttt{cancelled} is reachable from \texttt{training} through clean cancellation.
+Orchestrated experiments are state machines stored as JSON by an \texttt{ExperimentStore}. Persistence is what makes the machine trustworthy. A crash or restart does not lose the experiment; any state can be inspected later like any other evidence, and the JSON file uses the same evidence format as everything else. Figure~\ref{fig:lifecycle} shows the states. Two transitions deserve note. First, \texttt{completed} may cycle back through \texttt{iterating} when the user sends feedback (``focus on tree models''), which starts a new planning phase informed by the previous results. Second, \texttt{cancelled} is reachable from \texttt{training} through clean cancellation.
 
 \begin{figure}[H]
 \centering
@@ -383,7 +383,7 @@ Orchestrated experiments are state machines stored as JSON by an \texttt{Experim
 \label{fig:lifecycle}
 \end{figure}
 
-Execution runs through a background \texttt{JobManager}. It streams per-stage and per-model progress to the UI with server-sent events (SSE). Every event is also appended to the run's \texttt{events.jsonl}, so the live view and the later evidence are the same data. Approved agentic rounds (Section~\ref{sec:agenticround}) run as a further tracked job stage after the deterministic batch and stream their per-agent events through the same channel.
+Execution runs through a background \texttt{JobManager}. It streams per-stage and per-model progress to the UI with server-sent events (SSE). Every event is also appended to the run's \texttt{events.jsonl}, so the live view and the later evidence are the same data. Approved agentic rounds (Section~\ref{sec:agenticround}) run as further tracked job stages after the deterministic batch and stream their per-agent events through the same channel.
 
 \section{The workspace UI}
 \label{sec:ui}
@@ -396,9 +396,9 @@ The web workspace is built with React 18, TypeScript and Vite, with a hand-rolle
 	\item A mini-dock hosts the Global Agent chat drawer and the Admin views. The Admin views include the model registry with metrics, artifacts, predict and evidence tabs, context search with sessions, a sandbox playground, an MCP server inventory panel, and the generated-notebook viewer.
 \end{itemize}
 
-The chat drawer streams per-tool progress, renders markdown, and exposes usage, token and time telemetry for every exchange. It accepts style and role directives, supports inline proposal approval, and keeps the conversation alive across open and close. Every exchange is indexed into the context store. Dataset context is shared across views, and the dataset being explored in the Data tab is the same one proposed upon in the Experiments tab.
+The chat drawer streams per-tool progress, renders markdown, and exposes usage, token and time telemetry for every exchange. It accepts style and role directives, supports inline proposal approval, and keeps the conversation alive across opens and closes. Every exchange is indexed into the context store. Dataset context is shared across views, and the dataset being explored in the Data tab is the same one proposed upon in the Experiments tab.
 
-The first UI was deliberately a dependency free vanilla JavaScript. The rework to React and Vite was an was a break in that constraint in exchange for maintainability and charting ergonomics. It is recorded here as an example of the project's own willgness to revise its own rules when the evidence favored it.
+The first UI was deliberately dependency-free vanilla JavaScript. The rework to React and Vite was a break in that constraint in exchange for maintainability and charting ergonomics. It is recorded here as an example of the project's own willingness to revise its own rules when the evidence favored it.
 
 \begin{lstlisting}[language=bash, caption={Launching the workspace UI.}, label={lst:ui-launch}, style=cli]
 # one-time: create and activate the environment, install from the lockfile
@@ -449,7 +449,6 @@ Approval gate & Every path from proposal to training passes one chokepoint; agen
 \end{tabular}
 \end{table}
 
-Three mechanisms define the safety model. Table~\ref{tab:safety} summarizes their guarantees and their honest limits.
 The sandbox deserves elaboration because it executes LLM-generated code. It spawns a fresh interpreter for every execution and speaks a JSON protocol over stdin and stdout. It forces a non-interactive matplotlib backend and enforces its policy in three layers.
 
 The first layer is a static AST check that rejects forbidden constructs before execution. Class definitions, async constructs, and dynamic \texttt{type()} calls are among the rejected shapes. Lambdas are deliberately \emph{allowed}. The RQ5 spike proved that blocking \texttt{ast.Lambda} is incompatible with pandas-idiomatic code such as \texttt{groupby().transform(lambda s: ...)}. A lambda cannot import, reach blocked builtins, or escape its scope, because \texttt{global} and \texttt{nonlocal} remain blocked. The second layer is an import hook that re-enforces the whitelist at runtime. The \texttt{inspect} module is deliberately excluded, after an audit finding showed it could recover unfiltered builtins. The third layer is compute limits. Memory is capped at 2~GB, raised from 512~MB after measuring the address space pandas~3 needs for its shared libraries. Wall-clock time and output size are capped as well.
@@ -459,12 +458,10 @@ The hardening approach follows secure-development guidance on supply-chain and c
 \subsection{Alternatives considered}
 \label{sec:alternatives}
 
-Three architectural alternatives were explicitly evaluated and set aside, a record kept here because it delimits the novelty claim:
-
 Three architectural alternatives were explicitly evaluated and set aside. The record is kept here because it delimits the novelty claim.
 
 \begin{itemize}
 	\item \textbf{Orchestration frameworks (Airflow, LangGraph, AutoGen) as the core.} An external orchestrator would compete with the hand-rolled orchestration layer that is itself the thesis's object of study and would dilute the claim. Frameworks remain the comparison baseline of Table~\ref{tab:frameworks}.
 	\item \textbf{A workflow/data-transformation engine (dbt) and a warehouse (Snowflake/\allowbreak{}BigQuery) as the data layer.} The fit was genuine, since a transformation module wrapped as an MCP tool is exactly the ``capability = MCP module'' pattern. However, migrating the evidence layer from local SQLite and files to a warehouse conflicts with the local-first motive that defines the system. Recorded as future work for organizational deployments.
-	\item \textbf{A vector-database memory layer (RAG) over the context store.} Interesting addition but deferred by decision (Section~\ref{sec:process}). The curret keyword FTS5 store preserves verifiability, and semantic retrieval is future work.  (Section~\ref{sec:futurework}).
+	\item \textbf{A vector-database memory layer (RAG) over the context store.} Interesting addition but deferred by decision (Section~\ref{sec:process}). The current keyword FTS5 store preserves verifiability, and semantic retrieval is future work (Section~\ref{sec:futurework}).
 \end{itemize}

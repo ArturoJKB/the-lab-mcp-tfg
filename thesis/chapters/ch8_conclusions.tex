@@ -3,40 +3,40 @@
 
 \section{Conclusions}
 
-This thesis set out to demonstrate that a local, multi-agent orchestration architecture built on typed contracts and the Model Context Protocol can execute a reproducible data-to-model workflow and expose its artifacts to independent agents without coupling to any specific LLM provider. The work supports this claim with a complete implementation and a recorded evaluation. Achiving the objectives proposed at the start of the project:
+This thesis set out to demonstrate that a local, multi-agent orchestration architecture built on typed contracts and the Model Context Protocol can execute a reproducible data-to-model workflow and expose its artifacts to independent agents without coupling to any specific LLM provider. The work supports this claim with a complete implementation and a recorded evaluation. Achieving the objectives proposed at the start of the project:
 
 \begin{itemize}
-	\item \textbf{O1 (Deterministic factory).} The pipeline successfully turns a local CSV into a registered, locally servable model with a complete eleven-artifact evidence set per run. With rejection treated as a first-class outcome with full provenance, validation at real scale (164k rows) and protected by traceable scale guards.
+	\item \textbf{O1 (Deterministic factory).} The pipeline successfully turns a local CSV into a registered, locally servable model with a complete eleven-artifact evidence set per run, with rejection treated as a first-class outcome with full provenance, validation at real scale (164k rows), and protection by traceable scale guards.
 
 	\item \textbf{O2 (Typed contracts), achieved.} Six strict Pydantic contracts form the system's shared language; the strictness rejected integration errors and agent mistakes alike, converting both into readable validation messages.
 
-	\item \textbf{O3 (MCP surface)} Seven stdio servers with 25 schema-bounded tools. That expose datasets, profiles, contracts, models, artifacts, context, EDA skills, and orchestration. With RQ2 and Experiment~1 verifying independent consumption end-to-end.
+	\item \textbf{O3 (MCP surface).} Seven stdio servers with 32 schema-bounded tools that expose datasets, profiles, contracts, models, artifacts, context, EDA skills, and orchestration, with RQ2 and Experiment~1 verifying independent consumption end-to-end.
 
 	\item \textbf{O4 (Context store)} The SQLite+FTS5 store provides redacted, fingerprinted, privacy-leveled evidence with provably read-only retrieval (RQ3). The case study shows it functioning as genuine agent memory.
 
-	\item \textbf{O5 (Multi-Agentic layer).} Organized around a single typed protocol abstracting four inference provider adapters. Role-specialized agents with distinct prompt contracts. An  orchestrator and grounded chat both operating through a single approval chokepoint with claim-level grounding. Agent-initiated execution intiatited to \texttt{awaiting\_approval}, with rejected proposals being unexecutable. Sandboxed exploration over the deterministic baseline's artifacts, and provider-free runs on the mock adapter, proving provider-agnosticism structurally.
+	\item \textbf{O5 (Multi-Agentic layer).} Organized around a single typed protocol abstracting four inference provider adapters. Role-specialized agents with distinct prompt contracts. An orchestrator and grounded chat both operating through a single approval chokepoint with claim-level grounding. Agent-initiated execution initiated to \texttt{awaiting\_approval}, with rejected proposals being unexecutable. Sandboxed exploration over the deterministic baseline's artifacts, and provider-free runs on the mock adapter, proving provider-agnosticism structurally.
 
-	\item \textbf{O6 (Evaluation)} The three system-deterministic questions (RQ1--RQ3) were passed under an automated evaluator (inside a disposable temporary workspace) at every milestone of the project. The four recorded experiments: three-ways-in with the provider dimension, S\&P-scale validation, the grounded-autonomy agentic round and the multi-domain stress validation extended the evidence to realistic data. The agentic research questions (RQ4--RQ6) were evaluated across ten datasets, 37 agentic generations and five model families. Resulting in: 19 replay-verified absorptions (17 distinct champion models), 6 honest refusals, validity 1.0 on every post-fix agentic round and the mixed-model team outperforming every uniform team.
+	\item \textbf{O6 (Evaluation)} The three system-deterministic questions (RQ1--RQ3) were passed under an automated evaluator (inside a disposable temporary workspace) at every milestone of the project. The four recorded experiments: three-ways-in with the provider dimension, S\&P-scale validation, the grounded-autonomy agentic round and the multi-domain stress validation extended the evidence to realistic data. The agentic research questions (RQ4--RQ6) were evaluated across ten datasets and 37 agentic generations. Resulting in: 19 replay-verified absorptions (17 distinct champion models), 15 of them from rounds with 100\% batch validity, 6 honest refusals, and the mixed-model team outperforming every uniform team.
 \end{itemize}
 
-One scope note belongs in the conclusions. The factory is deliberately tabular, CPU-only, and local. Deep learning, GPU training, and distributed execution were taken out of the project scope by recorded decisions. The contribution is not model sophistication, is the auditable orchestration protocol around the models. Measured by system properties (reproducibility, interoperability and evidence integrity) rather than by benchmark leadership. Capability benchmarks over the agent layer are the natural continuation on the project evolution (Section~\ref{sec:futurework}).
+One scope note belongs in the conclusions. The factory is deliberately tabular, CPU-only, and local. Deep learning, GPU training, and distributed execution were taken out of the project scope by recorded decisions. The contribution is not model sophistication but the auditable orchestration protocol around the models. Measured by system properties (reproducibility, interoperability and evidence integrity) rather than by benchmark leadership. Capability benchmarks over the agent layer are the natural continuation of the project's evolution (Section~\ref{sec:futurework}).
 
 
 \section{Future work}
 \label{sec:futurework}
 
-The following extensions are concrete future implementation, ordered by the expected impact they produce:
+The following extensions are concrete future implementations, ordered by the expected impact they produce:
 
 \begin{enumerate}
 	\item \textbf{OS-level sandbox confinement.} Close the gap with UID separation or kernel confinement (landlock/nsjail), upgrading the sandbox from compute isolation to filesystem confinement.
 	\item \textbf{Grammar-constrained sampling.} Replace the post-hoc JSON repair with provider-side structured outputs, where the JSON schema is enforced while the model is still generating. This removes the repair ladder at its root cause, making every agent answer schema-valid by construction.
 	\item \textbf{Semantic hybrid retrieval.} Add an optional local embedding index alongside FTS5, preserving the redaction and immutability guarantees, to recover paraphrase recall without cloud vector stores and whose design can mimic graph-structured memory approaches for code and knowledge bases \cite{mempalace2026,codebasememory2026}.
 
-	\item \textbf{Unsupervised learning} Expand the scope to accept unsupervised learning task such as cluster-profiling view and dimensionality reduction.
+	\item \textbf{Unsupervised learning.} Expand the scope to accept unsupervised learning tasks such as cluster-profiling and dimensionality reduction.
 
 	\item \textbf{HTTP MCP transport.} Serve the same tool surface over HTTP+SSE to reach remote MCP clients, with the existing path-safety and schema layers unchanged.
 
-	\item \textbf{Live-provider automated evaluation.} Extend the evaluator with a provider-configurable profile so RQ-level checks can be exercise over Ollama/OpenRouter end-to-end.
+	\item \textbf{Live-provider automated evaluation.} Extend the evaluator with a provider-configurable profile so RQ-level checks can be exercised over Ollama/OpenRouter end-to-end.
 
 	\item \textbf{Capability-benchmark evaluation.} Run an external ML-agent capability benchmark (e.g., MLE-bench's suite \cite{chan2024mlebench}) over the agent layer as a complementary evaluation to the system-property checks of this thesis (Section~\ref{sec:bg-benchmarks}).
 

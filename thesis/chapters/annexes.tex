@@ -198,3 +198,99 @@ The Experiment~4 dataset set: Arm~A (agentic re-run over datasets with recorded 
 \end{table}
 
 Notes: the Patch Bay dataset ships as two CSVs (\texttt{nodes.csv} with GitHub statistics and network-centrality features per MCP server; \texttt{edges.csv} as a weighted shared-category edge list) and enters the workspace as two ingests from one slug. GTZAN's heavy raw audio stays in the transient kagglehub cache; only the extracted-features CSV is stored. The S\&P~500 analyst dataset was downloaded from a public source outside Kaggle and is already recorded in \texttt{uploads/}.
+
+\clearpage
+\section{Declaración de uso de Inteligencia Artificial Generativa}
+\label{sec:anx-iag}
+\includepdf[pages=-,pagecommand={\thispagestyle{plain}}]{figures/declaracion_iag.pdf}
+
+
+\clearpage
+\section{Declaración de uso de Inteligencia Artificial Generativa (IAG) en el Trabajo de Fin de Grado (TFG)}
+\label{sec:anx-iag}
+
+\textbf{He usado IAG en mi TFG.}
+
+Marca lo que corresponda: \textbf{SI.}
+
+\subsection*{Parte 1: declaración sobre comportamiento legal, ético y responsable}
+
+\textbf{En mi interacción con herramientas de IAG he facilitado datos de carácter confidencial contando siempre con la debida autorización de los interesados.}
+
+NO, no he usado datos de carácter confidencial.
+
+\textbf{En mi interacción con herramientas de IAG he facilitado materiales protegidos por derechos de autoría contando siempre con la autorización de los respectivos titulares.}
+
+NO, no he usado materiales protegidos por derechos de autoría.
+
+\textbf{En mi interacción con herramientas de IAG he facilitado datos de carácter personal con la debida autorización de los interesados.}
+
+NO, no he usado datos de carácter personal.
+
+\textbf{Mi utilización de la herramienta de IAG ha respetado sus términos de uso, así como los principios éticos esenciales, no orientándola de manera maliciosa a obtener un resultado inapropiado para el trabajo presentado.}
+
+SI.
+
+\subsection*{Parte 2: declaración de uso técnico}
+
+\textbf{Declaro haber hecho uso del sistema de IAG (GLM-5.3-flash, Llama-3.3-70b-instruct, Mistral-Small-24b, DeepSeek-V4-flash, Claude-Haiku-4.5, GPT-5.6-luna y Qwen3-4b, vía OpenRouter y Ollama local) como objeto de estudio del propio trabajo, y para: investigar recursos en línea, asistir en tareas de código, realizar auditorías de código y tests.}
+
+\textbf{Documentación y redacción:}
+
+\textbf{Soporte a la reflexión en relación con el desarrollo del trabajo: proceso iterativo de análisis de alternativas y enfoques utilizando la IAG}
+
+\textbf{Prompt: [Analiza por qué el equipo mixto (analista ollama, ingeniero de características GLM, selector mistral) obtuvo mayor consistencia que los equipos uniformes, y qué alternativas de diseño existen]}, teniendo como interacción el análisis de alternativas de arquitectura (equipos mixtos frente a uniformes).
+
+\textbf{Revisión o reescritura de párrafos redactados previamente}
+
+\textbf{Prompt: [Verifica que estas cifras y esta redacción coinciden con los registros generados por el sistema y presenta los resultados vía chat]}, teniendo como interacción la corrección de cifras y redacción de los capítulos 5 y 6 sobre borradores previamente escritos por mí, con revisión y aceptación manual de cada cambio.
+
+\textbf{Búsqueda de información o respuesta a preguntas concretas:}
+
+\textbf{Prompt: [Busca repositorios open-source parecidos a MLflow]}, para encontrar repositorios de código libre como fuente de inspiración para el desarrollo del sistema.
+
+\textbf{Búsqueda de bibliografía}
+
+NO, no se utilizó directamente para una lista curada de fuentes, sino como herramienta de investigación para encontrar recursos útiles algunos de ellos representados en la bibliografía.
+
+\textbf{Resumen de bibliografía consultada}
+
+NO, no se utilizó IAG para resumir la bibliografía.
+
+\textbf{Traducción de textos consultados}
+
+NO, no se utilizó IAG para traducción. La memoria está redactada en inglés por mí y para momentos puntuales se usaron traductores como DeepL.
+
+\textbf{Desarrollar contenido específico}
+
+Se ha hecho uso de IAG como herramienta de soporte para el desarrollo del contenido específico del TFG, incluyendo:
+
+\textbf{Asistencia en el desarrollo de líneas de código (programación):}
+
+Declaro haber hecho uso de los sistemas de IAG mediante OpenRouter y agentes de programación vía OpenCode para el desarrollo de ciertas partes del código y para la depuración de la aplicación.
+
+\textbf{Prompt: [Ayúdame a entender por qué da el error de la línea 124 al compilar el código]}
+
+\textbf{Generación de esquemas, imágenes, audios o vídeos:}
+
+\textbf{Prompt: [Genera una tabla usando matplotlib a partir de los esquemas JSON generados por la aplicación]}. Para la creación de tablas y gráficas a partir de contexto generado por la propia aplicación.
+
+\textbf{Procesos de optimización:}
+
+\textbf{Prompt: [Actúa como un auditor de código profesional, busca vulnerabilidades y fallos estructurales del código]}. Para procesos de auditoría de código y sugerencias de refactorización.
+
+\textbf{Tratamiento de datos: recogida, análisis, cruce de datos:}
+
+\textbf{Prompt: [Analiza estos datos de manera exhaustiva y prepara un plan de EDA; posteriormente te presentaré mi plan establecido para realizar una comparación]}. Para investigar datasets antes de usarlos como input para la aplicación desarrollada.
+
+\textbf{Inspiración de ideas en el proceso creativo:}
+
+\textbf{Prompt: [Analiza mis notas desestructuradas, ayúdame a realizar un plan coherente dividido en pasos]}. Para la validación de ideas antes de convertirlas en código.
+
+\textbf{Otros usos vinculados a la generación de puntos concretos del desarrollo específico del trabajo:}
+
+Para el propio trabajo en sí. Una arquitectura multiagente orquestadora de flujos de aprendizaje automático.
+
+\subsection*{Parte 3: reflexión sobre utilidad}
+
+La IA ha formado una parte indiscutible del trabajo, siendo este el principal tema de investigación: la creación de una arquitectura usando diferentes agentes enfocada al análisis de datos y la generación de modelos de aprendizaje automático (ML). Además de ayudar como asistente externo en las tareas de investigación de recursos, validación de ideas y desarrollo de código en partes del repositorio de la aplicación.

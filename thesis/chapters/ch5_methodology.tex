@@ -1,20 +1,20 @@
 \chapter{Evaluation Methodology}
 \label{ch:methodology}
 
-This chapter defines how the system is evaluated. Section~\ref{sec:eval-objectives} frames the evaluation; Section~\ref{sec:rq-criteria} binds the six research questions to methods and pass criteria; Section~\ref{sec:evaluator} describes the automated evaluator; Sections~\ref{sec:exp1}--\ref{sec:exp-agentic} define Experiments 1--3 (deterministic baseline, real-data validation, and the grounded-autonomy round); Section~\ref{sec:exp-kaggle} defines Experiment 4, the multi-domain stress validation; and Section~\ref{sec:metrics} fixes the metrics. All the experiment results are presented in chapter 6 along side the findigs.
+This chapter defines how the system is evaluated. Section~\ref{sec:eval-objectives} frames the evaluation; Section~\ref{sec:rq-criteria} binds the six research questions to methods and pass criteria; Section~\ref{sec:evaluator} describes the automated evaluator; Sections~\ref{sec:exp1}--\ref{sec:exp-agentic} define Experiments 1--3 (deterministic baseline, real-data validation, and the grounded-autonomy round); Section~\ref{sec:exp-kaggle} defines Experiment 4, the multi-domain stress validation; and Section~\ref{sec:metrics} fixes the metrics. All the experiment results are presented in Chapter~6 alongside the findings.
 
 \section{Evaluation objectives}
 \label{sec:eval-objectives}
 
-The goal was to automatically evaluate each of hypothesis stated on the Section~\ref{sec:hypothesis} with suffciient evidence \emph{reproducible by construction}. Each check run automatically, in a disposable temporary workspace, and produced machine-readable verdicts. It also demonstrates the system at increasing scales (fixture, real, and public data) as well as honesty of what does not have  about yet evaluated(part of future implementation). We can therefore distinguise three evaluation layers:
+The goal was to automatically evaluate the hypothesis stated in Section~\ref{sec:hypothesis} with sufficient evidence, \emph{reproducible by construction}. Each check runs automatically, in a disposable temporary workspace, and produces machine-readable verdicts. It also demonstrates the system at increasing scales (fixture, real, and public data) as well as its honesty about what is not yet evaluated (part of future implementation). We can therefore distinguish three evaluation layers:
 
 \begin{itemize}
 	\item \textbf{Automated baseline (RQ1--RQ3).} An isolated evaluator runs on every demand, on a small fixture dataset, producing the pass/fail final verdicts.
 	\item \textbf{Recorded experiments (Experiments 1, 2, 4).} Three experiments that test the systems claims at realistic scale (three-ways-in, real-dataset validation, and the multi-domain stress validation) with results recorded as regular run artifacts, in the same format the system itself produces.
-	\item \textbf{Grounded-autonomy experiment (Experiment 3, RQ4--RQ6).} A component-removal testing protocol that measures what the agent layer adds over the deterministic baseline: proposal grounding, sandboxed generated code, and role-specialized orchestration, saving each model results separetely for later analisys.
+	\item \textbf{Grounded-autonomy experiment (Experiment 3, RQ4--RQ6).} A component-removal testing protocol that measures what the agent layer adds over the deterministic baseline: proposal grounding, sandboxed generated code, and role-specialized orchestration, saving each model's results separately for later analysis.
 \end{itemize}
 
-The ordering is deliberate: RQ4--RQ6 are asked only after RQ1--RQ3 have established the grounding. Measuring what agents add over a deterministic baseline.
+The ordering is deliberate: RQ4--RQ6 are asked only after RQ1--RQ3 have established the grounding, measuring what agents add over the deterministic baseline.
 
 
 \section{Research questions and pass criteria}
@@ -61,7 +61,7 @@ Hallucinated claims are reported and proposal validity is at least 90\%. \\
 \addlinespace
 \textbf{RQ5, Agentic capability.} Can agent-written code train valid, competitive models beyond the fixed model grid? &
 Agents write feature-engineering and training code inside the sandbox. The deterministic validator recomputes every metric outside it. &
-At least 80\% of the generated scripts are valid and ther are zero silent failures. \\
+At least 80\% of the generated scripts are valid and there are zero silent failures. \\
 \addlinespace
 \textbf{RQ6, Orchestration value.} Do role-specialized agents outperform one shared-prompt agent? &
 The multi-agent round is compared against a single shared-prompt agent, with the deterministic pipeline as the reference. &
@@ -69,14 +69,14 @@ The multi-agent round completes at least as often as the single-agent one. Every
 \bottomrule
 \end{tabular}
 \end{table}
-Note: RQ5 and RQ6 measure \emph{validity, safety, and competitiveness} not so much victory. Improvement over the deterministic baseline is a bonus, not the bar. However after the testing phase most of the agentic runs generated better results than the not agentic ones, cofirming the hypothesis.
+Note: RQ5 and RQ6 measure \emph{validity, safety, and competitiveness} not so much victory. Improvement over the deterministic baseline is a bonus, not the bar. However after the testing phase most of the agentic runs generated better results than the non-agentic ones, confirming the hypothesis.
 
 \section{The automated evaluator}
 \label{sec:evaluator}
 
-All six research questions are answered by one committed script,\texttt{scripts/evaluate\_thesis.py}, so any claim in this thesis can be re-checked with a single command. The script runs inside a fresh temporary workspace, prints a verdict table and a JSON summary, and exits with an error code on any failure. No developer state is touched, and the checks are chained, so later questions reuse the runs produced by earlier ones.
+All six research questions are answered by one committed script, \texttt{scripts/evaluate\_thesis.py}, so any claim in this thesis can be re-checked with a single command. The script runs inside a fresh temporary workspace, prints a verdict table and a JSON summary, and exits with an error code on any failure. No developer state is touched, and the checks are chained, so later questions reuse the runs produced by earlier ones.
 
-The two groups are evaluated in different ways, and the difference is deliberate. The system questions (RQ1 to RQ3) are fully deterministic, so the script automates them completely. RQ1 trains the same model twice through the Python API and compares the metrics at exact-float tolerance ($10^{-12}$),confirming that the manifest recorded the seed and dependency versions. RQ2 starts a separate MCP client, its own process over stdio, and runs the discovery and prediction round trip against the RQ1 runs. RQ3 indexes one JSONL event and verifies that a search finds it without changing a single byte of the database.
+The two groups are evaluated in different ways, and the difference is deliberate. The system questions (RQ1 to RQ3) are fully deterministic, so the script automates them completely. RQ1 trains the same model twice through the Python API and compares the metrics at exact-float tolerance ($10^{-12}$), confirming that the manifest recorded the seed and dependency versions. RQ2 starts a separate MCP client, its own process over stdio, and runs the discovery and prediction round trip against the RQ1 runs. RQ3 indexes one JSONL event and verifies that a search finds it without changing a single byte of the database.
 
 The agentic questions (RQ4 to RQ6) cannot be reduced to one deterministic script, because the thing being measured is the behavior of an LLM. They run as recorded experiments instead. In suite mode, the mock provider drives the rounds, so the instruments (the grounding comparison, the sandbox-code validity check, and the role-assignment comparison) are verified on every demand with zero tokens. In \texttt{--live} mode, the same checks run against a real provider, with \texttt{--datasets} and \texttt{--rounds} selectors for multi-round runs, and the results are recorded as evidence for Chapter~\ref{ch:results}.
 
@@ -122,7 +122,7 @@ PATH=.venv/bin:$PATH python scripts/evaluate_thesis.py --live openrouter --model
 
 \textbf{Protocol.} On the iris fixture dataset with \texttt{logistic\_regression} and seed 42: (a) run the CLI command of Code~\ref{lst:cli}; (b) submit the same job through \texttt{POST /train} on the local service; (c) call \texttt{run\_training\_job} through the agent MCP server and poll \texttt{get\_job\_status}. Record test accuracy, wall-clock time, and the artifact set of each run. \textbf{Provider dimension:} repeat the orchestrated experiment on the Titanic dataset (891 rows, target \texttt{Survived}) through three execution paths: deterministic-only (no LLM), Ollama (llama3.2:3b), and OpenRouter (GLM~5.3 Flash), and compare metrics bit-for-bit.
 
-\textbf{Expected outcome.} Identical metrics across the three surfaces (1.0000 accuracy on iris) (0.8045 accuracy on Titanic). In this experiment the LLMs models do not create or modify code, they provide a rationale (possible modifications) over the deterministic pipeline, so in this case changing the LLM changes the explanation, not the training outcome. We can also conclude from the results that HTTP and MCP significantly faster than the synchronous CLI (measured $\sim$2~s vs.\ $\sim$0.2~s, dominated by interpreter startup, not training)
+\textbf{Expected outcome.} Identical metrics across the three surfaces (1.0000 accuracy on iris, 0.8045 accuracy on Titanic). In this experiment the LLMs models do not create or modify code, they provide a rationale (possible modifications) over the deterministic pipeline, so in this case changing the LLM changes the explanation, not the training outcome. We can also conclude from the results that HTTP and MCP are significantly faster than the synchronous CLI (measured $\sim$2~s vs.\ $\sim$0.2~s, dominated by interpreter startup, not training).
 
 
 \section{Experiment 2: real-dataset validation}
@@ -147,7 +147,7 @@ fields.
 	\item Run a full orchestrated experiment (3 models $\times$ 3 seeds) through the HTTP surface. Measure end-to-end time, per-model progress events, and best test accuracy.
 \end{enumerate}
 
-\textbf{Expected outcome.} The cleaning policy turns a messy dataset into a cleaned trainable one, with every decision being recorded in the cleaning report. The scale guard rejects impractical models instead of running for hours or exhausting memory. Training at real scale stays fast and fully traceably and the full orchestration run completes with every model being tracked.
+\textbf{Expected outcome.} The cleaning policy turns a messy dataset into a cleaned trainable one, with every decision being recorded in the cleaning report. The scale guard rejects impractical models instead of running for hours or exhausting memory. Training at real scale stays fast and fully traceable, and the full orchestration run completes with every model being tracked.
 
 
 \section{Experiment 3: grounded autonomy (the agentic round)}
@@ -155,11 +155,11 @@ fields.
 
 \textbf{Claim under test.} Agents grounded in the deterministic baseline's artifacts add measurable, safe and competitive value. Their proposals are verifiable when grounded (RQ4), their generated code is valid and competitive beyond the fixed grid (RQ5), and role-specialized coordination outperforms a single shared prompt (RQ6).
 
-\textbf{Protocol.} Run over at least three datasets (including Titanic and the S\&P~500 validation set; iris excluded from RQ5 as is a fixture datset, being useful for checking the code wiring but not the logic). Excution is carried out twice and results are recorded separately for local (Ollama) and cloud (OpenRouter) model providers.
+\textbf{Protocol.} Run over at least three datasets (including Titanic and the S\&P~500 validation set; iris excluded from RQ5 as it is a fixture dataset, being useful for checking the code wiring but not the logic). Execution is carried out twice and results are recorded separately for local (Ollama) and cloud (OpenRouter) model providers.
 
 
 \begin{enumerate}
-	\item \textbf{Deterministic reference arm} The standard detreministic experiment pipeline produces the baseline runs, artifacts, and indexed evidence.
+	\item \textbf{Deterministic reference arm.} The standard deterministic experiment pipeline produces the baseline runs, artifacts, and indexed evidence.
 	\item \textbf{Grounded arm (RQ4).} vs \textbf{Ungrounded arm (RQ4).} The grounded round runs with the full context pack (EDA brief + baseline metrics + prior-run evidence) and the ungrounded round with the context pack stripped to the minimum schema (no EDA findings, no baseline metrics, no prior runs). The idea is to compare the verified-claim rate (claims resolving to real run ids and recorded metrics), the hallucinated-claim count, and the proposal validity (contract acceptance without repair).
 	\item \textbf{Multi-agent arm (RQ6).} vs \textbf{Single-agent control (RQ6).} The comparison is between the three specialized role agentic round of Section~\ref{sec:agenticround} and one individual agent with performing all three stages. Comparing the completion rate, the handoff artifacts, and the final model accuracies.
 	\item \textbf{Generated-code track (RQ5).} The FeatureEngineer transforms and any training scripts execute only in the sandbox; the deterministic post-validator checks shape/schema/target/leakage, and metrics are recomputed outside the sandbox. Record script validity rate, silent-failure count (must be zero), and best-agentic vs.\ best-deterministic deltas.
@@ -190,11 +190,11 @@ RQ6 multi vs single & role contracts vs shared prompt & multi agentic; single de
 \section{Experiment 4: multi-domain stress validation (the continuous loop)}
 \label{sec:exp-kaggle}
 
-\textbf{Claim under test.} The goal was to test the complete stack: Kaggle ingestion, context pack, EDA, clean, agent proposal, approval, train, agentic round, and notebook generation work and generalizes across diverse public datasets without code changes.Ten datasets were selected: six with recorded deterministic baselines (Arm A) and four never seen by the factory (Arm B). All the evidence produced by the experiment lives in \texttt{thesis/evidence/raw/} and every number below traces to them.
+\textbf{Claim under test.} The goal was to test the complete stack: Kaggle ingestion, context pack, EDA, clean, agent proposal, approval, train, agentic round, and notebook generation work and generalizes across diverse public datasets without code changes. Ten datasets were selected: six with recorded deterministic baselines (Arm A) and four never seen by the factory (Arm B). All the evidence produced by the experiment lives in \texttt{thesis/evidence/raw/} and every number below traces to them.
 
 \textbf{Protocol.} The experiment had two arms:
 
-\textbf{Arm A: agentic re-run over recorded baselines.} Six datasets were used during development to test the architecture (churn, California housing, IBM HR, e-commerce, Titanic, S\&P~500). This datasets had only been trained deterministic, so the idea was to run the arquitecture this time powered by the agentic layer and comapare the results with the already recorded deteminisc baselines, comparing best-agentic vs.\ best-deterministic per dataset, with validity rates and rejections,in order to see if agents produce improvement in the model accuracy.
+\textbf{Arm A: agentic re-run over recorded baselines.} Six datasets were used during development to test the architecture (churn, California housing, IBM HR, e-commerce, Titanic, S\&P~500). These datasets had only been trained deterministically, so the idea was to run the architecture this time powered by the agentic layer and compare the results with the already recorded deterministic baselines, comparing best-agentic vs.\ best-deterministic per dataset, with validity rates and rejections, in order to see if agents produce an improvement in model accuracy.
 
 
 \begin{itemize}
@@ -207,9 +207,9 @@ RQ6 multi vs single & role contracts vs shared prompt & multi agentic; single de
 
 \textbf{Storage policy.} The datasets are kept in the workspace as proof as well as the generated files: the analysis CSV (each under $\sim$20~MB), the context pack, and the cleaning report. Heavy raw sources stay in the transient kagglehub cache and are eliminated after ingest.
 
-\textbf{The ratchet protocol.} The whole idea of the experiemnt was to generate a working loop (ratchet loop). Each generation starts from a fair deterministic baseline, in which all registered models are trained and persisted by the factory itself. Role-specialized agentic rounds then explore beyond it, trying to beat the model baseline. If an agentic round produces a better models the factory absorbes the models as the winning configuration for the dataset. But it will only be absrobed if it can be repoduce by the factory determinstic pipeline (no code modifications). Champions are recorded in a per-dataset generation ledger (baseline, per-round validity, mode, entries, the prompts, token costs, and the absorption decision with its replay proof), so the next generation of runs will face stronger baseline,and agents will have to produce better results to beat it.
+\textbf{The ratchet protocol.} The whole idea of the experiment was to generate a working loop (ratchet loop). Each generation starts from a fair deterministic baseline, in which all registered models are trained and persisted by the factory itself. Role-specialized agentic rounds then explore beyond it, trying to beat the model baseline. If an agentic round produces a better model the factory absorbs the model as the winning configuration for the dataset. But it will only be absorbed if it can be reproduced by the factory deterministic pipeline (no code modifications). Champions are recorded in a per-dataset generation ledger (baseline, per-round validity, mode, entries, the prompts, token costs, and the absorption decision with its replay proof), so the next generation of runs will face stronger baselines, and agents will have to produce better results to beat it.
 
-\textbf{Results.} Across the ten datasets the loop recorded \textbf{37 generations} and \textbf{45 training rounds}, producing \textbf{19 absorbed champions}. The remaining 18 generations absorbed nothing, and the ledger records the reason for each one.Five never reached an agentic round (all entries degraded or rejected), two hit a ceiling, where their best possible score already equal the baseline, and eleven finished below the baseline they faced. The per-dataset results follow: Arm A in Table~\ref{tab:exp4arma}, Arm B in Table~\ref{tab:exp4armb}.
+\textbf{Results.} Across the ten datasets the loop recorded \textbf{37 generations} and \textbf{53 training rounds}, producing \textbf{19 absorbed champions}. The remaining 18 generations absorbed nothing, and the ledger records the reason for each one. Five never reached an agentic round (all entries degraded or rejected), two hit a ceiling, where their best possible score already equaled the baseline, and eleven finished below the baseline they faced. The per-dataset results follow: Arm A in Table~\ref{tab:exp4arma}, Arm B in Table~\ref{tab:exp4armb}.
 
 
 

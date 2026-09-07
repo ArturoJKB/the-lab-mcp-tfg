@@ -36,12 +36,12 @@
 \contentsline {table}{\numberline {6.20}{\ignorespaces Model latency probe on OpenRouter with realistic generation.}}{62}{table.caption.48}%
 \contentsline {table}{\numberline {6.21}{\ignorespaces P6 findings harvest: major findings and by-design rejections (full log in \texttt {docs/P6\_FINDINGS.md}; every ticket cites its run evidence).}}{63}{table.caption.49}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {7.1}{\ignorespaces Development budget (recorded costs over the project window).}}{72}{table.caption.50}%
+\contentsline {table}{\numberline {7.1}{\ignorespaces Development budget (recorded costs over the project window).}}{71}{table.caption.50}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces CLI troubleshooting (from \texttt {docs/CLI\_GUIDE.md}).}}{83}{table.caption.52}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces CLI troubleshooting (from \texttt {docs/CLI\_GUIDE.md}).}}{82}{table.caption.52}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {D.1}{\ignorespaces Experiment 4 datasets (Kaggle slugs, verified live; tiered).}}{87}{table.caption.53}%
+\contentsline {table}{\numberline {D.1}{\ignorespaces Experiment 4 datasets (Kaggle slugs, verified live; tiered).}}{86}{table.caption.53}%
 \contentsfinish 
