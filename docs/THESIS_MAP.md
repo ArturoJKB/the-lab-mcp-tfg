@@ -147,6 +147,12 @@ thelab-mcp-demo data_catalog --run-id <run_id>     # datasets, profiles, contrac
 Updated as work progresses — no fixed timeline; we iterate fast and the
 present is what counts.
 
+- [x] Ratchet loop (P6): ten-dataset validation complete — 37 agentic
+      generations, 19 replay-verified absorptions, 6 honest refusals
+      (imbalanced ceiling, saturated negative control); open-vs-commercial
+      mixed teams showed no dominance (2/2/2); run IDs searchable under
+      `runs/`, ledgers under `.thelab/generations/`
+
 - [x] Real-dataset hardening: cleaning policy (datetime + cardinality), model
       scale guards, per-model progress, job cancellation — S&P dataset runs
       end-to-end (`tests/test_real_data_hardening.py`)

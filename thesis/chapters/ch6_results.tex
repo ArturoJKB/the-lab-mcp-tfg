@@ -1,29 +1,29 @@
 ++\chapter{Results}
 \label{ch:results}
 
-This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}), which includes the automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology}. It continues with Experiments 1 and 2 plus the Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
+This chapter reports the results in the order of the methodology. It opens with the recorded evidence base (Section~\ref{sec:evidence}), which includes the automated RQ1--RQ3 verdicts from Chapter~\ref{ch:methodology}. It continues with Experiments 1 and 2 plus a Kaggle proof (Sections~\ref{sec:exp1-results}--\ref{sec:exp2-results} and Section~\ref{sec:kaggle-results}), Experiment 3 with its live recordings (Section~\ref{sec:exp-agentic-results}), and Experiment 4 with both arms recorded (Section~\ref{sec:exp-kaggle-results}). It closes with the agent case study (Section~\ref{sec:casestudy}), the cross-cutting benchmark observations (Section~\ref{sec:b1results}), and the agent efficiency and reliability metrics (Section~\ref{sec:agentmetrics}).
 
 \section{The recorded evidence base}
 \label{sec:evidence}
 
-Before the presenting the claimed results, is good to state that every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window the workspace accumulated \textbf{1{,}591 recorded runs}: 1{,}247 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error).
+Before presenting the claimed results, is good to state that every number reported in this chapter traces to one of the persisted run directories under \texttt{runs/}, and the charts below were generated from those same manifests, the context the system itself produced, not hand-built summaries. Over its development window the workspace accumulated \textbf{1{,}596 recorded runs}: 1{,}252 completed, 314 rejected, and 30 failed, a 19.7\% rejection rate that quantifies the rejection-as-first-class design (one in five runs is a traceable refusal with a persisted reason, not a silent error).
 
 Note: The follwing window includes records stored during development, so counts reflect the live system rather than a curated benchmark once the project had finished.
 
 \begin{table}[H]
 \centering
-\caption{Recorded run inventory by status and model family (1{,}591 runs, from \texttt{runs/} manifests).}
+\caption{Recorded run inventory by status and model family (1{,}596 runs, Aug 19 -- Sep 6, 2026, from \texttt{runs/} manifests).}
 \label{tab:runinventory}
 \small
 \begin{tabular}{lr lr}
 \toprule
 \textbf{Status} & \textbf{Runs} & \textbf{Model family} & \textbf{Runs} \\
 \midrule
-completed & 1{,}247 & random\_forest & 371 \\
+completed & 1{,}252 & random\_forest & 371 \\
 rejected & 314 & logistic\_regression & 297 \\
 failed & 30 & hist\_gradient\_boosting & 207 \\
 \midrule
-\textbf{Total} & \textbf{1{,}591} & svc / sgd\_classifier & 237 \\
+\textbf{Total} & \textbf{1{,}596} & svc / sgd\_classifier & 237 \\
 Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
  & & hist\_gradient\_boosting\_regressor & 134 \\
  & & linear\_regression / other & 67\\
@@ -49,32 +49,11 @@ Rejection rate & 19.7\% & ridge / random\_forest\_regressor & 283 \\
 \addplot coordinates {(1,7) (2,22) (3,15) (4,262) (5,303) (6,157) (7,98)};
 \end{axis}
 \end{tikzpicture}
-\caption{Test-accuracy distribution of completed classification runs. The distribution now spreads across the 0.6--0.9 range on real datasets, with the fixture-driven mass at $\geq 0.99$ a visible minority; the honest left tail (0.33--0.67) remains recorded evidence that determinism guarantees repeatability, not quality.}
+\caption{Test-accuracy distribution of completed classification runs. The distribution now spreads across the 0.6--0.9 range on real datasets, with the fixture-driven mass at $\geq 0.99$ a visible minority}
 \label{fig:accdist}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-	width=0.86\linewidth, height=4.6cm,
-	ybar, bar width=14pt,
-	ymin=0, ylabel={completed runs},
-	xtick={1,...,7},
-	xticklabels={{[0,0.4)},{[0.4, 0.6)},{[0.6, 0.7)},{[0.7, 0.8)},{[0.8, 0.9)},{[0.9,00.99)},{$\geq$.99}},
-	x tick label style={font=\scriptsize},
-	xlabel={test accuracy bucket (864 classification runs)},
-	tick label style={font=\scriptsize},
-	label style={font=\small},
-]
-\addplot coordinates {(1,7) (2,22) (3,15) (4,262) (5,303) (6,157) (7,98)};
-\end{axis}
-\end{tikzpicture}
-\caption{Test-accuracy distribution of completed classification runs. The distribution now spreads across the 0.6--0.9 range on real datasets, with the fixture-driven mass at $\geq 0.99$ a visible minority; the honest left tail (0.33--0.67) remains recorded evidence that determinism guarantees repeatability, not quality.}
-\label{fig:runacc}
-\end{figure}
-
-From the completed run distribution we can infere two interesting facts. First, the rejection rate: 314 of 1{,}591 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data: the mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live, and the comparison surfaces (\texttt{compare}, Model Lab, batch reports) exist precisely to expose the spread.
+From the completed run distribution we can infere two interesting facts. First, the rejection rate: 314 of 1{,}596 runs ended \texttt{rejected} with a persisted reason, the scale guards, schema checks, and constant-column rules firing in production use, exactly the traceable refusal behaviour RQ1's protocol treats as a valid outcome. Second, the accuracy distribution moved as the workload moved from fixtures to real data. The mass now sits in the 0.7--0.9 bands (565 runs), which is where honest tabular results live.
 
 \section{Experiment 1: three ways in}
 \label{sec:exp1-results}
@@ -97,9 +76,8 @@ MCP & \texttt{run\_training\_job} + status poll & 1.0000 & 1.0000 & $\sim$0.2 s 
 \end{tabular}
 \end{table}
 
-This result carries the interoperability claim beyond RQ2's registry check. Not only can an independent agent \emph{use} a model, it can drive the factory itself, and the run it triggers is indistinguishable from a human's.
 
-\textbf{Provider dimension (recorded).} The same experiment executed on the Titanic dataset (891 rows, 14 features, target \texttt{Survived}) through three execution paths: deterministic-only (no LLM), the Ollama local brain (llama3.2:3b), and the OpenRouter cloud brain (GLM~5.3 Flash), produced bit-for-bit identical training outcomes (Table~\ref{tab:providers}). This is the central design claim made measurable: \emph{changing the LLM changes the explanation, never the training outcome}, and the deterministic-only path is always available as a ground-truth baseline for validating that the agentic layer adds interpretation without injecting non-determinism when is not wanted. In later experiments is showed that different accuracies from the baseline are obtained when the models are given access to the controlled sandbox.
+\textbf{Provider expansion.} The same experiment was executed on the Titanic dataset (891 rows, 14 features, target \texttt{Survived}) through three execution paths. Deterministic-only (no LLM), the Ollama local brain (llama3.2:3b), and the OpenRouter cloud brain (GLM~5.3 Flash), produced bit-for-bit identical training outcomes (Table~\ref{tab:providers}). This is the central design claim made measurable: \emph{changing the LLM changes the explanation, never the training outcome}, and the deterministic-only path is always available as a ground-truth baseline for validating that the agentic layer adds interpretation without injecting non-determinism when is not wanted. In later experiments is showed that different accuracies from the baseline are obtained when the models are given access to the controlled sandbox.
 
 \begin{table}[H]
 \centering
@@ -141,7 +119,7 @@ Leakage study & naive features \textbf{84.2\%} $\rightarrow$ at-decision-time fe
 \end{tabular}
 \end{table}
 
-Two results deserve interpretation. First, the \emph{before/after of the cleaning policy}. A first run with naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV. the second run with the cardinality-aware policy produces 16--21~MB for the same data, a huge difference that turns a non working run into a 6-second one, with every decision auditable in the report.Second, the leakage study. The naive feature set scored 84.2\% accuracy, but that number does not hold up in the real world. When the features are limited to those available at decision time, the score drops to 60.3\%, which is realistic for analyst ratings. Both runs are kept as inspectable evidence, and that is exactly the value of recording every rejection and every provenance detail.
+Two results deserve interpretation. First, the \emph{before/after} of the cleaning policy. A first run with naive one-hot encoding of the raw dataset (501 ticker dummies among others) produced a 22~GB intermediate CSV. The second run with the cardinality-aware policy produced 16--21~MB for the same data. A notably huge difference that turned a non working run into a 6-second succesfull one.Second, the leakage study. The naive feature set scored 84.2\% accuracy, but that number does not hold up in the real world. When the features are limited to those available at decision time, the score drops to 60.3\%, which is realistic for analyst ratings. Both runs are kept as inspectable evidence, and that is exactly the value of recording every rejection and every provenance detail.
 
 \section{Kaggle pipeline proof}
 \label{sec:kaggle-results}
@@ -157,18 +135,21 @@ Before Experiment 4, a three-dataset proof recorded the full journey end-to-end 
 \toprule
 \textbf{Dataset (Kaggle slug)} & \textbf{Shape} & \textbf{Best result} & \textbf{Task} \\
 \midrule
-\texttt{shrutimechlearn/\allowbreak{}churn-modelling}\footnotemark[1] & 10{,}000 $\times$ 14 & \texttt{random\_forest}: acc 0.862, F1 0.742 & classification \\
-\texttt{camnugent/\allowbreak{}california-housing-prices}\footnotemark[2] & 20{,}640 $\times$ 10 & \texttt{random\_forest\_regressor}: $R^2$ 0.817 & regression \\
-\texttt{pavansubhasht/\allowbreak{}ibm-hr-analytics-attrition-dataset}\footnotemark[3] & 1{,}470 $\times$ 35 & \texttt{logistic\_regression}: acc 0.861, F1 0.679 & classification \\
+\texttt{shrutimechlearn/\allowbreak{}churn-modelling}\footnotemark[1] & 10{,}000 $\times$ 14 & \texttt{random\_forest}: acc 0.8615, F1 0.742 & classification \\
+\texttt{camnugent/\allowbreak{}california-housing-prices}\footnotemark[2] & 20{,}640 $\times$ 10 & \texttt{random\_forest\_regressor}: $R^2$ 0.8172 & regression \\
+\texttt{pavansubhasht/\allowbreak{}ibm-hr-analytics-attrition-dataset}\footnotemark[3] & 1{,}470 $\times$ 35 & \texttt{logistic\_regression}: acc 0.8605, F1 0.679 & classification \\
 \bottomrule
 \end{tabular}%
 }
-\footnotetext[1]{Run IDs: \texttt{run-20260831-001740-df421901} (random\_forest, acc 0.8615) and \texttt{run-20260831-001740-388f3f8d} (logistic\_regression, 0.808).}
-\footnotetext[2]{Run IDs: \texttt{run-20260831-001753-8c88ce63} (random\_forest\_regressor, $R^2$ 0.8172) and \texttt{run-20260831-001753-02d2899d} (ridge, 0.6255).}
-\footnotetext[3]{Run IDs: \texttt{run-20260831-001835-12bc076e} (logistic\_regression, acc 0.8605) and \texttt{run-20260831-001835-2a5b0631} (random\_forest, 0.8401). The raw-data validation rejections behind the constant-column finding: \texttt{run-20260831-001814-cedd5a3b} and \texttt{run-20260831-001814-e2a43afb}.}
+\footnotetext[1]{Run IDs: \texttt{run-20260831-001740-df421901} (random\_forest, acc 0.8615).}
+\footnotetext[2]{Run IDs: \texttt{run-20260831-001753-8c88ce63} (random\_forest\_regressor, $R^2$ 0.8172).}
+\footnotetext[3]{Run IDs: \texttt{run-20260831-001835-12bc076e} (logistic\_regression, acc 0.8605).}
+\footnotetext[4]{The raw-data validation rejections behind the constant-column finding: \texttt{run-20260831-001814-cedd5a3b} and \texttt{run-20260831-001814-e2a43afb}.}
+
+
 \end{table}
 
-The sytem worked correctly, but there was a genuine engineering finding: on the HR dataset, constant columns (\texttt{EmployeeCount}, \texttt{StandardHours}, and the one-hot \texttt{Over18\_Y}) were rejected by validation, correctly refusing to train on zero-information features, and the cleaning policy was extended (constant-column drop) so that the \emph{system} handles the case, not the operator. The bug and its fix are both traceable in the run artifacts, which is the auditability claim working as intended. All three runs produced valid generated notebooks (six cells, nbformat~4) through \texttt{GET /runs/\{id\}/notebook}.
+The system worked correctly, but there was a genuine engineering finding: on the HR~\footnotemark[4]  dataset, constant columns (\texttt{EmployeeCount}, \texttt{StandardHours}, and the one-hot \texttt{Over18\_Y}) were rejected by validation, correctly refusing to train on zero-information features, and the cleaning policy was extended (constant-column drop) so that the \emph{system} handles the case, not the operator. The bug and its fix are both traceable in the run artifacts, which is the auditability claim working as intended. All three runs produced valid generated notebooks (six cells, nbformat~4) through \texttt{GET /runs/\{id\}/notebook}.
 
 
 \section{Experiment 3: grounded autonomy (agentic round)}
@@ -176,7 +157,7 @@ The sytem worked correctly, but there was a genuine engineering finding: on the 
 
 The agentic round of Section~\ref{sec:agenticround} is executed over the deterministic baseline's artifacts on three datasets (iris, california-housing, churn), recorded live per provider. The tables below report the recorded results.
 
-\textbf{RQ4, grounding ablation} (grounded vs.\ ungrounded proposals).
+\textbf{RQ4, grounding} (proposals with the recorded EDA summary vs proposals with little or no evidence).
 
 \begin{table}[H]
 \centering
@@ -197,15 +178,35 @@ churn & ungrounded & 1.0 & -- & 0 \\
 \end{tabular}
 \end{table}
 
-\textbf{RQ5, agentic capability} (sandboxed generated code). Figure~\ref{fig:exp4validity} summarizes the batch-entry outcomes across the validator generations. The pre-fix failures (0/108, 0/15, 0/9) are on the record next to the post-fix 1.0-validity rounds.
+The first test used three datasets whose column names explain themselves (sepal length, Balance, Age). With the EDA summary the agent verified every claim it made. Without any context it also verified every claim, because a model that is told nothing can still read the column names and guess correctly when the names describe the data. On these schemas the instrument could not separate the two arms, so we treat this table as a designed null. It motivated a second test on a dataset where column names hide their meaning.
+
+That second test ran on the raw S\&P~500 file, before any cleaning. It has 18 columns with jargon names such as \texttt{from\_grade} and \texttt{price\_target\_action}, no documentation, and a five-class target called \texttt{action}. The grounded arm received a short EDA summary of the real file. The ungrounded arms received either nothing at all or only the domain (a financial table), so any claim they made about columns or classes was a guess.
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Grounding test on the ambiguous schema (raw S\&P~500 file, GLM 5.3 Flash). A claim counts as verified when it resolves to a fact of the file.}
+\label{tab:rq4amb}
+\begin{tabular}{p{4.2cm}p{2.4cm}p{7.6cm}}
+\toprule
+\textbf{Arm} & \textbf{Verified} & \textbf{What happened} \\
+\midrule
+Grounded (with the EDA summary) & 4 of 5 & Concrete and correct. The row count, the five target classes, the most frequent class with its share, and the date range. One checker false negative on an arithmetic sum. \\
+Ungrounded, no context & none made & The model refused to invent claims and asked for the data. An honest refusal, but it produces nothing to check. \\
+Ungrounded, domain knowledge only & 0 of 5 & Plausible guesses about a financial table. None matched. It invented columns such as \texttt{transaction\_id} and a binary fraud label that do not exist here. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:rq4grounding} shows the verified share per arm. The grounded arm turned the file into verifiable claims. The ungrounded arms produced either silence or confident invention. This is the whole argument for grounding in one test. The recorded comparison rounds also passed the proposal contract in both arms, so the pipeline kept working either way and only the evidence quality moved.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{figures/validity_story.pdf}
-\caption{Batch entries vs valid entries across the validator generations: every pre-fix failure was caught by the deterministic validator, and every post-fix round completed at validity 1.0.}
-\label{fig:exp4validity}
+\includegraphics[width=0.7\textwidth]{figures/rq4_grounding.pdf}
+\caption{Grounding test on the ambiguous schema. Share of verified claims per arm on the raw S\&P~500 file.}
+\label{fig:rq4grounding}
 \end{figure}
 
+\textbf{RQ5, capability} (agent-written code vs the fixed deterministic grid).
 
 \begin{table}[H]
 \centering
@@ -217,13 +218,15 @@ churn & ungrounded & 1.0 & -- & 0 \\
 \textbf{Dataset} & \textbf{Scripts} & \textbf{Valid} & \textbf{Silent failures} & \textbf{$\Delta$ best (agentic $-$ det.)} \\
 \midrule
 iris & 15 & 15 & 0 & +0.0000 (tie at the 1.0 ceiling) \\
-california-housing & 9 & 0 & 0 & -- (all 9 loudly rejected pre-F4; no valid round) \\
+california-housing & 9 & 0 & 0 & -- (all 9 loudly, no valid round) \\
 churn & 30 & 30 & 0 & +0.0095 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{RQ6, orchestration value} (multi-agent vs.\ single-agent control).
+Three recorded outcomes. On churn the agent-written rounds trained 30 valid entries and beat the deterministic baseline by 0.95 points of accuracy. On iris the rounds tied the baseline at the 1.0 ceiling, with all 15 entries valid. On california-housing the first version of the validator rejected all 9 entries, because the generated transform quantized the target column. That failure was recorded, the validator was extended, and the fix is regression-tested.
+
+\textbf{RQ6, orchestration} (role-specialized team vs one shared prompt).
 
 \begin{table}[H]
 \centering
@@ -244,42 +247,49 @@ churn (3 rounds) & single & 3/3 & yes & \texttt{degraded\_deterministic} \\
 \end{tabular}
 \end{table}
 
-The ablation results support all three agentic claims. Grounding did not measurably change the verified-claim rate on these datasets (both arms scored 1.0), but this is because the datasets have clean, well-documented schemas where even ungrounded agents propose correct column names. The grounding instrument's value is protective, and an ambiguous-schema ablation on the raw S\&P~500 file (18 jargon-named columns, no documentation) demonstrated it directly: the grounded arm produced 5 concrete, verifiable claims (4--5 verified: row count, the five target classes, their distribution, the date range), while the ungrounded arm with zero context honestly refused to fabricate claims, and with only a domain prior it emitted 5 plausible-sounding claims that verified at 0/5 (guessed columns such as transaction\_id and a binary fraud target that do not exist in the dataset). Grounding converts no-answer and plausible hallucination into verifiable claims. The selector's objective choice revealed a genuine finding: on imbalanced datasets (HR attrition, 84/16 split), both the agent and the deterministic pipeline optimized accuracy, where the baseline model was already near-ceiling; the actual headroom was in macro-F1 (0.61--0.74 across all runs), which means the imbalanced-class objective is a selection-policy gap, not a model-capability gap.
+Three findings. First, the role-specialized team completed every round it attempted at validity 1.0 and drove the absorbed champions (better score than baseline) of titanic, california-housing, and churn. Second, the single shared-prompt control never reached agentic mode. With \texttt{llama} or \texttt{mistral} as the shared prompt, the FeatureEngineer stage produced no sandbox-valid code, and the round fell back to the deterministic path. We then ran the control again with \texttt{GLM}, the one model that can write factory-safe transforms. Even \texttt{GLM}, broke every stage contract under the shared prompt, and the round degraded to deterministic. Third, the human cost is exactly one recorded gate decision per round, on the record. Across 53 recorded rounds there was one gate decision per round, zero bypasses, and 10 proposal rejections recorded across the project.
 
-The mixed team (llama analyst + GLM feature engineer + mistral/llama selector) completed every round it attempted at validity 1.0 and was the driver of record on the absorbed generations of all three of its ratchet datasets (titanic, california-housing, churn). The single-agent control (one shared prompt across all stages) also completed (as a \emph{degraded\_deterministic} fallback, recorded per the provenance policy), because its FeatureEngineer stage produced no sandbox-valid code (llama, mistral). The FE role requires a model whose reasoning chain can produce pandas code that passes both the sandbox whitelist and the deterministic post-validator. A dedicated control closed this gap. A single shared-prompt round with the one FE-capable model (GLM-5.3-flash) as its only agent. Under the shared prompt, every stage contract broke. The analyst brief, the feature-engineering JSON, and the selector proposal all failed to parse, and the round degraded to deterministic (1/1 baseline-tie entries, no agentic output). Role specialization is not cosmetic. The same model that absorbs champions inside role contracts cannot function without them. The RQ6 comparison is therefore role-contract multi-agent (validity 1.0, absorbed) versus a shared-prompt control that cannot reach agentic mode. And the intervention record over the full loop is one recorded gate decision per round (53 rounds, zero bypasses, 10 project-wide human proposal rejections, 19 absorptions). The orchestration's human cost is exactly one decision per round, on the record. GLM's reasoning-driven code generation was the only capability that produced factory-safe transforms on titanic; on california-housing, gemini-2.5-flash-lite produced a safe but quality-degrading transform (R$^2$ dropped from 0.823 to 0.533). The post-validator rejected one constant-feature transform (GLM, pre-fix), three wrong-task model proposals (automatic guard), and two below-baseline selections (honest no-absorption).
-
-\subsection{RQ5 spike: first recorded validity numbers}
-\label{sec:rq5spike}
-
-Before committing to the full ablation protocol, a de-risking spike exercised the RQ5 instrument directly (Titanic, cleaned 891$\times$14; validation by a deterministic epilogue appended to the agent's code, never by prompt compliance). The cloud model (GLM~5.3 Flash) produced \textbf{3/3 valid feature-engineering transforms} (100\%, against the $\geq$80\% bar) across three open-ended instructions (14, 8, and 6 new features respectively, including interaction terms (\texttt{Age$\times$Pclass}, \texttt{WomanOrChild}), skew handling (\texttt{log1p} on \texttt{Fare}), and leakage-safe group encodings) and a 1/1 valid model selection that correctly chose \texttt{svc} on macro-F1 reasoning for the imbalanced target. The spike also produced two engineering findings: the sandbox's blanket \texttt{ast.Lambda} block was RQ5's sole blocker (0/3 valid before, 3/3 after the safe, justified lift described in Section~\ref{sec:safety}), and the sandbox memory limit required a measured raise (512~MB $\rightarrow$ 2~GB) for pandas~3's address-space needs. The recorded spike artifact is kept under \texttt{benchmarks/spike/}. The spike's validity result was later confirmed at live scale (15/15 on iris, 30/30 across three churn rounds, Section~\ref{sec:exp-agentic-results}), and the open Ollama question was closed by the fully-offline run of Section~\ref{sec:localfirst}.
+Two secondary findings complete the picture. On the imbalanced HR dataset (an 84/16 split) both the agent and the deterministic pipeline optimized accuracy, where the baseline model was already near its ceiling. The real headroom was in macro-F1, which ranged from 0.61 to 0.74 across the recorded runs. On this dataset the gap is a selection-policy gap, not a model-capability gap. And on california-housing the \texttt{gemini-lite} transform was safe but quality-degrading, with test $R^2$ dropping from 0.823 to 0.533, recorded as an honest no-absorption.
 
 \section{Experiment 4: multi-domain stress validation}
 \label{sec:exp-kaggle-results}
 
-The loop executed on the final system build (after the P5 rework). The tables below are filled from the recorded runs.
+The ratchet loop idea executed on the final system build with 10 different dataset. Arm A being datasets already seen by the factory during development, and arm B being new never seen datasets.The tables below present the findings filled from the recorded runs and the generated artifacts.
 
-\textbf{Arm A, agentic re-run over recorded baselines.} The six datasets with persisted deterministic baselines receive the P5 agentic round; the delta columns are the comparison:
+\textbf{Arm A, agentic re-run over recorded baselines.} The six datasets with persisted deterministic baselines. The delta columns are the comparison:
+
 
 \begin{table}[H]
 \centering
-\caption{Experiment 4, Arm A: recorded deterministic baselines vs.\ agentic round.}
+\caption{Experiment 4, Arm A: recorded deterministic baselines vs.\ agentic round. The seed column is the winning random seed, recorded so every result is replayable.}
 \label{tab:exp4arma}
 \small
-\begin{tabular}{p{3.4cm}p{2.6cm}p{2.6cm}p{1.8cm}p{2.6cm}}
+\begin{tabular}{p{3.0cm}p{2.4cm}p{2.4cm}p{1.2cm}p{1.4cm}p{2.2cm}}
 \toprule
-\textbf{Dataset} & \textbf{Best deterministic (recorded)} & \textbf{Best agentic} & \textbf{$\Delta$} & \textbf{Validity / rejections} \\
+\textbf{Dataset} & \textbf{Best deterministic (recorded)} & \textbf{Best agentic} & \textbf{Seed} & \textbf{$\Delta$} & \textbf{Validity / rejections} \\
 \midrule
-churn-modelling & acc 0.8615 & HGB s128 0.8710 & +0.95 & 1.0/1.0 \\
-california-housing & $R^2$ 0.8234 & HGB-regressor 0.8455 & +2.21 & 1.0/1.0 \\
-IBM HR attrition & SVC acc 0.8707 & SVC 0.8707 & tie & 1.0/1.0 \\
-e-commerce sales & LR $R^2$ 1.0000 (computed col) & LR 1.0000 & headroom = 0 & 1.0/1.0 \\
-Titanic & acc 0.8045 & RF s456 0.8547 & +5.03 & 0.83/1.0/1.0 \\
-S\&P 500 analyst & acc 0.9845 & HGB s84 0.9861 & +0.16 & 0.67/1.0/1.0 \\
+churn-modelling & acc--0.8615 & HGB 0.8710 & 128 & +0.95 & 1.0/1.0 \\
+california-housing & $R^2$--0.8234 & HGB-r 0.8455 & 84 & +2.21 & 1.0/1.0 \\
+IBM HR attrition & acc--0.8707 & SVC 0.8707 & 87 & tie & 1.0/1.0 \\
+e-commerce sales & $R^2$--1.0000 (computed col) & LR 1.0000 & 42 & headroom = 0 & 1.0/1.0 \\
+Titanic & acc--0.8045 & RF 0.8547 & 456 & +5.03 & 0.83/1.0/1.0 \\
+S\&P 500 analyst & acc--0.9845 & HGB 0.9861 & 84 & +0.16 & 0.67/1.0/1.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Arm B, new stress domains.} Four must-tier datasets completed the loop with mixed teams (genomics, health, crypto, energy); the strong/stretch tiers (NLP featurization, music signals, scale stress, clustering/graph track) were deferred when the schedule closed and are recorded as future work:
+Every absorbed champion in the table is replay-verified. The winning
+configuration was re-executed through the deterministic factory with the
+same seed, confirming exact metric equality before absorption. The replay
+command for the strongest result (churn, hist gradient boosting, seed 128)
+is a single line.
+
+\begin{lstlisting}[language=bash, caption={Replay command for the churn champion (Arm A, seed 128). Executing this line reproduces the exact recorded metrics.}, label={lst:replay}, style=cli]
+thelab run model --dataset uploads/shrutimechlearn_churn-modelling_cleaned.csv --target Exited --model hist_gradient_boosting --seed 128
+\end{lstlisting}
+
+
+\textbf{Arm B, new stress domains.} Four new never seen datasets completed the loop with mixed-model team runs. The domains were: genomics, health, crypto and energy. Other domains such as: NLP featurization, music signals, scale stress and clustering/graph tracking were orginally part of arm B but deferred due to time constraints. The are recorded as futre work.
 
 \begin{table}[H]
 \centering
@@ -293,15 +303,17 @@ S\&P 500 analyst & acc 0.9845 & HGB s84 0.9861 & +0.16 & 0.67/1.0/1.0 \\
 Genomics & \texttt{kevinarvai/\allowbreak{}clinvar-conflicting} & classification & must & HGB 0.8029 (+0.26), 2/3 absorbed \\
 Health & \texttt{rabieelkharoua/chronic-\allowbreak{}kidney-\allowbreak{}disease-\allowbreak{}dataset-\allowbreak{}analysis} & classification & must & HGB 0.9488 (+1.81), 2/3 absorbed \\
 Crypto & \texttt{sudalairajkumar/\allowbreak{}cryptocurrencypricehistory} & direction classification & must & HGB 0.5646 (+1.86), 2/3 absorbed \\
-Energy & \texttt{robikscube/\allowbreak{}hourly-\allowbreak{}energy-\allowbreak{}consumption} & regression & must & 0/3 absorbed: RF+calendar baseline (0.9590) refused all teams \\
+Energy & \texttt{robikscube/\allowbreak{}hourly-\allowbreak{}energy-\allowbreak{}consumption} & regression & must & 0/3 absorbed: RF+calendar baseline (0.9590)\\
 NLP/AI & \texttt{shivamb/\allowbreak{}real-\allowbreak{}or-\allowbreak{}fake-\allowbreak{}fake-\allowbreak{}jobposting-\allowbreak{}prediction} & text-featurize + classif. & strong & deferred \\
 Music signals & \texttt{andradaolteanu/gtzan-\allowbreak{}dataset-\allowbreak{}music-\allowbreak{}genre-\allowbreak{}classification} (features CSV) & classification & strong & deferred \\
 Scale stress & \texttt{mczielinski/\allowbreak{}bitcoin-historical-data} (daily aggregate) & regression & stretch & deferred \\
-Clustering/graph & \texttt{rahman4li/patch-\allowbreak{}bay-\allowbreak{}the-\allowbreak{}mcp-\allowbreak{}server-\allowbreak{}ecosystem-\allowbreak{}graph} nodes+edges & unsupervised & stretch & deferred \\
+Graph & \texttt{rahman4li/patch-\allowbreak{}bay-\allowbreak{}the-\allowbreak{}mcp-\allowbreak{}server-\allowbreak{}ecosystem-\allowbreak{}graph} nodes+edges & unsupervised & stretch & deferred \\
 Clustering & \texttt{adarsh1077/\allowbreak{}huggingface-\allowbreak{}hub-\allowbreak{}50k-\allowbreak{}ai-\allowbreak{}models} & unsupervised & stretch & deferred \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+
 
 \begin{figure}[H]
 \centering
@@ -316,18 +328,38 @@ Clustering & \texttt{adarsh1077/\allowbreak{}huggingface-\allowbreak{}hub-\allow
 \caption{Ratchet uplift per dataset: deterministic try-all baseline (grey) vs absorbed champion (blue); deltas annotated.}
 \label{fig:exp4uplift}
 \end{figure}
-The loop is a ratchet (protocol in Section~\ref{sec:exp-kaggle}). The deterministic baseline is the bar each generation must beat, absorbed champions raise it, and the absorption gate (exact factory replay) is what separates a verified improvement from an anecdote. The Arm A comparison shows that the agentic round beat the deterministic baseline on 4 of the 6 recorded datasets (churn +0.95 pts, california-housing +2.21 pts, titanic +5.03 pts, S\&P +0.16 pts), tied on 2 (HR attrition after the try-all baseline itself improved to 0.8707; e-commerce at a computed-column ceiling of 1.0000 where headroom is definitionally zero), and trailed on none. On S\&P, the baseline is the deterministic try-all over the default cleaned features (the feature-leakage ceiling discussed in the leakage study), not the at-decision-time figure. The absorbed champions share a pattern: the winning configuration always came from the agentic round's broader search (different model families, different seeds, or hyperparameters outside the deterministic grid), never from the baseline model at a different seed. On the absorbed datasets, the factory replay confirmed that the agentic win was real and reproducible, not a seed artifact.
+The loop is a ratchet (protocol in Section~\ref{sec:exp-kaggle}). The deterministic baseline is the bar each generation must beat, absorbed champions raise it, and the absorption gate (exact factory replay) is what separates a verified improvement from an anecdote. The Arm A comparison shows that the agentic round beat the deterministic baseline on 4 of the 6 recorded datasets (churn +0.95 pts, california-housing +2.21 pts, titanic +5.03 pts, S\&P +0.16 pts), tied on 2 (HR attrition after the try-all baseline itself improved to 0.8707; e-commerce at a computed-column ceiling of 1.0000 where headroom is definitionally zero), and trailed on none. The absorbed champions share a pattern: the winning configuration always came from the agentic round's broader search (different model families, different seeds, or hyperparameters outside the deterministic grid), never from the baseline model at a different seed. On the absorbed datasets, the factory replay confirmed that the agentic win was real and reproducible, not a seed artifact.
 
-\textbf{The ratchet scoreboard.} Across the full loop, Arms A and B together, the ledgers record \textbf{10 datasets}, \textbf{37 agentic generations}, \textbf{53 training rounds}, and \textbf{19 absorption events}, each replay-verified through the deterministic factory with exact metric equality before absorption. These resolve to \textbf{17 distinct champion models} (two absorbed configurations were superseded within their generations by later, stronger absorptions), and \textbf{6 honest refusals} (ties and below-baseline rounds that the absorption gate refused to ratchet). The per-generation ledgers for the four Arm B datasets follow; the Arm~A ledgers (titanic, churn, california-housing, HR attrition, S\&P 500) are of the same form.
+\textbf{The ratchet scoreboard.} The recorded ledgers of the experiment recorded \textbf{10 datasets}, \textbf{37 agentic generations}, \textbf{53 training rounds}, and \textbf{19 absorption events}, each replay-verified through the deterministic factory with exact metric equality before absorption. These resolve to \textbf{17 distinct champion models} (two absorbed configurations were superseded within their generations by later, stronger absorptions), and \textbf{6 honest refusals} (ties and below-baseline rounds that the absorption gate refused to ratchet).
 
+The per-generation ledgers for the four Arm B datasets follow. Each ledger
+records the deterministic try-all baseline, the agentic rounds, the validity
+rates, the absorbed champions, and the exact configurations.
+
+\textbf{Clinvar (genomics).} Two of three generations absorbed champions.
 \input{evidence/ratchet_generations_ratchet_ledger_clinvar}
+
+\textbf{Kidney (health).} Two of three generations absorbed champions.
 \input{evidence/ratchet_generations_ratchet_ledger_kidney}
+
+\textbf{Crypto (financial).} Two of three generations absorbed champions.
 \input{evidence/ratchet_generations_ratchet_ledger_crypto}
+
+\textbf{Energy (electrical usage).} Zero of three generations absorbed
+champions: the RF+calendar baseline refused every team, an honest boundary
+where headroom is genuinely absent.
 \input{evidence/ratchet_generations_ratchet_ledger_energy}
 
-Three of the four Arm B datasets absorbed champions (clinvar +0.26 pts, kidney +1.81 pts, crypto +1.86 pts) and two produced the loop's most instructive honest refusals. On energy, the deterministic baseline (random forest + calendar features, $R^2$ 0.9590) refused every agentic team across three generations, an honest boundary where headroom is genuinely absent. On e-commerce, the computed-column ceiling ($R^2$ = 1.0000) means no configuration can improve, and the gate correctly refused to ratchet ties. The absorption gate is the reproducibility instrument here: every absorbed champion was replayed with the same seed through the deterministic factory, ties never ratchet, below-baseline never absorbs, and mis-specified replays are refused.
-
-\textbf{Arm B deferred tiers.} The NLP featurization story, the music-signal features, the Bitcoin scale-stress aggregation, and the clustering/graph track remain wired but unrun in this window; they are recorded as future work with the dataset list and ingestion notes already validated (Annex~D).
+Three of the four Arm B datasets absorbed champions (clinvar +0.26 pts,
+kidney +1.81 pts, crypto +1.86 pts). The energy dataset produced the loop's
+most instructive honest refusal: the deterministic baseline (random forest +
+calendar features, $R^2$ 0.9590) was already at ceiling, and no agentic team
+beat it across three generations. On e-commerce (Arm A), the computed-column
+ceiling ($R^2$ = 1.0000) means no configuration can improve, and the gate
+correctly refused to ratchet ties. The absorption gate is the
+reproducibility instrument here: every absorbed champion was replayed with
+the same seed through the deterministic factory, ties never ratchet,
+below-baseline never absorbs, and mis-specified replays are refused.
 
 \subsection{Per-stage model assignment: the mixed-team experiment}
 \label{sec:mixedteam}
@@ -343,15 +375,15 @@ The architecture permits a different model per agent role (Analyst, FeatureEngin
 \toprule
 \textbf{Round} & \textbf{Model} & \textbf{Mode} & \textbf{Validity} & \textbf{Best} \\
 \midrule
-g0r0 & llama-3.3-70b-instruct & agentic & 0.83 (15/18) & RF 0.8212 \\
-g0r1 & llama-3.3-70b-instruct & agentic & 1.00 (15/15) & LR 0.8045 \\
-g0r2 & llama-3.3-70b-instruct & agentic & 1.00 (15/15) & RF 0.8156 \\
+g0r0 & llama-3.3-70b-instruct & agentic & 0.83--(15/18) & RF 0.8212 \\
+g0r1 & llama-3.3-70b-instruct & agentic & 1.00--(15/15) & LR 0.8045 \\
+g0r2 & llama-3.3-70b-instruct & agentic & 1.00--(15/15) & RF 0.8156 \\
 g1--g2 & mistral-small-24b & 1 agentic, 2 degraded & 1.00 & RF 0.8547 \\
-g3 & GLM-5.3-flash uniform & agentic & 0.00 (0/15) & \\
-g4 & mixed team (degraded) & degraded & 1.00 (1/1) & LR 0.8045 \\
-g5 & mixed team (agentic) & agentic & 1.00 (21/21) & HGB 0.8436 \\
-g6 & mixed team (agentic) & agentic & 1.00 (15/15) & RF 0.8212 \\
-g7 & mixed team (agentic) & agentic & 1.00 (15/15) & RF s13 0.8492 \\
+g3 & GLM-5.3-flash  & agentic & 0.00--(0/15) & \\
+g4 & mixed team  & detrministic degraded & 1.00--(1/1) & LR 0.8045 \\
+g5 & mixed team  & agentic & 1.00--(21/21) & HGB 0.8436 \\
+g6 & mixed team  & agentic & 1.00--(15/15) & RF 0.8212 \\
+g7 & mixed team  & agentic & 1.00--(15/15) & RF s13 0.8492 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -364,10 +396,10 @@ The finding is a (task, context) dependency. GLM uniform was the worst configura
 \caption{Arm B: best value per driver team and dataset (accuracy for kidney/clinvar/crypto, $R^2$ for energy). No team dominates: commercial and open teams each won two datasets, llama-uniform the other two.}
 \label{fig:exp4teams}
 \end{figure}
-\subsection{GLM-uniform ablation: validator as capability enabler}
-\label{sec:glmablation}
+\subsection{GLM-uniform control test: validator as capability enabler}
+\label{sec:glmcontrol}
 
-The titanic result left one mechanism question. Was the mixed team's success due to the cross-model context (llama's brief informing GLM's code) or to the deterministic validator and bounded rewrite loop? A GLM-uniform ablation with the constant-feature validator and rewrite loop now active answered it. The round completed fully agentic at \textbf{validity 1.0 (12/12 trained, 392 s)}, with no absorption (best 0.7374 vs.\ baseline 0.8045; the selection choice was poor, recorded honestly). The validator + repair loop, not the mixed-team brief, made the reasoning model factory-safe. Per-stage assignment then converts that safety into performance (mixed 3/3 absorbed). Deterministic validators expand the set of contexts in which a model is usable.
+The titanic result left one mechanism question. Was the mixed team's success due to the cross-model context (llama's brief informing GLM's code) or to the deterministic validator and bounded rewrite loop? A GLM-uniform control test with the constant-feature validator and rewrite loop now active answered it. The round completed fully agentic at \textbf{validity 1.0 (12/12 trained, 392 s)}, with no absorption (best 0.7374 vs.\ baseline 0.8045; the selection choice was poor, recorded honestly). The validator + repair loop, not the mixed-team brief, made the reasoning model factory-safe. Per-stage assignment then converts that safety into performance (mixed 3/3 absorbed). Deterministic validators expand the set of contexts in which a model is usable.
 
 \subsection{Local-first proof: offline execution}
 \label{sec:localfirst}

@@ -81,6 +81,13 @@ web/*.tsbuildinfo
 
 # LaTeX build artifacts (thesis)
 texput.log
+thesis/pgftest.*
+thesis/main.log
+thesis/main.lof
+thesis/main.toc
+thesis/main.bcf
+thesis/main.run.xml
+thesis/pdfa.xmpi
 *.aux
 *.bbl
 *.blg

@@ -3,7 +3,7 @@
 **An autonomous ML factory built on the Model Context Protocol.**
 Bachelor thesis (TFG) at **Universidad Carlos III de Madrid**, Data Science and Engineering.
 
-> **Status:** P0 → P2 complete. Deterministic core, agent orchestration, and agentic IDE all implemented, tested, and audited.
+> **Status:** P0 → P6 complete. Deterministic core, agent layer with a single approval gate, grounded-autonomy rounds, and a ten-dataset ratchet validation (37 agentic generations, 19 replay-verified absorptions, 6 honest refusals) — implemented, tested, and audited.
 
 ## What it is
 
@@ -27,6 +27,10 @@ Three properties define the system:
 | MCP servers | 7 stdio servers (catalog, registry, workspace, context, context-write, EDA, agent) | `thelab/mcp/` |
 | Local model service + UI | FastAPI dashboard, Experiment panel, SSE live runs | `thelab/model_service/` |
 | Sandboxed agent iteration | AST-restricted Python subprocess for agent-generated code | `thelab/sandbox/` |
+| Approval gate | One chokepoint from proposal to training; replay-equality absorption criterion | `thelab/agents/approval.py` |
+| Grounded-autonomy round | Role-specialized agents (per-stage model assignment) over baseline artifacts, sandboxed FE with deterministic validation | `thelab/ide/agentic_round.py` |
+| Ratchet validation | 10 datasets, 37 generations, 19 replay-verified absorptions, 6 honest refusals (imbalanced ceiling, saturated control) | `.thelab/generations/`, `docs/THESIS_EVALUATION.md` |
+| RQ1–RQ6 evaluator | Suite mode (mock) + live OpenRouter + fully-offline Ollama recordings | `scripts/evaluate_thesis.py` |
 | Thesis evaluation | Automated RQ1–RQ3 evaluator | `scripts/evaluate_thesis.py`, `docs/THESIS_EVALUATION.md` |
 
 ## Quick start
@@ -69,6 +73,7 @@ thelab-mcp-demo context
 ## Datasets
 
 - **Iris fixture** (`examples/iris.csv`) — the deterministic baseline mandated by the P0 spec; proves reproducibility end-to-end.
+- **Ten-dataset validation set** (6 Arm A recorded baselines + 4 Arm B stress domains: genomics, health, crypto direction, hourly energy) — the ratchet-loop benchmark of Section 6.5; ledgers under `.thelab/generations/`.
 - **S&P 500 analyst ratings** (~164k rows, real-world) — the realism benchmark: datetime columns, high-cardinality categoricals, missing targets, leakage structure. Used to demonstrate scale behavior and traceable rejection of incompatible configurations.
 
 ## Documentation
@@ -76,7 +81,7 @@ thelab-mcp-demo context
 | Doc | Purpose |
 |---|---|
 | [`docs/THESIS_MAP.md`](docs/THESIS_MAP.md) | Concept → implementation → demo mapping with reproduction commands |
-| [`docs/THESIS_EVALUATION.md`](docs/THESIS_EVALUATION.md) | RQ1–RQ3 protocol and recorded results |
+| [`docs/THESIS_EVALUATION.md`](docs/THESIS_EVALUATION.md) | RQ1–RQ6 protocol, live recordings, and recorded results |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Global roadmap: P0 → P1 → P2, current focus |
 | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | How to use the app: UI, CLI, HTTP API, MCP |
 | [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) | CLI reference |
@@ -115,10 +120,12 @@ flowchart TB
 
     subgraph AG["thelab/agents"]
         WORKER["WorkerAgent"]
-        HARNESS["AgentHarness — grounding + approval"]
+        HARNESS["AgentHarness — grounding"]
         PROV["Mock · Ollama · OpenAI-compat · OpenRouter"]
         WORKER --> HARNESS --> PROV
         ORCH --> WORKER
+        GATE["Approval gate — one chokepoint"]
+        GATE --> PROV
     end
 
     subgraph FACTORY["thelab/run — deterministic factory"]
@@ -136,17 +143,23 @@ flowchart TB
         RUNS[("runs/&lt;run_id&gt; — manifest, metrics, model, card")]
         UPLOADS[("data/uploads")]
         CTX[("context — SQLite + FTS5")]
+        LEDGER[(".thelab/generations — ratchet ledgers")]
     end
 
     CLEAN --> UPLOADS
     RUNNER --> RUNS
     SERVERS --> STORES
+    GATE -.->|champion configs replay-verified| RUNS
+    RUNS -->|"absorbed champions raise the baseline"| RUNNER
+    ORCH -->|"round records: prompts · tokens · cost"| CTX
 ```
 
 The flow for one experiment: **UI → HTTP API → job manager → orchestrator →
 (agents for planning) → BatchRunner → `run_model` → artifacts**. The MCP
 servers read the same stores, so an independent client can discover and use
-what the UI produced — that is the thesis interop claim.
+what the UI produced — that is the thesis interop claim. The ratchet loop closes the circuit: an agentic win counts only when the
+deterministic factory replays it exactly, and the absorbed configuration
+becomes the new baseline the next generation must beat.
 
 ## Tests and verification
 

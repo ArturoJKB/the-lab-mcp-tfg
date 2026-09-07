@@ -136,7 +136,7 @@ RQ2[iris], RQ3, RQ4–RQ6[iris], RQ1–RQ6[housing]**.
 | RQ6 ablation | PASS | multi arm `mode: agentic` (real LLM stages) vs single arm `mode: degraded_deterministic` — provenance is honest on both |
 | Human gate | verified | gate blocked unapproved execution, then enabled it after recorded approval |
 
-**Ollama (llama3.2:3b):** deferred — could not finish a grounded agent call
+**Ollama (llama3.2:3b):** the fully-offline RQ1–RQ6 chain on llama3.2:3b was later verified on this laptop (CPU, no network); live grounded rounds remain deferred
 within 170 s on the development laptop (CPU); local recordings move to a more
 powerful machine (plumbing verified separately: dead provider fails fast with
 a readable error).
