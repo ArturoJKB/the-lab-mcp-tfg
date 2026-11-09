@@ -832,3 +832,38 @@ def test_transform_retry_repairs_constant_feature(round_env, experiment):
     assert record["attempt_count"] == 2
     assert "constant feature columns found" in provider.prompts[1]
     assert "drop them or vary their values" in provider.prompts[1]
+
+
+def test_infer_round_task_uses_top_models_and_regressor_suffix():
+    from thelab.ide.agentic_round import _infer_round_task
+
+    # Regression evidence arrives via dry-run top-model metrics when the batch
+    # training_results entries lack a metrics key (orchestrator result shape).
+    result = {
+        "training_results": [{"model": "hist_gradient_boosting_regressor", "status": "completed"}],
+        "feature_engineering": {
+            "top_models": [
+                {"model": "hist_gradient_boosting_regressor", "status": "completed",
+                 "metrics": {"test_rmse": 3.1, "test_r2": 0.9}}
+            ]
+        },
+        "model_selection": {"recommendation": {"best_model": "random_forest_regressor"}},
+    }
+    assert _infer_round_task(result) == "regression"
+
+    # Recommended-name fallback when no metrics exist anywhere.
+    assert _infer_round_task({
+        "training_results": [],
+        "feature_engineering": {},
+        "model_selection": {"recommendation": {"best_model": "ridge"}},
+    }) == "regression"
+
+    # Classification evidence still wins by its metrics.
+    assert _infer_round_task({
+        "feature_engineering": {"top_models": [
+            {"model": "logistic_regression", "metrics": {"test_accuracy": 0.9}}
+        ]},
+    }) == "classification"
+
+    # No evidence at all -> honest "auto".
+    assert _infer_round_task({}) == "auto"

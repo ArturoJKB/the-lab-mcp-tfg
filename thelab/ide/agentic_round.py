@@ -160,7 +160,12 @@ def build_context_pack(experiment: Any, deterministic_result: dict[str, Any]) ->
 
 
 def _infer_round_task(deterministic_result: dict[str, Any]) -> str:
-    """Infer the round's task type from the deterministic baseline evidence."""
+    """Infer the round's task type from the deterministic baseline evidence.
+
+    Scans, in order: batch training metrics, dry-run top-model metrics, and
+    the recommended model name (``*_regressor`` implies regression). Returns
+    "auto" only when no evidence exists.
+    """
     training_results = deterministic_result.get("training_results", [])
     for result in training_results:
         metrics = result.get("metrics") or {}
@@ -168,6 +173,16 @@ def _infer_round_task(deterministic_result: dict[str, Any]) -> str:
             return "classification"
         if "test_rmse" in metrics or "test_r2" in metrics or "test_mae" in metrics:
             return "regression"
+    for top in deterministic_result.get("feature_engineering", {}).get("top_models") or []:
+        metrics = top.get("metrics") or {}
+        if "test_accuracy" in metrics or "test_f1_macro" in metrics:
+            return "classification"
+        if "test_rmse" in metrics or "test_r2" in metrics or "test_mae" in metrics:
+            return "regression"
+    recommendation = (deterministic_result.get("model_selection") or {}).get("recommendation") or {}
+    best_model = recommendation.get("best_model")
+    if isinstance(best_model, str) and best_model in set(MODEL_REGISTRY.list_models()):
+        return str(MODEL_REGISTRY.get(best_model).task_type)
     class_balance = (deterministic_result.get("eda") or {}).get("eda_result", {}).get(
         "class_balance", {}
     )
@@ -327,6 +342,22 @@ def _validate_transform(artifact: Path, source: Path, target: str) -> list[str]:
             errors.append("transform introduced NaN values in the target column")
         if src[target].nunique(dropna=True) >= 2 and target_series.nunique(dropna=True) < 2:
             errors.append("target collapsed to a single value (degenerate target)")
+        # Feature NaN check (live demand run 2026-09-28: AR lag features left
+        # 248 warm-up NaNs and the factory's training validator rejected every
+        # candidate). Flag it here so the FE agent rewrites with a bounded fill.
+        feature_nan = out[
+            [c for c in out.columns if c != target]
+        ].isna().sum()
+        nan_cols = [c for c in feature_nan.index if feature_nan[c] > 0]
+        if nan_cols:
+            total = int(feature_nan[nan_cols].sum())
+            shown = ", ".join(map(str, nan_cols[:4]))
+            extra = "" if len(nan_cols) <= 4 else f" (+{len(nan_cols) - 4} more)"
+            errors.append(
+                f"transform leaves {total} NaN values in feature columns [{shown}]{extra} — "
+                "training rejects NaN features; fill lag/rolling warm-up rows with a "
+                "bounded deterministic fill (e.g. bfill within the warm-up window) or 0"
+            )
         # Target-semantics checks (live housing run 2026-09-03: an LLM
         # transform quantized the float target into bins, silently flipping
         # the inferred task type to classification and failing every batch
@@ -419,6 +450,7 @@ def _generate_transform(
         "- Preserve the row count: exactly one output row per input row."
     )
     base_instruction = (
+        f"User goal: {pack.get('goal', '')}\n"
         f"Dataset context: {pack.get('eda_context', '')}\n"
         f"Target column: {target_name}\n"
         f"Analyst brief: {json.dumps(brief, default=str)[:2500]}\n"

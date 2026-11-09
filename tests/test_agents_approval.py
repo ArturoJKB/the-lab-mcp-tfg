@@ -84,8 +84,10 @@ def test_gate_on_missing_proposal_raises_required(store: ProposalStore):
         ensure_executable(store, "prop-missing", principal="x", allow_auto=False)
 
 
-def test_auto_approve_env_flag(monkeypatch: pytest.MonkeyPatch):
+def test_auto_approve_env_flag(monkeypatch: pytest.MonkeyPatch, tmp_path):
     monkeypatch.delenv("THELAB_AUTO_APPROVE", raising=False)
+    # Hermetic: never read the operator's real workspace config.
+    monkeypatch.setenv("THELAB_WORKSPACE_ROOT", str(tmp_path))
     assert auto_approve_enabled() is False
     monkeypatch.setenv("THELAB_AUTO_APPROVE", "1")
     assert auto_approve_enabled() is True

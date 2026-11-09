@@ -31,10 +31,13 @@ from thelab.agents.approval import (
 from thelab.agents.mock import MockProvider
 from thelab.agents.provider import LLMProvider
 from thelab.agents.worker import ProposalStore, WorkerAgent
+from thelab.env import load_dotenv
 from thelab.ide.datasets import resolve_dataset_path
 from thelab.ide.eda_api import run_eda
 from thelab.ide.jobs import get_job_manager
 from thelab.run.batch import BatchRunner
+
+load_dotenv()
 
 # Tool definitions
 TOOLS = [
