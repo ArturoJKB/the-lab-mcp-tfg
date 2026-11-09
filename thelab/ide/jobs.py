@@ -642,7 +642,31 @@ class JobManager:
         # binding policy — the round never inherits auto-approval).
         round_record: dict[str, Any] | None = None
         if payload.get("agentic_round") and not job.cancel_requested:
-            from thelab.ide.agentic_round import run_agentic_round
+            from thelab.ide.agentic_round import RoundConfig, run_agentic_round
+
+            round_config: RoundConfig | None = None
+            stage_specs = payload.get("stage_providers")
+            if isinstance(stage_specs, dict) and stage_specs:
+                from thelab.agents.chat import create_provider as _create_stage_provider
+
+                stage_providers: dict[str, Any] = {}
+                stage_models: dict[str, str] = {}
+                for role, spec in stage_specs.items():
+                    stage_provider = _create_stage_provider(
+                        str(spec.get("provider", "openrouter")), spec.get("model")
+                    )
+                    stage_providers[str(role)] = stage_provider
+                    stage_models[str(role)] = str(spec.get("model") or spec.get("provider"))
+                round_config = RoundConfig(
+                    role_mode="multi",
+                    stage_providers=stage_providers,
+                    stage_models=stage_models,
+                )
+                job.emit(
+                    "info",
+                    f"Mixed-model team for the agentic round: {stage_models}",
+                    {"stage": "agentic_round", "experiment_id": experiment_id},
+                )
 
             job.emit(
                 "info",
@@ -655,6 +679,7 @@ class JobManager:
                     result,
                     provider=provider,
                     require_approval=True,
+                    config=round_config,
                     on_event=on_event,
                     should_continue=lambda: not job.cancel_requested,
                     runs_root=runs_root,

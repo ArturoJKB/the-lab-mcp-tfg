@@ -69,15 +69,15 @@ def _wait_for_job(client: TestClient, job_id: str, timeout: float = 120.0) -> di
     raise AssertionError(f"job {job_id} did not finish in time")
 
 
-def _start_experiment(client: TestClient) -> dict:
-    response = client.post(
-        "/experiment/run",
-        json={
-            "goal": "Predict the iris species",
-            "dataset_id": "uploads/iris.csv",
-            "target": "species",
-        },
-    )
+def _start_experiment(client: TestClient, stage_providers: dict | None = None) -> dict:
+    payload: dict = {
+        "goal": "Predict the iris species",
+        "dataset_id": "uploads/iris.csv",
+        "target": "species",
+    }
+    if stage_providers is not None:
+        payload["stage_providers"] = stage_providers
+    response = client.post("/experiment/run", json=payload)
     assert response.status_code == 200
     return response.json()["data"]
 
@@ -182,3 +182,48 @@ def test_list_experiments(client: TestClient, experiment_dirs, iris_csv):
     assert response.status_code == 200
     experiments = response.json()["data"]
     assert any(e["experiment_id"] == data["experiment_id"] for e in experiments)
+
+
+def test_validate_stage_providers_rejects_unknown_role():
+    from thelab.ide.experiment_api import _validate_stage_providers
+
+    with pytest.raises(ValueError, match="unknown stage role"):
+        _validate_stage_providers({"Chef": {"provider": "mock"}})
+
+
+def test_validate_stage_providers_rejects_unknown_provider():
+    from thelab.ide.experiment_api import _validate_stage_providers
+
+    with pytest.raises(ValueError, match="unsupported provider"):
+        _validate_stage_providers({"Analyst": {"provider": "warp-drive"}})
+
+
+def test_validate_stage_providers_normalizes():
+    from thelab.ide.experiment_api import _validate_stage_providers
+
+    normalized = _validate_stage_providers(
+        {"FeatureEngineer": {"provider": "openrouter", "model": "deepseek/deepseek-r1"}}
+    )
+    assert normalized == {
+        "FeatureEngineer": {"provider": "openrouter", "model": "deepseek/deepseek-r1"}
+    }
+    assert _validate_stage_providers(None) is None
+
+
+def test_experiment_run_rejects_bad_stage_providers(client, experiment_dirs, iris_csv):
+    response = client.post(
+        "/experiment/run",
+        json={
+            "goal": "g",
+            "dataset_id": "uploads/iris.csv",
+            "target": "species",
+            "stage_providers": {"Chef": {"provider": "mock"}},
+        },
+    )
+    assert response.status_code == 400
+    assert "unknown stage role" in response.json()["detail"]
+
+
+def test_experiment_run_accepts_stage_providers(client, experiment_dirs, iris_csv):
+    data = _start_experiment(client, stage_providers={"FeatureEngineer": {"provider": "mock"}})
+    assert data["state"] in {"pending", "planning"}

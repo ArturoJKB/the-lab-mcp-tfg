@@ -1055,6 +1055,7 @@ async def post_experiment_run(payload: dict[str, Any]) -> dict[str, Any]:
             provider_name=str(payload.get("provider", "mock")),
             model=payload.get("model"),
             agentic_round=bool(payload.get("agentic_round", False)),
+            stage_providers=payload.get("stage_providers"),
         )
     except DatasetNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

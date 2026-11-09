@@ -16,6 +16,40 @@ from thelab.ide.datasets import resolve_dataset_path
 from thelab.ide.experiment import Experiment, ExperimentState, ExperimentStore, create_experiment
 from thelab.ide.jobs import get_job_manager
 
+_STAGE_ROLES = {"Analyst", "FeatureEngineer", "ModelSelector"}
+_STAGE_PROVIDER_NAMES = {"mock", "openai_compat", "ollama", "openrouter"}
+
+
+def _validate_stage_providers(
+    stage_providers: dict[str, Any] | None,
+) -> dict[str, dict[str, Any]] | None:
+    """Validate the per-stage model assignment (roles -> provider spec).
+
+    Returns a normalized ``{role: {"provider": name, "model": name|None}}``
+    mapping, or ``None`` when absent/empty. Raises ``ValueError`` on unknown
+    roles or unsupported providers so the HTTP layer can fail fast with 400.
+    """
+    if stage_providers is None:
+        return None
+    if not isinstance(stage_providers, dict):
+        raise ValueError("stage_providers must be an object mapping roles to provider specs")
+    normalized: dict[str, dict[str, Any]] = {}
+    for role, spec in stage_providers.items():
+        if role not in _STAGE_ROLES:
+            raise ValueError(
+                f"unknown stage role '{role}'; valid roles: {sorted(_STAGE_ROLES)}"
+            )
+        if not isinstance(spec, dict) or "provider" not in spec:
+            raise ValueError(f"stage_providers[{role}] must be an object with a 'provider' key")
+        provider_name = str(spec["provider"])
+        if provider_name not in _STAGE_PROVIDER_NAMES:
+            raise ValueError(
+                f"unsupported provider in stage_providers[{role}]: {provider_name}"
+            )
+        model = spec.get("model")
+        normalized[role] = {"provider": provider_name, "model": str(model) if model else None}
+    return normalized or None
+
 
 async def start_experiment(
     goal: str,
@@ -25,8 +59,14 @@ async def start_experiment(
     provider_name: str = "mock",
     model: str | None = None,
     agentic_round: bool = False,
+    stage_providers: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Create an experiment and queue its orchestration as a background job."""
+    """Create an experiment and queue its orchestration as a background job.
+
+    ``stage_providers`` optionally assigns a different LLM (provider + model)
+    to each agentic-round stage role ("Analyst", "FeatureEngineer",
+    "ModelSelector") — the role-specialized mixed-model team.
+    """
     resolve_dataset_path(dataset_id)
     _validate_target_column(dataset_id, target)
     from thelab.agents.chat import create_provider
@@ -35,6 +75,18 @@ async def start_experiment(
         create_provider(provider_name)  # fail fast on misconfigured providers
     except Exception as exc:
         raise ValueError(f"provider '{provider_name}' is not usable: {exc}") from exc
+
+    stage_providers = _validate_stage_providers(stage_providers)
+    if stage_providers:
+        for role, spec in stage_providers.items():
+            if spec["provider"] == "mock":
+                continue  # mock always constructs
+            try:
+                create_provider(spec["provider"], spec["model"])
+            except Exception as exc:
+                raise ValueError(
+                    f"stage_providers[{role}] provider '{spec['provider']}' is not usable: {exc}"
+                ) from exc
 
 
     experiment, store = create_experiment(
@@ -56,6 +108,7 @@ async def start_experiment(
             "provider": provider_name,
             "model": model,
             "agentic_round": bool(agentic_round),
+            "stage_providers": stage_providers,
         },
     )
     experiment.plan["job_id"] = job.job_id
