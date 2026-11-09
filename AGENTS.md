@@ -51,7 +51,11 @@ recharts planned).
 - Local-first by default. External LLM providers are supported through the provider
   abstraction (Ollama local, OpenAI-compatible, OpenRouter) with explicit user
   configuration. No other cloud services without an explicit request.
-- Out of thesis scope: trading, brokers, order execution, portfolios.
+- Out of thesis scope: trading, brokers, order execution, portfolios. Post-submission
+  productization (2026-09): **forecasting and decision support ARE in product scope**
+  (energy prices/demand, real-estate valuation, temporal backtesting) — the app
+  produces forecasts, gaps and decision-support artifacts; it must never place orders
+  or execute trades.
 - Do not silently change dependencies or architecture; ask before destructive commands
   or broad refactors.
 

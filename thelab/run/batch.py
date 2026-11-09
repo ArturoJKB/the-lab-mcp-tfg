@@ -23,6 +23,7 @@ class BatchEntry:
     seed: int
     task_type: TaskTypeArg = "auto"
     hyperparameters: dict[str, Any] = field(default_factory=dict)
+    split: str = "random"
 
 
 @dataclass
@@ -62,6 +63,7 @@ class BatchRunner:
                     seed=int(item["seed"]),
                     task_type=cast(TaskTypeArg, str(item.get("task_type", "auto"))),
                     hyperparameters=item.get("hyperparameters", {}) or {},
+                    split=str(item.get("split", "random")),
                 )
             )
         return entries
@@ -95,6 +97,7 @@ class BatchRunner:
                     workspace_root=self.workspace_root,
                     task_type=entry.task_type,
                     hyperparameters=entry.hyperparameters or None,
+                    split=entry.split,
                 )
                 result.run_id = outcome.get("run_id")
                 result.status = outcome.get("status", "unknown")
@@ -127,6 +130,7 @@ class BatchRunner:
                     "model": r.entry.model,
                     "seed": r.entry.seed,
                     "task_type": r.entry.task_type,
+                    "split": r.entry.split,
                     "hyperparameters": r.entry.hyperparameters,
                     "run_id": r.run_id,
                     "status": r.status,
@@ -159,8 +163,8 @@ def write_markdown_report(
         "",
         "## Results",
         "",
-        "| Dataset | Target | Model | Seed | Task Type | Hyperparameters | Status | Test Metric | Secondary Metric | Error |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Dataset | Target | Model | Seed | Task Type | Split | Hyperparameters | Status | Test Metric | Secondary Metric | Error |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in results:
         metrics = r.metrics or {}
@@ -178,7 +182,7 @@ def write_markdown_report(
         hp = json.dumps(r.entry.hyperparameters) if r.entry.hyperparameters else "-"
         lines.append(
             f"| {r.entry.dataset} | {r.entry.target} | {r.entry.model} | "
-            f"{r.entry.seed} | {task_type} | {hp} | {r.status} | {primary} | {secondary} | {error} |"
+            f"{r.entry.seed} | {task_type} | {r.entry.split} | {hp} | {r.status} | {primary} | {secondary} | {error} |"
         )
 
     if failed:

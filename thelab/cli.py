@@ -33,6 +33,16 @@ def _build_parser() -> argparse.ArgumentParser:
         default="auto",
         help="Task type (default: auto-infer from target column)",
     )
+    model_parser.add_argument(
+        "--split",
+        choices=["random", "temporal"],
+        default="random",
+        help=(
+            "Split policy: random (default, shuffled; stratified for "
+            "classification) or temporal (rows are time-ordered; the last "
+            "20%% is held out as the future and naive benchmarks are recorded)"
+        ),
+    )
     model_parser.add_argument("--try-all", action="store_true", help="Train every registered model and print a comparison table")
 
     batch_parser = run_subparsers.add_parser("batch", help="Run a batch of experiments from a JSON config")
@@ -94,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
                     workspace_root=Path.cwd(),
                     dry_run=args.dry_run,
                     task_type=args.task_type,
+                    split=args.split,
                 )
                 completed = [r for r in results if r["status"] == "completed"]
                 print(f"\nTrained {len(results)} models, {len(completed)} completed.")
@@ -116,6 +127,7 @@ def main(argv: list[str] | None = None) -> int:
                 workspace_root=Path.cwd(),
                 dry_run=args.dry_run,
                 task_type=args.task_type,
+                split=args.split,
             )
             return 0 if result["status"] == "completed" else 1
         except Exception as exc:

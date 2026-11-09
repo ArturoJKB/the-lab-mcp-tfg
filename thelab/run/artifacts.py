@@ -107,7 +107,11 @@ def write_model_card(
         if task_type == "regression"
         else "Trained classification model produced by The Lab direct run."
     )
-    split_desc = "80/20 stratified" if task_type == "classification" else "80/20 shuffle"
+    split_policy = training_config.get("split_policy", "random")
+    if split_policy == "temporal":
+        split_desc = "80/20 temporal (train on past rows, test on the future; naive benchmarks recorded)"
+    else:
+        split_desc = "80/20 stratified" if task_type == "classification" else "80/20 shuffle"
 
     lines = [
         "# Model Card",
@@ -148,12 +152,24 @@ def write_model_card(
             f"- Test accuracy: {_fmt('test_accuracy')}",
             f"- Test macro F1: {_fmt('test_f1_macro')}",
         ])
+    for key, label in (
+        ("test_mae_naive_lag1", "Test MAE naive lag-1"),
+        ("test_mae_naive_lag24", "Test MAE naive lag-24"),
+        ("test_mae_naive_lag168", "Test MAE naive lag-168"),
+        ("test_mae_train_mean", "Test MAE train-mean baseline"),
+        ("test_accuracy_majority", "Test accuracy majority baseline"),
+    ):
+        if key in metrics:
+            lines.append(f"- {label}: {_fmt(key)}")
     lines.extend([
         f"- Train samples: {metrics.get('train_samples', 'N/A')}",
         f"- Test samples: {metrics.get('test_samples', 'N/A')}",
         "",
         "## Reproducibility command",
-        f"```bash\nthelab run model --dataset {inputs['dataset']} --target {inputs['target']} --model {inputs['model']} --seed {inputs['seed']} --output {inputs['output']}\n```",
+        f"```bash\nthelab run model --dataset {inputs['dataset']} --target {inputs['target']} "
+        f"--model {inputs['model']} --seed {inputs['seed']} --output {inputs['output']}"
+        + (f" --split {inputs['split']}" if inputs.get("split", "random") != "random" else "")
+        + "\n```",
         "",
         "## Limitations",
     ])

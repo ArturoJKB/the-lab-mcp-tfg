@@ -5,7 +5,9 @@ import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
+
+from pydantic import ValidationError
 
 from thelab.contracts import RunStatus, TaskSpec, TaskState, TaskType, ValidationStatus
 from thelab.version import dependency_versions
@@ -14,7 +16,7 @@ from thelab.workspace import hash_file
 from .artifacts import append_event, write_artifacts
 from .contract import build_dataset_contract
 from .errors import RejectedRunError
-from .inputs import RunInputs, TaskTypeArg
+from .inputs import RunInputs, SplitArg, TaskTypeArg
 from .model_registry import MODEL_REGISTRY
 from .preprocess import build_pipeline
 from .profile import profile_dataframe, read_csv
@@ -81,6 +83,7 @@ def run_model(
     dry_run: bool = False,
     task_type: TaskTypeArg = "auto",
     hyperparameters: dict[str, Any] | None = None,
+    split: str = "random",
 ) -> dict[str, Any]:
     """Execute a direct deterministic Data-to-Model run.
 
@@ -100,15 +103,23 @@ def run_model(
     dataset_path = _relative_if_under(dataset_path, workspace_root)
     output_path = _relative_if_under(output_path, workspace_root)
 
-    inputs = RunInputs(
-        dataset=dataset_path,
-        target=target,
-        model=model,
-        seed=seed,
-        output=output_path,
-        task_type=task_type,
-        workspace_root=workspace_root,
-    )
+    if split not in {"random", "temporal"}:
+        raise RejectedRunError(
+            f"unsupported split policy: {split!r} (supported: random, temporal)"
+        )
+    try:
+        inputs = RunInputs(
+            dataset=dataset_path,
+            target=target,
+            model=model,
+            seed=seed,
+            output=output_path,
+            task_type=task_type,
+            workspace_root=workspace_root,
+            split=cast(SplitArg, split),
+        )
+    except ValidationError as exc:
+        raise RejectedRunError(f"invalid run inputs: {exc}") from exc
 
     run_id = _generate_run_id()
     run_dir = inputs.workspace_root / inputs.output / run_id
@@ -169,6 +180,7 @@ def run_model(
             feature_columns,
             inputs.seed,
             task_type=resolved_task_type,
+            split=inputs.split,
         )
 
         if not validation_report["valid"]:
@@ -195,17 +207,22 @@ def run_model(
             pipeline,
             inputs.seed,
             task_type=resolved_task_type,
+            split=inputs.split,
         )
 
         # Update split summary with actual counts from train_test_split.
         validation_report["split_summary"]["train_count"] = split_info["train_count"]
         validation_report["split_summary"]["test_count"] = split_info["test_count"]
+        validation_report["split_summary"]["strategy"] = split_info.get(
+            "strategy", validation_report["split_summary"].get("strategy")
+        )
 
         training_config = {
             "model": inputs.model,
             "seed": inputs.seed,
             "task_type": resolved_task_type,
             "preprocessing": ["StandardScaler"],
+            "split_policy": inputs.split,
             "split": validation_report["split_summary"],
             "dependency_versions": dependency_versions(),
             "estimator": {
@@ -338,6 +355,7 @@ def try_all_models(
     task_type: TaskTypeArg = "auto",
     on_result: Callable[[dict[str, Any]], None] | None = None,
     should_continue: Callable[[], bool] | None = None,
+    split: str = "random",
 ) -> list[dict[str, Any]]:
     """Train every registered model and return a comparison list.
 
@@ -363,6 +381,7 @@ def try_all_models(
             workspace_root=workspace_root,
             dry_run=dry_run,
             task_type=task_type,
+            split=split,
         )
         results.append(result)
         if on_result is not None:

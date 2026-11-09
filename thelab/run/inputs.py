@@ -9,6 +9,7 @@ from .errors import RejectedRunError
 from .model_registry import MODEL_REGISTRY
 
 TaskTypeArg = Literal["auto", "classification", "regression"]
+SplitArg = Literal["random", "temporal"]
 
 
 def _reject_unsafe_path(value: Path, field_name: str, root: Path) -> Path:
@@ -42,6 +43,7 @@ class RunInputs(BaseModel):
     seed: int
     output: Path
     task_type: TaskTypeArg = "auto"
+    split: SplitArg = "random"
     workspace_root: Path = Field(default_factory=Path.cwd)
 
     @field_validator("dataset", "output", "workspace_root", mode="before")
@@ -83,4 +85,5 @@ class RunInputs(BaseModel):
             "seed": self.seed,
             "output": str(self.output),
             "task_type": self.task_type,
+            "split": self.split,
         }

@@ -33,11 +33,15 @@ def compare_runs(runs_root: Path | None = None) -> list[dict[str, Any]]:
             "model": inputs.get("model"),
             "seed": inputs.get("seed"),
             "task_type": task_type,
+            "split": inputs.get("split", "random"),
             "test_accuracy": metrics.get("test_accuracy"),
             "test_f1_macro": metrics.get("test_f1_macro"),
             "test_rmse": metrics.get("test_rmse"),
             "test_mae": metrics.get("test_mae"),
             "test_r2": metrics.get("test_r2"),
+            "test_mae_naive_lag24": metrics.get("test_mae_naive_lag24"),
+            "test_mae_train_mean": metrics.get("test_mae_train_mean"),
+            "test_accuracy_majority": metrics.get("test_accuracy_majority"),
         })
     return runs
 
@@ -56,15 +60,21 @@ def format_comparison(runs: list[dict[str, Any]]) -> str:
         lines.extend([
             "## Classification runs",
             "",
-            "| Run ID | Dataset | Target | Model | Seed | Test Accuracy | Test F1 Macro |",
-            "|---|---|---|---|---|---|---|",
+            "| Run ID | Dataset | Target | Model | Seed | Split | Test Accuracy | Test F1 Macro | Majority baseline |",
+            "|---|---|---|---|---|---|---|---|---|",
         ])
         for r in classification_runs:
             acc = f"{r['test_accuracy']:.6f}" if r.get("test_accuracy") is not None else "N/A"
             f1 = f"{r['test_f1_macro']:.6f}" if r.get("test_f1_macro") is not None else "N/A"
+            maj = (
+                f"{r['test_accuracy_majority']:.6f}"
+                if r.get("test_accuracy_majority") is not None
+                else "-"
+            )
             lines.append(
                 f"| {r['run_id']} | {r.get('dataset', 'N/A')} | {r.get('target', 'N/A')} | "
-                f"{r.get('model', 'N/A')} | {r.get('seed', 'N/A')} | {acc} | {f1} |"
+                f"{r.get('model', 'N/A')} | {r.get('seed', 'N/A')} | {r.get('split', 'random')} | "
+                f"{acc} | {f1} | {maj} |"
             )
         lines.append("")
 
@@ -72,16 +82,19 @@ def format_comparison(runs: list[dict[str, Any]]) -> str:
         lines.extend([
             "## Regression runs",
             "",
-            "| Run ID | Dataset | Target | Model | Seed | Test RMSE | Test MAE | Test R2 |",
-            "|---|---|---|---|---|---|---|---|",
+            "| Run ID | Dataset | Target | Model | Seed | Split | Test RMSE | Test MAE | Test R2 | Naive lag-24 | Train-mean |",
+            "|---|---|---|---|---|---|---|---|---|---|---|",
         ])
         for r in regression_runs:
             rmse = f"{r['test_rmse']:.6f}" if r.get("test_rmse") is not None else "N/A"
             mae = f"{r['test_mae']:.6f}" if r.get("test_mae") is not None else "N/A"
             r2 = f"{r['test_r2']:.6f}" if r.get("test_r2") is not None else "N/A"
+            naive = f"{r['test_mae_naive_lag24']:.6f}" if r.get("test_mae_naive_lag24") is not None else "-"
+            mean_base = f"{r['test_mae_train_mean']:.6f}" if r.get("test_mae_train_mean") is not None else "-"
             lines.append(
                 f"| {r['run_id']} | {r.get('dataset', 'N/A')} | {r.get('target', 'N/A')} | "
-                f"{r.get('model', 'N/A')} | {r.get('seed', 'N/A')} | {rmse} | {mae} | {r2} |"
+                f"{r.get('model', 'N/A')} | {r.get('seed', 'N/A')} | {r.get('split', 'random')} | "
+                f"{rmse} | {mae} | {r2} | {naive} | {mean_base} |"
             )
         lines.append("")
 

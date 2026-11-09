@@ -205,6 +205,7 @@ def validate_dataset(
     test_size: float = 0.2,
     validators: list[TaskType] | None = None,
     task_type: str = "classification",
+    split: str = "random",
 ) -> dict[str, Any]:
     """Run dataset validation checks and return a structured report."""
     validators = validators or DEFAULT_VALIDATORS
@@ -214,10 +215,10 @@ def validate_dataset(
     n_test = math.ceil(test_size * len(df)) if len(df) > 0 else 0
     n_train = len(df) - n_test
     split_summary = {
-        "strategy": "train_test_split",
+        "strategy": "temporal_sequential" if split == "temporal" else "train_test_split",
         "test_size": test_size,
         "random_state": seed,
-        "stratify": task_type == "classification",
+        "stratify": task_type == "classification" and split != "temporal",
         "train_count": n_train,
         "test_count": n_test,
     }
